@@ -1,6 +1,4 @@
-# Satellite_autonome_client
- 
-# satellites_autonomes
+# Satellite autonome client
 
 PRESENTATION GENERALE DU CONCEPT DE SATELLITE AUTONOME
 
