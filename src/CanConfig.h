@@ -1,5 +1,8 @@
 /*
 
+
+  CanConfig.h
+
 https://dccwiki.com/CAN_Bus
 https://fr.wikipedia.org/wiki/Bus_de_donn%C3%A9es_CAN
 
