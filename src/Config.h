@@ -1,5 +1,7 @@
 /*
 
+  Config.h
+
   Sur les cartes qui utilisent un module ESP32-WROVER pour avoir plus de RAM,
   les pins GPIO16 et GPIO17 ne sont pas disponibles car ils sont utilisés en interne par la PSRAM.  
 
