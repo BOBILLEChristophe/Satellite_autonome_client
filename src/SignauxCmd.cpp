@@ -28,7 +28,6 @@ void SignauxCmd::setup()
   pinMode(m_pinVerrou, OUTPUT);
   pinMode(m_pinHorloge, OUTPUT);
   pinMode(m_pinData, OUTPUT);
-  //xQueueSignaux = queue;
 }
 
 void SignauxCmd::affiche(uint16_t x)

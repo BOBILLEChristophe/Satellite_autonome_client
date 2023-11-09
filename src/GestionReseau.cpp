@@ -33,7 +33,9 @@ void GestionReseau::loop(void *pvParameters)
             if (!node->busy())
             {
                 node->sensor[0].state(LOW);
+                node->sensor[1].state(LOW);
             }
+
             auto rechercheSat = [node](bool satPos) -> byte
             {
                 uint8_t idxA = 0;
@@ -138,7 +140,9 @@ void GestionReseau::loop(void *pvParameters)
                 rouge,
                 vert,
                 orange,
-                carre
+                carre,
+                ralentissement,
+                Rralentissement
             };
 
             if (node->nodeP[node->SP1_idx()] != nullptr)
@@ -151,7 +155,7 @@ void GestionReseau::loop(void *pvParameters)
                         debug.printf("Le canton SP1 est occupe\n");
                         node->signal[0]->affiche(rouge); // Signalisation Rouge + oeilleton
                         //  Ordre loco Ralentissement à 30
-                        if (node->sensor[1].state())
+                        if (node->sensor[1].state() && !node->sensor[0].state())
                             cmdLoco(node->loco.address(), 30, 1);
                         // arret au franchissement du capteur
                         if (node->sensor[0].state())
@@ -191,10 +195,10 @@ void GestionReseau::loop(void *pvParameters)
                     /*
                     Signalisation ???
                     */
-                    // Ordre loco Ralentissement
-                    if (node->sensor[1].state())
+                    // Ordre loco Ralentissement à 30
+                    if (node->sensor[1].state() && !node->sensor[0].state())
                         cmdLoco(node->loco.address(), 30, 1);
-                    // Ordre loco Arret
+                    // arret au franchissement du capteur
                     if (node->sensor[0].state())
                         cmdLoco(node->loco.address(), 0, 1);
                 }
@@ -205,10 +209,11 @@ void GestionReseau::loop(void *pvParameters)
                 /*
                 Signalisation Carré
                 */
-                // Ordre loco Ralentissement
-                if (node->sensor[1].state())
+
+                //  Ordre loco Ralentissement à 30
+                if (node->sensor[1].state() && !node->sensor[0].state())
                     cmdLoco(node->loco.address(), 30, 1);
-                // Ordre loco Arret
+                // arret au franchissement du capteur
                 if (node->sensor[0].state())
                     cmdLoco(node->loco.address(), 0, 1);
             }
