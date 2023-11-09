@@ -7,8 +7,6 @@
 
 #include "Signal.h"
 
-#include "Signal.h"
-
 uint8_t Signal::m_compt(0);
 uint16_t Signal::m_data(0);
 uint16_t Signal::m_masque(0);
