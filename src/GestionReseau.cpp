@@ -95,8 +95,7 @@ void GestionReseau::loop(void *pvParameters)
                 {
                     CanMsg::sendMsg(0, node->ID(), node->nodeP[spIdx[i]]->ID(), 0xA1 + i);
                     vTaskDelay(50 / portTICK_PERIOD_MS);
-                }
-                    
+                }  
             }
 
             if (node->nodeP[node->SP1_idx()] != nullptr)
