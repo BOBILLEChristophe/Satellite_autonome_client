@@ -72,7 +72,7 @@ const uint8_t sensorSize = 2;
 /* ----- Sensors ------------------*/
 #define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_33
 #define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_15
-#define CAPT_PONCT_TEMPO 10UL
+#define CAPT_PONCT_TEMPO 50UL
 
 /* ----- Registres a decalage ------*/
 #define SHREG_PIN_VERROU GPIO_NUM_4

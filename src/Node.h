@@ -66,11 +66,11 @@ private:
   uint16_t m_SM1_loco;
 
 public:
-  Node();                        // Constructor
-  //Node(const Node &);            // Constructeur de recopie
-  ~Node();                       // Destructeur
-  //Node &operator=(const Node &); // Operator d'affectation
-  static void testMemory(void *);
+  Node();                        
+  //Node(const Node &);            
+  ~Node();                       
+  //Node &operator=(const Node &);
+  //static void testMemory(void *);
   NodePeriph *nodeP[nodePsize];
   Aig *aig[aigSize];
   Loco loco;

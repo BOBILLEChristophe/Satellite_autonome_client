@@ -21,7 +21,8 @@ private:
   bool m_state;
 
 public:
-  //Sensor();
+  Sensor();
+  ~Sensor();
   //Sensor(gpio_num_t, uint32_t, byte);
   void setup(gpio_num_t, uint32_t, byte);
   static void IRAM_ATTR loop(void *);

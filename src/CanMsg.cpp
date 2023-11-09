@@ -33,7 +33,7 @@ void CanMsg::testMemory(void *pvParameters)
 #endif
 
 /*--------------------------------------
-  Reception
+  Reception CAN
   --------------------------------------*/
 void CanMsg::canReceiveMsg(void *pvParameters)
 {
@@ -138,19 +138,17 @@ void CanMsg::canReceiveMsg(void *pvParameters)
         default:            // Messages en provenance des autres satellites que le Main
           switch (fonction) // fonction appelée
           {
-          case 0xA1: // Demande d'informations destiné à SP1
-                     // if (node->ID() == frameIn.data[1]) // Si l'ID de ce sat correspond au SP1 de l'expéditeur
+          case 0xA1: // Demande d'informations en tant que SP1 et reponse destinee a SM1
             CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA3, node->SM1_idx(), node->busy(),
                            node->loco.address() & 0x00FF, node->loco.address() & 0xFF00); // SP1 envoie l'ID de son SM1, son état d'occupation et l'adresse de la loco
             break;
 
-          case 0xA2: // Demande d'informations destiné à SM1
-                     // if (node->ID() == frameIn.data[1]) // Si l'ID de ce sat correspond au SM1 de l'expéditeur
+          case 0xA2: // Demande d'informations en tant que SM1 et reponse destinee a SP1
             CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA4, node->SP1_idx(), node->busy(),
-                            node->loco.address() & 0x00FF, node->loco.address() & 0xFF00); // SM1 envoie l'ID de son SPI, son état d'occupation et l'adresse de la loco
+                            node->loco.address() & 0x00FF, node->loco.address() & 0xFF00); // SM1 envoie l'ID de son SP1, son état d'occupation et l'adresse de la loco
             break;
 
-          case 0xA3:
+          case 0xA3:  // Reception de la reponse a la demande 0xA1
             if (node->nodeP[node->SP1_idx()] != nullptr)
             {
               node->nodeP[node->SP1_idx()]->busy((bool)frameIn.data[1]); // Information de l'état occupé ou non de SP1
@@ -162,7 +160,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             }
             break;
 
-          case 0xA4:
+          case 0xA4:  // Reception de la reponse a la demande 0xA2
             if (node->nodeP[node->SM1_idx()] != nullptr)
             {
               node->nodeP[node->SM1_idx()]->busy((bool)frameIn.data[1]); // Information de l'état occupé ou non de SM1
@@ -259,7 +257,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 }
 
 /*--------------------------------------
-  Envoi
+  Envoi CAN
   --------------------------------------*/
 void CanMsg::sendMsg(CANMessage &frame)
 {
