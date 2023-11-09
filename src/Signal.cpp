@@ -7,6 +7,8 @@
 
 #include "Signal.h"
 
+#include "Signal.h"
+
 uint8_t Signal::m_compt(0);
 uint16_t Signal::m_data(0);
 uint16_t Signal::m_masque(0);
@@ -17,9 +19,10 @@ Signal::Signal() : m_id(255),
                    m_decalage(0)
 {}
 
-void Signal::setup()
+void Signal::setup(const uint8_t x)
 {
   m_decalage = m_compt;
+  m_id = x;
   switch (m_type)
   {
   case 0: // Feu orange  - rouge - vert
@@ -68,13 +71,13 @@ uint16_t Signal::affiche(uint16_t x)
     switch (x)
     {
     case 0: // orange
-      m_data = B1 << m_decalage;
+      m_data = 0x01 << m_decalage;
       break;
     case 1: // rouge
-      m_data = B10 << m_decalage;
+      m_data = 0x02 << m_decalage;
       break;
     case 2: // vert
-      m_data = B100 << m_decalage;
+      m_data = 0x04 << m_decalage;
       break;
     }
     break;

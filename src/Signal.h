@@ -26,9 +26,9 @@ private:
 public:
   Signal();
   void ID(const uint8_t);
-  void setup();
+  void setup(const uint8_t);
   static void reset();
-  uint16_t affiche(uint16_t);
+  uint16_t affiche(const uint16_t);
   void type(byte);
   byte type();
 };
