@@ -45,6 +45,8 @@ void GestionReseau::loop(void *pvParameters)
             {
                 node->sensor[horaire].state(LOW);
                 node->sensor[antiHor].state(LOW);
+                node->loco.comptCmd0(0);
+                node->loco.comptCmd30(0);
             }
             else
             {
@@ -78,7 +80,7 @@ void GestionReseau::loop(void *pvParameters)
                     idxS = 4;
                 }
 
-                uint8_t $idx = NO_ID;
+                uint8_t $idx = idxS;
 
                 if (node->aig[0 + idxA] != nullptr) // L'aiguille 0 à horaire (ou 3 à anti-horaire) existe
                 {
@@ -107,8 +109,8 @@ void GestionReseau::loop(void *pvParameters)
                 }
                 return $idx;
             };
-            node->SP1_idx(rechercheSat(0));
-            node->SM1_idx(rechercheSat(1));
+            node->SP1_idx(rechercheSat(horaire));
+            node->SM1_idx(rechercheSat(antiHor));
 
 #ifdef DEBUG
             debug.printf("node->SP1_idx() %d\n", node->SP1_idx());
@@ -124,7 +126,7 @@ void GestionReseau::loop(void *pvParameters)
                     if (node->nodeP[idx[i]] != nullptr)
                     {
                         CanMsg::sendMsg(0, node->ID(), node->nodeP[idx[i]]->ID(), 0xA1 + i);
-                        vTaskDelay(20 / portTICK_PERIOD_MS); // Attente de la reponse
+                        vTaskDelay(100 / portTICK_PERIOD_MS); // Attente de la reponse
                     }
                 }
             }
@@ -132,14 +134,14 @@ void GestionReseau::loop(void *pvParameters)
             if (node->nodeP[node->SP1_idx()] != nullptr)
             {
                 CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SP1_idx()]->ID(), 0xA1);
-                vTaskDelay(50 / portTICK_PERIOD_MS);
+                vTaskDelay(100 / portTICK_PERIOD_MS);
                 debug.printf("SP1 occupe : %d\n", node->nodeP[node->SP1_idx()]->busy());
                 debug.printf("SP1 accessible : %d\n", node->nodeP[node->SP1_idx()]->acces());
             }
             if (node->nodeP[node->SM1_idx()] != nullptr)
             {
                 CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SM1_idx()]->ID(), 0xA2);
-                vTaskDelay(50 / portTICK_PERIOD_MS);
+                vTaskDelay(100 / portTICK_PERIOD_MS);
                 debug.printf("SM1 occupe :  %d\n", node->nodeP[node->SM1_idx()]->busy());
                 debug.printf("SM1 accessible :  %d\n", node->nodeP[node->SM1_idx()]->acces());
             }
@@ -152,7 +154,23 @@ void GestionReseau::loop(void *pvParameters)
             {
                 const uint8_t $address0 = address & 0x00FF;
                 const uint8_t $address1 = address & 0xFF00;
-                CanMsg::sendMsg(1, node->ID(), 253, 0xF0, $address1, $address0, speed, direction); // Message à la centrale DCC++
+
+                if (speed == 0)
+                {
+                    if (node->loco.comptCmd0() < 5)
+                    {
+                        CanMsg::sendMsg(1, node->ID(), 253, 0xF0, $address1, $address0, speed, direction); // Message à la centrale DCC++
+                        node->loco.comptCmd0(node->loco.comptCmd0() + 1);
+                    }
+                }
+                if (speed == 30)
+                {
+                    if (node->loco.comptCmd30() < 5)
+                    {
+                        CanMsg::sendMsg(1, node->ID(), 253, 0xF0, $address1, $address0, speed, direction); // Message à la centrale DCC++
+                        node->loco.comptCmd30(node->loco.comptCmd30() + 1);
+                    }
+                }
             };
 
             enum
@@ -175,7 +193,7 @@ void GestionReseau::loop(void *pvParameters)
                         debug.printf("Le canton SP1 est occupe\n");
                         node->signal[0]->affiche(rouge); // Signalisation Rouge + oeilleton
                         //  Ordre loco Ralentissement à 30
-                        if (node->sensor[1].state() && ! node->sensor[0].state())
+                        if (node->sensor[1].state() && !node->sensor[0].state())
                             cmdLoco(node->loco.address(), 30, 1);
                         // arret au franchissement du capteur
                         if (node->sensor[0].state())
@@ -186,7 +204,7 @@ void GestionReseau::loop(void *pvParameters)
                         // debug.printf("SP1 = node->nodeP[%d] : libre\n", node->SP1_idx());
                         debug.printf("Le canton SP1 est accessible et libre\n");
                         CanMsg::sendMsg(0, node->ID(), 0, 0xA3, node->nodeP[node->SP1_idx()]->ID());
-                        vTaskDelay(20 / portTICK_PERIOD_MS);
+                        vTaskDelay(100 / portTICK_PERIOD_MS);
 
                         if (node->SP2_acces()) // Le canton SP2 est-il accessible ?
                         {
@@ -238,6 +256,6 @@ void GestionReseau::loop(void *pvParameters)
                     cmdLoco(node->loco.address(), 0, 1);
             }
         }
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
     }
 }

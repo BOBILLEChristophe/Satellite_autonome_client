@@ -11,6 +11,7 @@ bool Settings::WIFI_ON = true;
 bool Settings::DISCOVERY_ON = true;
 String Settings::ssid_str;
 String Settings::password_str;
+//String Settings::ssid = "Livebox-BC90";
 char Settings::ssid[30] = {};
 char Settings::password[30] = {};
 // uint8_t Settings::idNode = NO_ID;
@@ -43,23 +44,19 @@ bool Settings::begin()
   do
   {
     CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
-    if (!isMainReady)
-    {
 #ifdef DEBUG
-      debug.printf("Attente de reponse en provenance de la carte Main.\n");
+    debug.printf("Attente de reponse en provenance de la carte Main.\n");
 #endif
-      delay(1000);
-    }
+    delay(1000);
   } while (!isMainReady);
 
-  //--- Identifiant du Node
+  --- Identifiant du Node
   while (node->ID() == NO_ID) // L'identifiant n'est pas en mémoire
   {
     //--- Requete identifiant
     CanMsg::sendMsg(0, node->ID(), 254, 0xB4);
     delay(100);
   }
-  // node->ID(idNode);
 
   writeFile();
 
@@ -116,7 +113,6 @@ void Settings::readFile()
   }
   else
   {
-
 #ifdef DEBUG
     debug.printf("\nInformations du fichier \"settings.json\" : \n\n");
 #endif
@@ -125,9 +121,11 @@ void Settings::readFile()
     DeserializationError error = deserializeJson(doc, file);
     delay(100);
     if (error)
+    {
 #ifdef DEBUG
       debug.printf("Failed to read file, using default configuration\n\n");
 #endif
+    }
     else
     {
       // ---
@@ -143,6 +141,11 @@ void Settings::readFile()
       password_str = doc["password"].as<String>();
       strcpy(ssid, ssid_str.c_str());
       strcpy(password, password_str.c_str());
+
+#ifdef DEBUG
+      debug.printf("- ssid : %s\n", ssid);
+      debug.printf("- password : %s\n", password);
+#endif
 
       // Nœuds
       const char *index[] = {"p00", "p01", "p10", "p11", "m00", "m01", "m10", "m11"};

@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.9.8"
+#define VERSION "v 0.9.9"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -100,8 +100,8 @@ void setup()
   debug.printf(Settings::wifiOn() ? "Wifi : on\n" : "Wifi : off\n");
 
   //--- Lancement de la méthode pour le procecuss de découverte
-  if (Settings::discoveryOn()) // Si option validée
-    Discovery::begin(node);
+  // if (Settings::discoveryOn()) // Si option validée
+  //   Discovery::begin(node);
   debug.printf(Settings::discoveryOn() ? "Discovery : on\n" : "Discovery : off\n");
   debug.println();
 #ifdef RFID
@@ -109,16 +109,16 @@ void setup()
 #endif
 
   //--- Signal::setup()
-  if (! Settings::discoveryOn())
-  {
-    for (byte i = 0; i < aigSize; i++)
-    {
-      if (node->signal[i] != nullptr)
-        node->signal[i]->setup(i);
-    }
-  }
+  // if (! Settings::discoveryOn())
+  // {
+  //   for (byte i = 0; i < aigSize; i++)
+  //   {
+  //     if (node->signal[i] != nullptr)
+  //       node->signal[i]->setup(i);
+  //   }
+  // }
 
-  GestionReseau::setup(node);
+  //GestionReseau::setup(node);
 
   // Test
   // if (node.nodeP[1] == nullptr)

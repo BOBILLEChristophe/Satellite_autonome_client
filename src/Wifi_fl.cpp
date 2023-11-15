@@ -35,7 +35,7 @@ void Fl_Wifi::start()
     debug.print("\n");
     debug.print("\n------------WIFI------------");
     debug.print("\nConnected to : ");
-    debug.print(Settings::ssid);
+    //debug.print(Settings::ssid);
     debug.print("\nIP address :   ");
     debug.print(WiFi.localIP());
     debug.print("\n----------------------------\n\n");
