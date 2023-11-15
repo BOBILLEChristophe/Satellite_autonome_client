@@ -29,13 +29,38 @@ void GestionReseau::loop(void *pvParameters)
     {
         if (!Settings::discoveryOn())
         {
+            /*************************************************************************************
+             * Occupation du canton detectee par Railcom
+             * et etat des capteurs
+             ************************************************************************************/
+
             // Desactivation des capteurs ponctuels si canton vide
             if (!node->busy())
             {
                 node->sensor[0].state(LOW);
                 node->sensor[1].state(LOW);
             }
+            else
+            {
+                // Pour déterminer le sens de roulage des locos,
+                if (node->sensor[0].state() && !node->sensor[1].state())
+                {
+                    node->loco.sens(0);
+                    debug.printf("Sens de roulage horaire");
+                }
+                else if (node->sensor[1].state() && !node->sensor[0].state())
+                {
+                    node->loco.sens(1);
+                    debug.printf("Sens de roulage horaire");
+                }
+            }
 
+            /*************************************************************************************
+             * Information aupres des satellites environnants
+             ************************************************************************************/
+
+            // En fonction des aiguilles qui appartiennent a ce canton et de leur position
+            // on en deduit quel est le SP1 et le SM1
             auto rechercheSat = [node](bool satPos) -> byte
             {
                 uint8_t idxA = 0;
@@ -76,24 +101,15 @@ void GestionReseau::loop(void *pvParameters)
                 }
                 return $idx;
             };
-            //***************************************************************************
-
-            /*********** Recherche du SP1 et du SM1 pour ce satellite
-                     en fonction des aiguilles existantes et de leur position **********/
-
             node->SP1_idx(rechercheSat(0));
             node->SM1_idx(rechercheSat(1));
 
 #ifdef DEBUG
-            // debug.printf("node->SP1_idx() %d\n", node->SP1_idx());
-            // debug.printf("node->SM1_idx() %d\n", node->SM1_idx());
+            debug.printf("node->SP1_idx() %d\n", node->SP1_idx());
+            debug.printf("node->SM1_idx() %d\n", node->SM1_idx());
 #endif
 
-            // Pour déterminer le sens de roulage des locos, on demande à SP1 et à SM1
-            // quelle est la loco qui l'occupe (s'il y en a une) et on enregistre cette info
-            // Ensuite, on compare ces adresses avec l'adresse locale
-
-            // Ce satellite envoie une demande d'informations à son SP1 et son SM1
+            // Ce satellite envoie maintenant une demande d'informations à son SP1 et son SM1
             const uint8_t idx[2] = {node->SP1_idx(), node->SM1_idx()};
             for (byte i = 0; i < 2; i++)
             {
@@ -102,29 +118,29 @@ void GestionReseau::loop(void *pvParameters)
                     if (node->nodeP[idx[i]] != nullptr)
                     {
                         CanMsg::sendMsg(0, node->ID(), node->nodeP[idx[i]]->ID(), 0xA1 + i);
-                        vTaskDelay(20 / portTICK_PERIOD_MS);
+                        vTaskDelay(20 / portTICK_PERIOD_MS); // Attente de la reponse
                     }
                 }
             }
 
             if (node->nodeP[node->SP1_idx()] != nullptr)
             {
-                //     CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SP1_idx()]->ID(), 0xA1);
-                //     vTaskDelay(50 / portTICK_PERIOD_MS);
+                CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SP1_idx()]->ID(), 0xA1);
+                vTaskDelay(50 / portTICK_PERIOD_MS);
                 debug.printf("SP1 occupe : %d\n", node->nodeP[node->SP1_idx()]->busy());
                 debug.printf("SP1 accessible : %d\n", node->nodeP[node->SP1_idx()]->acces());
             }
             if (node->nodeP[node->SM1_idx()] != nullptr)
             {
-                //     CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SM1_idx()]->ID(), 0xA2);
-                //     vTaskDelay(50 / portTICK_PERIOD_MS);
+                CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SM1_idx()]->ID(), 0xA2);
+                vTaskDelay(50 / portTICK_PERIOD_MS);
                 debug.printf("SM1 occupe :  %d\n", node->nodeP[node->SM1_idx()]->busy());
                 debug.printf("SM1 accessible :  %d\n", node->nodeP[node->SM1_idx()]->acces());
             }
 
-            //**************************************************************************
-
-            //****************** Commande des locomotives ******************************
+            /*************************************************************************************
+             * Commande des locomotives et de la signalisation
+             ************************************************************************************/
 
             auto cmdLoco = [node](const uint16_t address, const uint8_t speed, const uint8_t direction)
             {
@@ -132,8 +148,6 @@ void GestionReseau::loop(void *pvParameters)
                 const uint8_t $address1 = address & 0xFF00;
                 CanMsg::sendMsg(1, node->ID(), 253, 0xF0, $address1, $address0, speed, direction); // Message à la centrale DCC++
             };
-
-            //************************* Process ****************************************
 
             enum
             {
@@ -155,7 +169,7 @@ void GestionReseau::loop(void *pvParameters)
                         debug.printf("Le canton SP1 est occupe\n");
                         node->signal[0]->affiche(rouge); // Signalisation Rouge + oeilleton
                         //  Ordre loco Ralentissement à 30
-                        if (node->sensor[1].state() && !node->sensor[0].state())
+                        if (node->sensor[1].state() && ! node->sensor[0].state())
                             cmdLoco(node->loco.address(), 30, 1);
                         // arret au franchissement du capteur
                         if (node->sensor[0].state())
