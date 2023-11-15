@@ -22,6 +22,12 @@ void GestionReseau::loop(void *pvParameters)
     Node *node;
     node = (Node *)pvParameters;
 
+    enum
+    {
+        horaire,
+        antiHor
+    };
+
     TickType_t xLastWakeTime;
     xLastWakeTime = xTaskGetTickCount();
 
@@ -37,21 +43,21 @@ void GestionReseau::loop(void *pvParameters)
             // Desactivation des capteurs ponctuels si canton vide
             if (!node->busy())
             {
-                node->sensor[0].state(LOW);
-                node->sensor[1].state(LOW);
+                node->sensor[horaire].state(LOW);
+                node->sensor[antiHor].state(LOW);
             }
             else
             {
                 // Pour déterminer le sens de roulage des locos,
-                if (node->sensor[0].state() && !node->sensor[1].state())
+                if (node->sensor[antiHor].state() && !node->sensor[horaire].state())
                 {
-                    node->loco.sens(0);
+                    node->loco.sens(horaire);
                     debug.printf("Sens de roulage horaire");
                 }
-                else if (node->sensor[1].state() && !node->sensor[0].state())
+                else if (node->sensor[horaire].state() && !node->sensor[antiHor].state())
                 {
-                    node->loco.sens(1);
-                    debug.printf("Sens de roulage horaire");
+                    node->loco.sens(antiHor);
+                    debug.printf("Sens de roulage anti-horaire");
                 }
             }
 
