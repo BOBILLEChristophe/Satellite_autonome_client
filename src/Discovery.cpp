@@ -48,9 +48,9 @@ void Discovery::begin(Node *nd)
 
   m_thisID_sat = node->ID();
 
-  //TaskHandle_t discoveryProcessHandle = nullptr;
+  TaskHandle_t discoveryProcessHandle = nullptr;
   xTaskCreate(process, "Process", 4 * 1024, (void *)node, 2, NULL);
-  //xTaskCreate(createCiblesSignaux, "createCiblesSignaux", 4 * 1024, (void *)node, 2, NULL);
+  // xTaskCreate(createCiblesSignaux, "createCiblesSignaux", 4 * 1024, (void *)node, 2, NULL);
 }
 
 void Discovery::process(void *pvParameters)
