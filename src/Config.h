@@ -35,9 +35,9 @@ enum // Index des satellites périphériques
 //#define RFID
 
 /* ----- Debug   -------------------*/
-#define DEBUG
+//#define DEBUG
 #define debug Serial
-#define TEST_MEMORY_TASK
+//#define TEST_MEMORY_TASK
 
 /* ---------------------------------*/
 #define NO_ID 255
@@ -93,25 +93,4 @@ const uint8_t sensorSize = 2;
 #define AIG_PIN_SIGNAL_3 GPIO_NUM_13
 #define AIG_SPEED 6000.0000
 
-/* ----- Wifi --------------------*/
-
-// #define CONFIG 2 // Selection du mode
-
-// #if CONFIG == 0 // WiFi en mode point d’accès
-// #define WIFI_AP_MODE
-// #define WIFI_SSID "satellite"
-// #define WIFI_PSW "satellite" // Password facultatif
-
-// #elif CONFIG == 1
-// #define WIFI_SSID "xxxxx"
-// #define WIFI_PSW "xxxxx"
-
-// #elif CONFIG == 2
-// #define WIFI_SSID "Livebox-BC90"
-// #define WIFI_PSW "V9b7qzKFxdQfbMT4Pa"
-// #endif
-
-// #define MDNS_NAME              "satellite"
-// #define OTAName                "satellite"
-// #define OTAPassword            "satellite"
 #endif
