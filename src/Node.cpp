@@ -54,12 +54,12 @@ Node::Node() : m_id(NO_ID)
 {
   for (byte i = 0; i < nodePsize; i++)
     this->nodeP[i] = nullptr;
-  // for (auto el : nodeP)
-  //   el = nullptr;
-  // for (auto el : aig)
-  //   el = nullptr;
-  // for (auto el : signal) 
-  //   el = nullptr;
+  for (byte i = 0; i < aigSize; i++)
+  {
+    this->aig[i] = nullptr;
+    this->signal[i] = nullptr;
+  }
+
   // rfid->setup(RST_PIN, SCL_PIN, SDA_PIN, IRQ_PIN, TEMPO_RFID);
 
   sensor[0].setup(CAPT_PONCT_ANTIHOR_PIN, CAPT_PONCT_TEMPO, INPUT_PULLUP);
@@ -89,18 +89,13 @@ bool Node::SP2_busy() { return m_SP2_busy; }
 
 void Node::ciblesSignaux()
 {
-  
 }
 
 void Node::aigRun(byte idx)
 {
   if (!(this->aig[idx]->isRunning()))
   {
-    if (this->aig[idx]->posDroit() == this->aig[idx]->posDevie())
-#ifdef DEBUG
-      debug.printf("Aiguille %d, position droite et déviée sont égales\n", this->aig[idx]->ID());
-#endif
-    else
+    if (this->aig[idx]->posDroit() != this->aig[idx]->posDevie())
     {
       Node *pThis = (Node *)this->aig[idx];
       TaskHandle_t aigGoToHandle = NULL;
