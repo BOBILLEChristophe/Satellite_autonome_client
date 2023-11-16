@@ -21,7 +21,7 @@ class Settings
 {
 private:
 
-  static uint8_t nbLoco;
+  //static uint8_t nbLoco;
   static bool isMainReady;
   static String ssid_str;
   static String password_str;
@@ -32,7 +32,7 @@ private:
 public:
   static char ssid[30];
   static char password[30];
-  //Settings() = delete;
+  Settings() = delete;
   static void setup(Node *);
   static bool begin();
   static void writeFile();
