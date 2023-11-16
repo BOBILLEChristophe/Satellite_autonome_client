@@ -56,9 +56,9 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) :
   for (uint8_t i = 0; i < NB_ADDRESS_TO_COMPARE; i++) // On place des zéros dans le buffer de comparaison
     buffer.push(x);
 
-  xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 4, &railcomReceiveHandle, 0); // Création de la tâches pour la réception
-  xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 5, &railcomParseHandle, 1);       // Création de la tâches pour le traitement
-  xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 3, &railcomSetHandle, 1);       // Création de la tâches pour MAJ adresse
+  xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 1 * 1024, this, 4, &railcomReceiveHandle, 0); // Création de la tâches pour la réception
+  xTaskCreatePinnedToCore(this->parseData, "ParseData", 1 * 1024, this, 5, &railcomParseHandle, 1);       // Création de la tâches pour le traitement
+  xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 1 * 1024, this, 3, &railcomSetHandle, 1);       // Création de la tâches pour MAJ adresse
 }
 
 /* ----- getAddress   -------------------*/
