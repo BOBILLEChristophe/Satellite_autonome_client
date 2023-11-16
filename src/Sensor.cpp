@@ -7,7 +7,7 @@
 
 #include "Sensor.h"
 
-Sensor::Sensor(){};
+Sensor::Sensor() : m_state(false){};
 Sensor::~Sensor(){};
 
 void Sensor::setup(gpio_num_t pin, uint32_t tempo, byte input)
@@ -27,8 +27,9 @@ void IRAM_ATTR Sensor::loop(void *p)
 
   for (;;)
   {
-    if (pThis->m_state) // Si l'état est à LOW
+    if (!pThis->m_state) // Si l'état est à LOW
       pThis->m_state = !digitalRead(pThis->m_pin);
+    //debug.println((bool)pThis->m_state);
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(pThis->m_tempo)); // toutes les x ms
   }
 }
