@@ -55,14 +55,12 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
     debug.printf("WebSocket len %d\n", len);
     debug.printf("WebSocket data %s\n\n", data);
 #endif
-
     StaticJsonDocument<1024> doc1; // Memory pool
     DeserializationError error = deserializeJson(doc1, data);
 
     if (error) // Check for errors in parsing
-      #ifdef DEBUG
       debug.println("Parsing failed");
-#endif
+
     else
     {
       String message = (char *)data;
