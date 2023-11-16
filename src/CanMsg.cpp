@@ -11,9 +11,9 @@ void CanMsg::setup(Node *node)
 {
   debug.println("CanMsg::setup");
   TaskHandle_t canReceiveHandle = NULL;
-  xTaskCreate(canReceiveMsg, "CanReceiveMsg", 4 * 1024, (void *)node, 6, &canReceiveHandle); // Création de la tâches pour le traitement
+  xTaskCreate(canReceiveMsg, "CanReceiveMsg", 1 * 1024, (void *)node, 6, &canReceiveHandle); // Création de la tâches pour le traitement
 #ifdef TEST_MEMORY_TASK
-   xTaskCreate(testMemory, "TestMemory", 4 * 1024, (void *)canReceiveHandle, 2, NULL); // Création de la tâches pour le traitement
+  xTaskCreate(testMemory, "TestMemory", 4 * 1024, (void *)canReceiveHandle, 2, NULL); // Création de la tâches pour le traitement
 #endif
 }
 
@@ -52,7 +52,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
       const byte *idSatDestinataire = &idSatExpediteur;
       const byte fonction = (frameIn.id & 0x7F8) >> 3;
 #ifdef DEBUG
-      //debug.printf("\n------ Expediteur %d : Fonction 0x%0X, Destinataire %d \n", idSatExpediteur, fonction, (frameIn.id & 0X7F800) >> 11);
+      // debug.printf("\n------ Expediteur %d : Fonction 0x%0X, Destinataire %d \n", idSatExpediteur, fonction, (frameIn.id & 0X7F800) >> 11);
 #endif
       if (frameIn.rtr) // Remote frame
       {
@@ -91,12 +91,12 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             }
             break;
 
-          case 0xB7: // fn : Reponse à demande nombre de locos (0xB6) faite par ce sat
-            Settings::sNbLoco(frameIn.data[0]);
-#ifdef DEBUG
-            debug.printf("------ Rec->Nombre de locos : %d\n", frameIn.data[0]);
-#endif
-            break;
+            //           case 0xB7: // fn : Reponse à demande nombre de locos (0xB6) faite par ce sat
+            //             Settings::sNbLoco(frameIn.data[0]);
+            // #ifdef DEBUG
+            //             debug.printf("------ Rec->Nombre de locos : %d\n", frameIn.data[0]);
+            // #endif
+            //             break;
 
           case 0xB9: // fn : Reponse à tags des locos
             // node->rfid->tableLoco(
@@ -124,23 +124,20 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 
           case 0xBF: // fn : Enreistrement périodique des données en mémoire flash
 #ifdef SAUV_BY_MAIN
-#ifdef DEBUG
             debug.printf("------ Rec->sauvegarde automatique\n");
-#endif
             Settings::writeFile();
-            break;
+
 #else
-#ifdef DEBUG
             debug.printf("Sauvegarde automatique desactivee.\n");
 #endif
-#endif
+            break;
           }
         default:            // Messages en provenance des autres satellites que le Main
           switch (fonction) // fonction appelée
           {
           case 0xA1: // Demande d'informations en tant que SP1 et reponse destinee a SM1
             CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA3, node->SM1_idx(), node->busy(),
-                           node->loco.address() & 0x00FF, node->loco.address() & 0xFF00); // SP1 envoie l'ID de son SM1, son état d'occupation et l'adresse de la loco
+                            node->loco.address() & 0x00FF, node->loco.address() & 0xFF00); // SP1 envoie l'ID de son SM1, son état d'occupation et l'adresse de la loco
             break;
 
           case 0xA2: // Demande d'informations en tant que SM1 et reponse destinee a SP1
@@ -148,7 +145,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
                             node->loco.address() & 0x00FF, node->loco.address() & 0xFF00); // SM1 envoie l'ID de son SP1, son état d'occupation et l'adresse de la loco
             break;
 
-          case 0xA3:  // Reception de la reponse a la demande 0xA1
+          case 0xA3: // Reception de la reponse a la demande 0xA1
             if (node->nodeP[node->SP1_idx()] != nullptr)
             {
               node->nodeP[node->SP1_idx()]->busy((bool)frameIn.data[1]); // Information de l'état occupé ou non de SP1
@@ -160,7 +157,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             }
             break;
 
-          case 0xA4:  // Reception de la reponse a la demande 0xA2
+          case 0xA4: // Reception de la reponse a la demande 0xA2
             if (node->nodeP[node->SM1_idx()] != nullptr)
             {
               node->nodeP[node->SM1_idx()]->busy((bool)frameIn.data[1]); // Information de l'état occupé ou non de SM1
