@@ -13,8 +13,6 @@
 
 #include "Railcom.h"
 
-uint8_t Railcom::m_compt(0);
-
 // Identifiants des données du canal 1
 const byte CH1_ADR_LOW = 1 << 2;
 const byte CH1_ADR_HIGH = 1 << 3;
@@ -26,10 +24,9 @@ RingBuf<uint16_t, NB_ADDRESS_TO_COMPARE> buffer; // Instance
 
 /* ----- Constructeur   -------------------*/
 
-Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) :
-  m_rxPin(rxPin),
-  m_txPin(txPin),
-  m_address(0)
+Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) : m_rxPin(rxPin),
+                                                                   m_txPin(txPin),
+                                                                   m_address(0)
 {
   // Queue
   xQueue1 = xQueueCreate(QUEUE_1_SIZE, sizeof(uint8_t));
@@ -37,28 +34,16 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) :
   TaskHandle_t railcomParseHandle = NULL;
   TaskHandle_t railcomReceiveHandle = NULL;
   TaskHandle_t railcomSetHandle = NULL;
-
-  Railcom::m_compt++;
-  switch (m_compt)
-  {
-  case 1:
-    mySerial = &Serial1;
-    break;
-  case 2:
-    mySerial = &Serial2;
-    break;
-  default:
-    return;
-  }
+  mySerial = &Serial1;
   mySerial->begin(250000, SERIAL_8N1, m_rxPin, m_txPin); // Define and start ESP32 HardwareSerial port
 
   const uint16_t x = 0;
   for (uint8_t i = 0; i < NB_ADDRESS_TO_COMPARE; i++) // On place des zéros dans le buffer de comparaison
     buffer.push(x);
 
-  xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 1 * 1024, this, 4, &railcomReceiveHandle, 0); // Création de la tâches pour la réception
-  xTaskCreatePinnedToCore(this->parseData, "ParseData", 1 * 1024, this, 5, &railcomParseHandle, 1);       // Création de la tâches pour le traitement
-  xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 1 * 1024, this, 3, &railcomSetHandle, 1);       // Création de la tâches pour MAJ adresse
+  xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 4, &railcomReceiveHandle, 0); // Création de la tâches pour la réception
+  xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 5, &railcomParseHandle, 1);       // Création de la tâches pour le traitement
+  xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 3, &railcomSetHandle, 1);       // Création de la tâches pour MAJ adresse
 }
 
 /* ----- getAddress   -------------------*/
