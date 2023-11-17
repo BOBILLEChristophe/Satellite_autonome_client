@@ -65,12 +65,10 @@ bool Settings::begin()
     delay(100);
   }
 
-  writeFile();
+  //writeFile();
 
-#ifdef DEBUG
   debug.printf("End settings\n");
   debug.printf("-----------------------------------\n\n");
-#endif
 
   return 0;
 } //--- End begin
@@ -216,8 +214,7 @@ void Settings::writeFile()
     file.print(output);
     file.close();
     // SPIFFS.end();
-#ifdef DEBUG
     debug.print("Sauvegarde des datas en FLASH\n");
-#endif
+
   }
 } //--- End writeFile
