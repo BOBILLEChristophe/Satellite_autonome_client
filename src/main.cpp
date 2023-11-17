@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.9.10"
+#define VERSION "v 0.9.11"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -73,10 +73,12 @@ void setup()
 #endif
 
   Settings::setup(node);
-
+  delay(100);
   //--- Configure ESP32 CAN
   CanConfig::setup(node->ID(), Settings::discoveryOn());
+  delay(100);
   CanMsg::setup(node);
+  delay(100);
 
   bool err = 0;
   if (err == Settings::begin())
@@ -120,25 +122,6 @@ void setup()
 
   GestionReseau::setup(node);
 
-  // Test
-  // if (node.nodeP[1] == nullptr)
-  // {
-  //   node.nodeP[1] = new NodePeriph;
-  //   node.nodeP[1]->ID(12);
-  // }
-  // Serial.printf("Instance(s) de NodePeriph = %d\n", NodePeriph::comptInst);
-  // delay(1000);
-  // // Serial.printf("node.nodeP[1]->ID() = %d\n", node.nodeP[1]->ID());
-  // for (byte i = 0; i < aigSize; i++)
-  // {
-  //   if (node.nodeP[i] != nullptr)
-  //   {
-  //     delete node.nodeP[i];
-  //     node.nodeP[i] = nullptr;
-  //   }
-  // }
-  // Serial.printf("Instance(s) de NodePeriph = %d\n", NodePeriph::comptInst);
-
 } // ->End setup
 
 /*-------------------------------------------------------------
@@ -160,13 +143,13 @@ void loop()
     {
       node->busy(true);
       node->loco.address(railcom.address());
-      // debug.printf("Railcom - Numero de loco : %d\n", railcom.address());
+      //debug.printf("Railcom - Numero de loco : %d\n", node->loco.address());
     }
     else
     {
       node->busy(false);
       node->loco.address(0);
-      // debug.printf("Railcom - Pas de loco.\n");
+      //debug.printf("Railcom - Pas de loco.\n");
     }
 #endif
     //**************************************************************************
