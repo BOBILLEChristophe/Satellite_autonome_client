@@ -11,9 +11,9 @@ void CanMsg::setup(Node *node)
 {
   debug.println("CanMsg::setup");
   TaskHandle_t canReceiveHandle = NULL;
-  xTaskCreate(canReceiveMsg, "CanReceiveMsg", 1 * 1024, (void *)node, 6, &canReceiveHandle); // Création de la tâches pour le traitement
+  xTaskCreate(canReceiveMsg, "CanReceiveMsg", 2 * 1024, (void *)node, 6, &canReceiveHandle); // Création de la tâches pour le traitement
 #ifdef TEST_MEMORY_TASK
-  xTaskCreate(testMemory, "TestMemory", 4 * 1024, (void *)canReceiveHandle, 2, NULL); // Création de la tâches pour le traitement
+  xTaskCreate(testMemory, "TestMemory", 2 * 1024, (void *)canReceiveHandle, 2, NULL); // Création de la tâches pour le traitement
 #endif
 }
 
@@ -98,19 +98,19 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             // #endif
             //             break;
 
-          case 0xB9: // fn : Reponse à tags des locos
-            // node->rfid->tableLoco(
-            //     frameIn.data[1],
-            //     frameIn.data[2],
-            //     frameIn.data[3],
-            //     frameIn.data[4],
-            //     frameIn.data[5],
-            //     frameIn.data[6],
-            //     frameIn.data[7]);
-            // #ifdef DEBUG
-            //           debug.printf("------ Rec->Loco n° %d\n", frameIn.data[1]);
-            // #endif
-            break;
+            // case 0xB9: // fn : Reponse à tags des locos
+            //  node->rfid->tableLoco(
+            //      frameIn.data[1],
+            //      frameIn.data[2],
+            //      frameIn.data[3],
+            //      frameIn.data[4],
+            //      frameIn.data[5],
+            //      frameIn.data[6],
+            //      frameIn.data[7]);
+            //  #ifdef DEBUG
+            //            debug.printf("------ Rec->Loco n° %d\n", frameIn.data[1]);
+            //  #endif
+            // break;
 
           case 0xBD: // Activation du WiFi
                      // if (node->ID() == frameIn.data[0])
@@ -200,35 +200,35 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             }
             break;
 
-            // case 0xC2:                           // Un satellite a envoyé l'état de ses liaisons
-            //  if (node->ID() == frameIn.data[1]) // Si l'ID de ce sat est celle du destinataire
-            //  {
-            //    for (byte i = 0; i < nodePsize; i++)
-            //    {
-            //      if (node->nodeP[i]->ID() == idSatExpediteur) // Rechrche du sat conerné
-            //      {
-            //        node->nodeP[i]->liaison[0]->aig = frameIn.data[2];
-            //        node->nodeP[i]->liaison[0]->pos = frameIn.data[3];
-            //      }
-            //    }
-            //  }
-            // break;
+            //             //             // case 0xC2:                           // Un satellite a envoyé l'état de ses liaisons
+            //             //             //  if (node->ID() == frameIn.data[1]) // Si l'ID de ce sat est celle du destinataire
+            //             //             //  {
+            //             //             //    for (byte i = 0; i < nodePsize; i++)
+            //             //             //    {
+            //             //             //      if (node->nodeP[i]->ID() == idSatExpediteur) // Rechrche du sat conerné
+            //             //             //      {
+            //             //             //        node->nodeP[i]->liaison[0]->aig = frameIn.data[2];
+            //             //             //        node->nodeP[i]->liaison[0]->pos = frameIn.data[3];
+            //             //             //      }
+            //             //             //    }
+            //             //             //  }
+            //             //             // break;
 
-            //   case 0xC3:                           // Un satellite a envoyé l'état de ses liaisons
-            //     if (node->ID() == frameIn.data[1]) // Si l'ID de ce sat est celle du destinataire
-            //     {
-            //       for (byte i = 0; i < nodePsize; i++)
-            //       {
-            //         if (node->nodeP[i]->ID() == idSatExpediteur) // Rechrche du sat conerné
-            //         {
-            //           node->nodeP[i]->liaison[0]->aig = frameIn.data[2];
-            //           node->nodeP[i]->liaison[0]->pos = frameIn.data[3];
-            //           node->nodeP[i]->liaison[1]->aig = frameIn.data[4];
-            //           node->nodeP[i]->liaison[1]->pos = frameIn.data[5];
-            //         }
-            //       }
-            //     }
-            //     break;
+            //             //             //   case 0xC3:                           // Un satellite a envoyé l'état de ses liaisons
+            //             //             //     if (node->ID() == frameIn.data[1]) // Si l'ID de ce sat est celle du destinataire
+            //             //             //     {
+            //             //             //       for (byte i = 0; i < nodePsize; i++)
+            //             //             //       {
+            //             //             //         if (node->nodeP[i]->ID() == idSatExpediteur) // Rechrche du sat conerné
+            //             //             //         {
+            //             //             //           node->nodeP[i]->liaison[0]->aig = frameIn.data[2];
+            //             //             //           node->nodeP[i]->liaison[0]->pos = frameIn.data[3];
+            //             //             //           node->nodeP[i]->liaison[1]->aig = frameIn.data[4];
+            //             //             //           node->nodeP[i]->liaison[1]->pos = frameIn.data[5];
+            //             //             //         }
+            //             //             //       }
+            //             //             //     }
+            //             //             //     break;
 
           case 0xC4: // Un satellite demande le masqueAig
             CanMsg::sendMsg(2, node->ID(), *idSatDestinataire, 0xC5, node->masqueAig());
@@ -246,6 +246,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             node->masqueAigSP2(frameIn.data[0]);
             break;
           }
+          break;
         }
       }
     }
