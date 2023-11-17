@@ -23,7 +23,6 @@ private:
   QueueHandle_t xQueue1;
   QueueHandle_t xQueue2;
   HardwareSerial *mySerial;
-  static uint8_t m_compt;
 
   static void IRAM_ATTR receiveData(void *);
   static void IRAM_ATTR parseData(void *);
