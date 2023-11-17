@@ -50,7 +50,18 @@ byte NodePeriph::masqueAig() { return m_masqueAig; }
 --------------------------------------------------------------*/
 
 // Constructor
-Node::Node() : m_id(NO_ID)
+Node::Node()
+    : m_id(NO_ID),
+      m_busy(false),
+      m_masqueAig(0),
+      m_SP1_idx(0),
+      m_SM1_idx(0),
+      m_SP2_acces(false),
+      m_SP2_busy(false),
+      m_masqueAigSP2(0),
+      m_masqueAigSM2(0),
+      m_SP1_loco(0),
+      m_SM1_loco(0)
 {
   for (byte i = 0; i < nodePsize; i++)
     this->nodeP[i] = nullptr;
