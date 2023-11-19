@@ -9,7 +9,7 @@
 
 void CanMsg::setup(Node *node)
 {
-  debug.println("CanMsg::setup");
+  debug.println("[CanMsg]::setup");
   TaskHandle_t canReceiveHandle = NULL;
   xTaskCreate(canReceiveMsg, "CanReceiveMsg", 2 * 1024, (void *)node, 6, &canReceiveHandle); // Création de la tâches pour le traitement
 #ifdef TEST_MEMORY_TASK
@@ -136,45 +136,93 @@ void CanMsg::canReceiveMsg(void *pvParameters)
           switch (fonction) // fonction appelée
           {
           case 0xA1: // Demande d'informations en tant que SP1 et reponse destinee a SM1
+                     // debug.print("[CanMsg 139] Reception fonction 0xA1\n");
+
             CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA3, node->SM1_idx(), node->busy(),
-                            node->loco.address() & 0x00FF, node->loco.address() & 0xFF00); // SP1 envoie l'ID de son SM1, son état d'occupation et l'adresse de la loco
+                            (node->loco.address() & 0xFF00) >> 8, node->loco.address() & 0x00FF); // SP1 envoie l'ID de son SM1, son état d'occupation et l'adresse de la loco
+            //debug.printf("[CanMsg %d] SP1 occupe : %d\n", __LINE__, node->loco.address() & 0x00FF);
             break;
 
           case 0xA2: // Demande d'informations en tant que SM1 et reponse destinee a SP1
+            // debug.print("[CanMsg 147] Reception fonction 0xA2\n");
+
             CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA4, node->SP1_idx(), node->busy(),
-                            node->loco.address() & 0x00FF, node->loco.address() & 0xFF00); // SM1 envoie l'ID de son SP1, son état d'occupation et l'adresse de la loco
+                            (node->loco.address() & 0xFF00) >> 8, node->loco.address() & 0x00FF); // SM1 envoie l'ID de son SP1, son état d'occupation et l'adresse de la loco
+
             break;
 
           case 0xA3: // Reception de la reponse a la demande 0xA1
+            // debug.print("[CanMsg 155] Reception fonction 0xA3\n");
+            // debug.print("[CanMsg 156] Reponse a la demande 0xA1\n");
             if (node->nodeP[node->SP1_idx()] != nullptr)
             {
               node->nodeP[node->SP1_idx()]->busy((bool)frameIn.data[1]); // Information de l'état occupé ou non de SP1
-              uint16_t locoAddr = frameIn.data[2] << 8 | frameIn.data[3];
-              if (node->SM1_idx() == frameIn.data[0])      // Si le SP1 de ce sat est celui envoyé
+              //debug.printf("[CanMsg 160] SP1 occupe : %d\n", node->nodeP[node->SP1_idx()]->busy());
+              //uint16_t locoAddr = (frameIn.data[2] << 8) | frameIn.data[3];
+              node->nodeP[node->SP1_idx()]->locoAddr((frameIn.data[2] << 8) | frameIn.data[3]);
+              //debug.printf("[CanMsg %d] Adresse loco en SP1 : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->locoAddr());
+              if (node->SM1_idx() == frameIn.data[0]) // Si le SP1 de ce sat est celui envoyé
+              {
                 node->nodeP[node->SP1_idx()]->acces(true); // Le SP1 est accessible
+                //debug.printf("[CanMsg %d] SP1 est accessible\n", __LINE__);
+              }
               else
+              {
                 node->nodeP[node->SP1_idx()]->acces(false); // Le SP1 n'est pas accessible
+                //debug.printf("[CanMsg %d] SP1 n'est pas accessible\n", __LINE__);
+              }
             }
-            break;
+            else
+              // debug.println("[CanMsg 176] Il n'y a pas de satellite SP1");
+              break;
 
           case 0xA4: // Reception de la reponse a la demande 0xA2
+            // debug.print("[CanMsg 180] Reception fonction 0xA4\n");
+            // debug.print("[CanMsg 181] Reponse a la demande 0xA2\n");
+
             if (node->nodeP[node->SM1_idx()] != nullptr)
             {
               node->nodeP[node->SM1_idx()]->busy((bool)frameIn.data[1]); // Information de l'état occupé ou non de SM1
-              uint16_t locoAddr = frameIn.data[2] << 8 | frameIn.data[3];
-              if (node->SP1_idx() == frameIn.data[0])      // Si le SM1 de ce sat est celui envoyé
+              // debug.printf("[CanMsg 185] SM1 occupe : %d\n", node->nodeP[node->SM1_idx()]->busy());
+              node->nodeP[node->SM1_idx()]->locoAddr((frameIn.data[2] << 8) | frameIn.data[3]);
+              // debug.printf("[CanMsg 187] Loco en SM1 : %d\n", (frameIn.data[2] << 8) | frameIn.data[3]);
+              if (node->SP1_idx() == frameIn.data[0]) // Si le SM1 de ce sat est celui envoyé
+              {
                 node->nodeP[node->SM1_idx()]->acces(true); // Le SM1 est accessible
+                // debug.print("[CanMsg 191] SM1 est accessible\n");
+              }
+
               else
+              {
                 node->nodeP[node->SM1_idx()]->acces(false); // Le SM1 n'est pas accessible
+                // debug.print("[CanMsg 197] SM1 n'est pas accessible\n");
+              }
             }
+            // else
+            // debug.println("[CanMsg 201] Il n'y a pas de satellite SM1");
             break;
 
           case 0xA5:
-            node->SP2_acces(frameIn.data[0]); // Enregistrement dans S0 de l'état d'accessibilité de SP2
-            node->SP2_busy(frameIn.data[1]);  // ... et enregistrement de l'état d'occupation de SP2
+            // debug.print("[CanMsg 205] Reception fonction 0xA5\n");
+            if (node->nodeP[node->SP1_idx()] != nullptr)
+              CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA6,
+                              node->nodeP[node->SP1_idx()]->acces(), node->nodeP[node->SP1_idx()]->busy(), node->nodeP[node->SP1_idx()]->ID());
+            // else
+
             break;
 
-          // Process de DECOUVERTE
+          case 0xA6:                          // Reception fonction 0xA6
+            node->SP2_acces(frameIn.data[0]); // Enregistrement dans S0 de l'état d'accessibilité de SP2
+            node->SP2_busy(frameIn.data[1]);  // ... et enregistrement de l'état d'occupation de SP2
+            // debug.printf("[CanMsg 213] node->SP2_acces : %d\n", frameIn.data[0]);
+            // debug.printf("[CanMsg 214] node->SP2_busy : %d\n", frameIn.data[1]);
+            // debug.printf("[CanMsg 215] node->SP2_id : %d\n", frameIn.data[2]);
+            break;
+
+            /******************************************************************************************************************
+            // Process de DECOUVERTE
+            ******************************************************************************************************************/
+
           case 0xC0:                                   // fn : Réception de l'ID d'un satellite et de l'état des liaisons
             if (((Discovery::btnState() & 0x03)) == 1) // Le bouton Sat- est enfoncé
             {
