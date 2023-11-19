@@ -154,7 +154,7 @@ void IRAM_ATTR Railcom::parseData(void *p)
         temp = dccAddr[0];
       else
         temp += dccAddr[0];
-
+        
       bool testOk = true;
       uint16_t j = 0;
       buffer.pop(j);
