@@ -3,7 +3,7 @@
 "wifi_on":true,
 "ssid":"xxxxxxxxxx",
 "password":"xxxxxxxxxx",
-"discovery_on":false,
+"discovery_on":true,
 "comptAig":0,
 "masqueAig":0,
 "p00":"null",
