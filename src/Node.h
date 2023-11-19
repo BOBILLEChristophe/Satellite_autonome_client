@@ -29,6 +29,7 @@ protected:
   uint8_t m_id;
   bool m_busy;
   bool m_acces;
+  uint16_t m_locoAddr;
   byte m_masqueAig;
 
 public:
@@ -44,6 +45,8 @@ public:
   bool busy();
   void acces(bool);
   bool acces();
+  void locoAddr(uint16_t);
+  uint16_t locoAddr();
   void masqueAig(byte);
   byte masqueAig();
 };
@@ -62,8 +65,8 @@ private:
   bool m_SP2_busy;
   byte m_masqueAigSP2;
   byte m_masqueAigSM2;
-  uint16_t m_SP1_loco;
-  uint16_t m_SM1_loco;
+  //uint16_t m_SP1_loco;
+  //uint16_t m_SM1_loco;
 
 public:
   Node();                        
