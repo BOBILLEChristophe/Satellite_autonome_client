@@ -134,9 +134,8 @@ void Settings::readFile()
           node->aig[i]->ID(doc["aig" + String(i) + "id"]);
           node->aig[i]->posDroit(doc["aig" + String(i) + "posDroit"]);
           node->aig[i]->posDevie(doc["aig" + String(i) + "posDevie"]);
-          node->aig[i]->curPos(doc["aig" + String(i) + "curPos"]);
           node->aig[i]->speed(doc["aig" + String(i) + "speed"]);
-          node->aig[i]->signalPin(doc["aig" + String(i) + "Pin"]);
+          node->aig[i]->signalPin(doc["aig" + String(i) + "pin"]);
           node->aig[i]->setup();
           debug.printf("- Creation de l'aiguille %d\n", i);
         }
@@ -193,9 +192,8 @@ void Settings::writeFile()
         doc["aig" + String(i) + "id"] = node->aig[i]->ID();
         doc["aig" + String(i) + "posDroit"] = node->aig[i]->posDroit();
         doc["aig" + String(i) + "posDevie"] = node->aig[i]->posDevie();
-        doc["aig" + String(i) + "curPos"] = node->aig[i]->curPos();
         doc["aig" + String(i) + "speed"] = node->aig[i]->speed();
-        doc["aig" + String(i) + "Pin"] = node->aig[i]->signalPin();
+        doc["aig" + String(i) + "pin"] = node->aig[i]->signalPin();
       }
     }
 
