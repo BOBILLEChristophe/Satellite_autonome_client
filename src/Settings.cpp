@@ -39,6 +39,8 @@ void Settings::setup(Node *nd)
     debug.printf("An Error has occurred while mounting SPIFFS\n\n");
     return;
   }
+  else
+    Serial.printf("[SPIFFS] Ok mounting\n");
   readFile();
 }
 
@@ -49,12 +51,8 @@ bool Settings::begin()
   {
     CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
     if (!isMainReady)
-    {
-#ifdef DEBUG
       debug.printf("Attente de reponse en provenance de la carte Main.\n");
-#endif
-      delay(1000);
-    }
+    delay(1000);
   } while (!isMainReady);
 
   //--- Identifiant du Node
@@ -65,7 +63,7 @@ bool Settings::begin()
     delay(100);
   }
 
-  //writeFile();
+ //writeFile();
 
   debug.printf("End settings\n");
   debug.printf("-----------------------------------\n\n");
@@ -146,7 +144,6 @@ void Settings::readFile()
       debug.printf("---------------------------------\n");
     }
     file.close();
-    // SPIFFS.end();
   }
 } //--- End readFile
 
@@ -156,13 +153,6 @@ void Settings::readFile()
 
 void Settings::writeFile()
 {
-  //   if (!SPIFFS.begin(true))
-  //   {
-  // #ifdef DEBUG
-  //     debug.println("An Error has occurred while mounting SPIFFS\n\n");
-  // #endif
-  //     return;
-  //   }
   File file = SPIFFS.open("/settings.json", "w");
   if (!file)
   {
@@ -213,8 +203,6 @@ void Settings::writeFile()
     serializeJson(doc, output);
     file.print(output);
     file.close();
-    // SPIFFS.end();
     debug.print("Sauvegarde des datas en FLASH\n");
-
   }
 } //--- End writeFile
