@@ -16,7 +16,7 @@ void Sensor::setup(gpio_num_t pin, uint32_t tempo, byte input)
   m_tempo = tempo;
   m_input = input;
   pinMode(m_pin, m_input);
-  xTaskCreate(this->loop, "loop", 1 * 1024, this, 3, NULL);
+  xTaskCreate(this->loop, "loop", 2 * 1024, this, 10, NULL);
 }
 
 void IRAM_ATTR Sensor::loop(void *p)
@@ -29,8 +29,9 @@ void IRAM_ATTR Sensor::loop(void *p)
   {
     if (!pThis->m_state) // Si l'état est à LOW
       pThis->m_state = !digitalRead(pThis->m_pin);
-    //debug.println((bool)pThis->m_state);
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(pThis->m_tempo)); // toutes les x ms
+    // else
+    //   debug.printf("[Sensor %d] Le capteur est actif\n", __LINE__);
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50)); // toutes les x ms
   }
 }
 
