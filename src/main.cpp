@@ -55,7 +55,6 @@ WebHandler webHandler;
 void setup()
 {
 
-  //--- Start serial
   Serial.begin(115200);
   while (!Serial)
     ;
@@ -89,7 +88,7 @@ void setup()
   }
   else
   {
-    debug.printf("Echec de la configuration\n");
+    debug.printf("[Settings] : Echec de la configuration\n");
     return;
   }
 
@@ -99,12 +98,12 @@ void setup()
     wifi.start();
     webHandler.init(node, 80);
   }
-  debug.printf(Settings::wifiOn() ? "Wifi : on\n" : "Wifi : off\n");
+  debug.printf(Settings::wifiOn() ? "[Wifi] : on\n" : "Wifi : off\n");
 
   //--- Lancement de la méthode pour le procecuss de découverte
   if (Settings::discoveryOn()) // Si option validée
     Discovery::begin(node);
-  debug.printf(Settings::discoveryOn() ? "Discovery : on\n" : "Discovery : off\n");
+  debug.printf(Settings::discoveryOn() ? "[Discovery] : on\n" : "[Discovery] : off\n");
   debug.println();
 #ifdef RFID
   rfid.setup();
@@ -121,6 +120,7 @@ void setup()
   // }
 
   GestionReseau::setup(node);
+  debug.printf("[GestionResau] : setup\n\n");
 
 } // ->End setup
 
@@ -130,29 +130,27 @@ void setup()
 
 void loop()
 {
-
   //******************** Ecouteur page web **********************************
+
   if (Settings::wifiOn()) // Si option validée
     webHandler.loop();    // ecoute des ports web 80 et 81
 
   if (!Settings::discoveryOn())
   {
     //************************* Railcom ****************************************
-#ifdef RAILCOM
+
     if (railcom.address())
     {
       node->busy(true);
       node->loco.address(railcom.address());
-      //debug.printf("Railcom - Numero de loco : %d\n", node->loco.address());
+      //debug.printf("[main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
     }
     else
     {
       node->busy(false);
       node->loco.address(0);
-      //debug.printf("Railcom - Pas de loco.\n");
+      // debug.printf("Railcom - Pas de loco.\n");
     }
-#endif
-    //**************************************************************************
 
     //****************************** RFID **************************************
 #ifdef RFID
@@ -162,14 +160,6 @@ void loop()
       debug.printf("RFID - Pas de loco.\n");
 #endif
     //**************************************************************************
-
-    //****************************** Capteurs IR **************************************
-    // if (node->sensor[0].state())
-    //   debug.println("Capteur horaire actif.");
-
-    // if (node->sensor[1].state())
-    //   debug.println("Capteur anti-horaire actif.");
   }
-
   vTaskDelay(pdMS_TO_TICKS(10));
 } // ->End loop
