@@ -54,7 +54,7 @@ const uint8_t aigSize = 6;
 const uint8_t sensorSize = 2;
 
 /* ----- Railcom -------------------*/
-#define NB_ADDRESS_TO_COMPARE 100 // Nombre de valeurs à comparer pour obtenir l'adresse de la loco
+#define NB_ADDRESS_TO_COMPARE 10 // Nombre de valeurs à comparer pour obtenir l'adresse de la loco
 #ifdef RAILCOM
 #define RAILCOM_RX GPIO_NUM_0
 #define RAILCOM_TX GPIO_NUM_17
@@ -72,7 +72,7 @@ const uint8_t sensorSize = 2;
 /* ----- Sensors ------------------*/
 #define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_15
 #define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_33
-#define CAPT_PONCT_TEMPO 50UL
+#define CAPT_PONCT_TEMPO 10UL
 
 /* ----- Registres a decalage ------*/
 #define SHREG_PIN_VERROU GPIO_NUM_4
