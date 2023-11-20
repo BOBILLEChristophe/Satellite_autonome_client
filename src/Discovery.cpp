@@ -50,7 +50,7 @@ void Discovery::begin(Node *nd)
 
   TaskHandle_t discoveryProcessHandle = nullptr;
   xTaskCreate(process, "Process", 4 * 1024, (void *)node, 2, NULL);
-  // xTaskCreate(createCiblesSignaux, "createCiblesSignaux", 4 * 1024, (void *)node, 2, NULL);
+  xTaskCreate(createCiblesSignaux, "createCiblesSignaux", 4 * 1024, (void *)node, 2, NULL);
 }
 
 void Discovery::process(void *pvParameters)
@@ -207,14 +207,18 @@ void Discovery::createCiblesSignaux(void *pvParameters)
   for (;;)
   {
 
+    // debug.printf("[Discovery %d] : Discovery:: createCiblesSignaux() running\n", __LINE__);
+
     //   //******************** MAJ des masqueAig **********************************
     // Pour chaque noeud périphérique on demande la valeur de son masqueAig
     for (byte i = 0; i < nodePsize; i++)
     {
+
       if (node->nodeP[i] != nullptr)
       {
         CanMsg::sendMsg(2, node->ID(), node->nodeP[i]->ID(), 0xC4);
         vTaskDelay(100 / portTICK_PERIOD_MS);
+        // debug.printf("[Discovery %d] : Reception du masqueAig de sat %d = %d \n", __LINE__, node->nodeP[i]->ID(), node->nodeP[i]->masqueAig());
       }
     }
     //******************* Cibles de signalisation ******************************
@@ -223,32 +227,40 @@ void Discovery::createCiblesSignaux(void *pvParameters)
 
     auto createSign = [node](uint8_t idxSig)
     {
+      byte typeCible = 0;
       if (node->signal[idxSig] == nullptr)
         node->signal[idxSig] = new Signal;
       node->signal[idxSig]->ID(idxSig);
 
-      node->signal[idxSig]->type(0);         // typeCible = 0 (qui est le feu par defaut)
+      // node->signal[idxSig]->type(0);                             // typeCible = 0 (qui est le feu par defaut)
       if (node->masqueAig() & (1 << idxSig)) // Une aiguille existe
-        node->signal[idxSig]->type(3);       // RRalentissement (avec Carré) - > pas besoin d'aller plus loin
-      else                                   // Pas d'aiguille
+        // node->signal[idxSig]->type(3);                           // RRalentissement (avec Carré) - > pas besoin d'aller plus loin
+        typeCible = 3;
+      else // Pas d'aiguille
       {
         if (node->nodeP[idxSig]->masqueAig() & (1 << (idxSig + 3))) // Il faut chercher si l'aiguille 3 de SP1 existe
-          node->signal[idxSig]->type(1);                            // Si oui -> la cible est (au moins) un carré
-        if (node->nodeP[idxSig]->masqueAig() & (1 << idxSig))       // Il faut chercher si l'aiguille 0 de SP1 (SM1) existe
-          node->signal[idxSig]->type(2);                            // Ralentissement (avec Carré)
-        else                                                        // L'aiguille 0 de SP1 (SM1) n'existe pas
-        {                                                           // Il faut savoir s'il y a une aiguille 3 à SP2
-          CanMsg::sendMsg(0, node->nodeP[idxSig]->ID(), 0, 0xC6);   // On adresse une demande à SP2
-          delay(100);                                               // On attend 1/10 de sec
-          if (node->masqueAigSP2() & (1 << idxSig))                 // Si oui
-            node->signal[idxSig]->type(2);                          // Ralentissement (avec Carré)
+          // node->signal[idxSig]->type(1);                         // Si oui -> la cible est (au moins) un carré
+          typeCible = 1;
+        if (node->nodeP[idxSig]->masqueAig() & (1 << idxSig)) // Il faut chercher si l'aiguille 0 de SP1 (SM1) existe
+          // node->signal[idxSig]->type(2);                         // Ralentissement (avec Carré)
+          typeCible = 2; // L'aiguille 0 de SP1 (SM1) n'existe pas
+        else
+        {                                                         // Il faut savoir s'il y a une aiguille 3 à SP2
+          CanMsg::sendMsg(0, node->nodeP[idxSig]->ID(), 0, 0xC6); // On adresse une demande à SP2
+          delay(100);                                             // On attend 1/10 de sec
+          if (node->masqueAigSP2() & (1 << idxSig))               // Si oui
+            // node->signal[idxSig]->type(2);                     // Ralentissement (avec Carré)
+            typeCible = 2;
         }
       }
+      node->signal[idxSig]->type(typeCible);
+      debug.printf("[Discovery %d] : Le type de cible pour la sortie %d = %d \n", __LINE__, idxSig, node->signal[idxSig]->type());
     };
 
     for (byte i = 0; i < aigSize; i++)
     {
-      if (node->m_masqueAig & (1 << i))
+      // if (node->m_masqueAig & (1 << i))
+      if (node->nodeP[i] != nullptr)
         createSign(i);
     }
 
