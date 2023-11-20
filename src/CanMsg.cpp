@@ -9,7 +9,7 @@
 
 void CanMsg::setup(Node *node)
 {
-  debug.println("[CanMsg]::setup");
+  debug.printf("[CanMsg %d] : setup\n", __LINE__);
   TaskHandle_t canReceiveHandle = NULL;
   xTaskCreate(canReceiveMsg, "CanReceiveMsg", 2 * 1024, (void *)node, 6, &canReceiveHandle); // Création de la tâches pour le traitement
 #ifdef TEST_MEMORY_TASK
@@ -35,6 +35,7 @@ void CanMsg::testMemory(void *pvParameters)
 /*--------------------------------------
   Reception CAN
   --------------------------------------*/
+
 void CanMsg::canReceiveMsg(void *pvParameters)
 {
   Node *node;
@@ -140,7 +141,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 
             CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA3, node->SM1_idx(), node->busy(),
                             (node->loco.address() & 0xFF00) >> 8, node->loco.address() & 0x00FF); // SP1 envoie l'ID de son SM1, son état d'occupation et l'adresse de la loco
-            //debug.printf("[CanMsg %d] SP1 occupe : %d\n", __LINE__, node->loco.address() & 0x00FF);
+            // debug.printf("[CanMsg %d] SP1 occupe : %d\n", __LINE__, node->loco.address() & 0x00FF);
             break;
 
           case 0xA2: // Demande d'informations en tant que SM1 et reponse destinee a SP1
@@ -157,19 +158,19 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             if (node->nodeP[node->SP1_idx()] != nullptr)
             {
               node->nodeP[node->SP1_idx()]->busy((bool)frameIn.data[1]); // Information de l'état occupé ou non de SP1
-              //debug.printf("[CanMsg 160] SP1 occupe : %d\n", node->nodeP[node->SP1_idx()]->busy());
-              //uint16_t locoAddr = (frameIn.data[2] << 8) | frameIn.data[3];
+              // debug.printf("[CanMsg 160] SP1 occupe : %d\n", node->nodeP[node->SP1_idx()]->busy());
+              // uint16_t locoAddr = (frameIn.data[2] << 8) | frameIn.data[3];
               node->nodeP[node->SP1_idx()]->locoAddr((frameIn.data[2] << 8) | frameIn.data[3]);
-              //debug.printf("[CanMsg %d] Adresse loco en SP1 : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->locoAddr());
+              // debug.printf("[CanMsg %d] Adresse loco en SP1 : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->locoAddr());
               if (node->SM1_idx() == frameIn.data[0]) // Si le SP1 de ce sat est celui envoyé
               {
                 node->nodeP[node->SP1_idx()]->acces(true); // Le SP1 est accessible
-                //debug.printf("[CanMsg %d] SP1 est accessible\n", __LINE__);
+                // debug.printf("[CanMsg %d] SP1 est accessible\n", __LINE__);
               }
               else
               {
                 node->nodeP[node->SP1_idx()]->acces(false); // Le SP1 n'est pas accessible
-                //debug.printf("[CanMsg %d] SP1 n'est pas accessible\n", __LINE__);
+                // debug.printf("[CanMsg %d] SP1 n'est pas accessible\n", __LINE__);
               }
             }
             else
@@ -282,8 +283,18 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             CanMsg::sendMsg(2, node->ID(), *idSatDestinataire, 0xC5, node->masqueAig());
             break;
 
-          case 0xC5: // Un satellite envoie son masqueAig
-            node->masqueAig(frameIn.data[0]);
+          case 0xC5: // Ce satellite recoit les masqueAig
+            for (byte i = 0; i < nodePsize; i++)
+            {
+              if (node->nodeP[i] != nullptr)
+              {
+                if (node->nodeP[i]->ID() == idSatExpediteur)
+                {
+                  node->nodeP[i]->masqueAig(frameIn.data[0]);
+                  //debug.printf("[CanMsg %d] : Ce satellite recoit le masqueAig de sat %d = %d\n", __LINE__, idSatExpediteur, node->nodeP[i]->masqueAig());
+                }
+              }
+            }
             break;
 
           case 0xC6: // Un satellite demande le masqueAig du nodeP[p00] de ce node
@@ -305,6 +316,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 /*--------------------------------------
   Envoi CAN
   --------------------------------------*/
+
 void CanMsg::sendMsg(CANMessage &frame)
 {
   if (0 == ACAN_ESP32::can.tryToSend(frame))
