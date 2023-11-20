@@ -41,7 +41,7 @@ void GestionReseau::loop(void *pvParameters)
              * et etat des capteurs
              ************************************************************************************/
 
-            // Desactivation des capteurs ponctuels si canton vide
+            // Desactivation des capteurs ponctuels si aucune loco reconnue
             if (!node->busy())
             {
                 node->sensor[horaire].state(LOW);
@@ -229,7 +229,7 @@ void GestionReseau::loop(void *pvParameters)
             }
             else // Le canton SP1 n'existe pas
             {
-                debug.printf("[GestionReseau %d] Le canton SP1 n'existe pas\n", __LINE__);
+                //debug.printf("[GestionReseau %d] Le canton SP1 n'existe pas\n", __LINE__);
                 /*
                 Signalisation Carré
                 */
