@@ -9,15 +9,19 @@
 
 void CanConfig::setup(const byte thisID, const bool discovery_on)
 {
-    debug.printf("[CanConfig %d] : Configure ESP32 CAN", __LINE__);
+    debug.printf("[CanConfig %d] : Configure ESP32 CAN\n", __LINE__);
     ACAN_ESP32_Settings settings(CAN_BITRATE);
     settings.mRxPin = CAN_RX;
     settings.mTxPin = CAN_TX;
     uint32_t errorCode;
 
     if (discovery_on)
-        // Si mode discovery, pas de filtre
+    {
+           // Si mode discovery, pas de filtre
         errorCode = ACAN_ESP32::can.begin(settings);
+        debug.printf("[CanConfig %d] : config without filter\n", __LINE__);
+    }
+     
     else
     {
         // En fonctionnement, on active le filtre pour ne recevoir que les seuls messages
