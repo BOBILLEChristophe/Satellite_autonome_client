@@ -36,36 +36,36 @@ void Settings::setup(Node *nd)
   node = nd;
   if (!SPIFFS.begin(true))
   {
-    debug.printf("An Error has occurred while mounting SPIFFS\n\n");
+    debug.printf("[Settings %d] : An Error has occurred while mounting SPIFFS\n\n", __LINE__);
     return;
   }
   else
-    Serial.printf("[SPIFFS] Ok mounting\n");
+    debug.printf("[Settings %d] : SPIFFS ok mounting\n", __LINE__);
   readFile();
 }
 
 bool Settings::begin()
 {
   //--- Test de la présence du Main
-  do
-  {
-    CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
-    if (!isMainReady)
-      debug.printf("Attente de reponse en provenance de la carte Main.\n");
-    delay(1000);
-  } while (!isMainReady);
+  // do
+  // {
+  //   CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
+  //   if (!isMainReady)
+  //     debug.printf("[Settings %d] : Attente de reponse en provenance de la carte Main.\n", __LINE__);
+  //   delay(1000);
+  // } while (!isMainReady);
 
   //--- Identifiant du Node
-  while (node->ID() == NO_ID) // L'identifiant n'est pas en mémoire
-  {
-    //--- Requete identifiant
-    CanMsg::sendMsg(0, node->ID(), 254, 0xB4);
-    delay(100);
-  }
+  // while (node->ID() == NO_ID) // L'identifiant n'est pas en mémoire
+  // {
+  //   //--- Requete identifiant
+  //   CanMsg::sendMsg(0, node->ID(), 254, 0xB4);
+  //   delay(100);
+  // }
 
  //writeFile();
 
-  debug.printf("End settings\n");
+  debug.printf("[Settings %d] : End settings\n", __LINE__);
   debug.printf("-----------------------------------\n\n");
 
   return 0;
@@ -80,7 +80,7 @@ void Settings::readFile()
   File file = SPIFFS.open("/settings.json", "r");
   if (!file)
   {
-    debug.println("Failed to open settings.json\n\n");
+    debug.printf("[Settings %d] : Failed to open settings.json\n\n", __LINE__);
     return;
   }
   else
@@ -90,7 +90,7 @@ void Settings::readFile()
     DeserializationError error = deserializeJson(doc, file);
     delay(100);
     if (error)
-      debug.printf("Failed to read file, using default configuration\n\n");
+      debug.printf("[Settings %d] Failed to read file, using default configuration\n\n", __LINE__);
     else
     {
       // ---
