@@ -63,6 +63,8 @@ private:
   uint8_t m_SM1_idx;
   bool m_SP2_acces;
   bool m_SP2_busy;
+  bool m_SM2_acces;
+  bool m_SM2_busy;
   byte m_masqueAigSP2;
   byte m_masqueAigSM2;
   //uint16_t m_SP1_loco;
@@ -102,6 +104,10 @@ public:
   bool SP2_acces();
   void SP2_busy(bool);
   bool SP2_busy();
+  void SM2_acces(bool);
+  bool SM2_acces();
+  void SM2_busy(bool);
+  bool SM2_busy();
 };
 
 #endif
