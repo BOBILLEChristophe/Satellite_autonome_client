@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.9.13"
+#define VERSION "v 0.10.0"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -25,9 +25,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #include "Discovery.h"
 #include "GestionReseau.h"
 #include "Node.h"
-#ifdef RAILCOM
 #include "Railcom.h"
-#endif
 #ifdef RFID
 #include "RFID.h"
 #endif
