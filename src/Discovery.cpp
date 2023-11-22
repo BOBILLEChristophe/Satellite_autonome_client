@@ -157,8 +157,8 @@ void Discovery::process(void *pvParameters)
       }
       m_comptAig = 0;
     }
-
     digitalWrite(m_pinLed, m_toggleLed);
+
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100)); // toutes les x ms
   }
 }
