@@ -35,7 +35,6 @@ void GestionReseau::loop(void *pvParameters)
         if (!Settings::discoveryOn()) // La gestion de reseau ne fonctionne que si le mode discovery
                                       // est desactive
         {
-
             /*************************************************************************************
              * Occupation du canton detectee par Railcom
              * et etat des capteurs
@@ -50,23 +49,19 @@ void GestionReseau::loop(void *pvParameters)
                 node->loco.m_comptCmd30 = 0;
                 node->loco.sens(0);
             }
-            // else
-            // debug.printf("[GestionReseau %d] busy\n", __LINE__);
 
-            // Pour déterminer le sens de roulage des locos,
+            // Sens de roulage des locos,
             if (node->sensor[antiHor].state() && !node->sensor[horaire].state())
                 node->loco.sens(1);
             else if (node->sensor[horaire].state() && !node->sensor[antiHor].state())
                 node->loco.sens(2);
-
-            // debug.printf("[GestionReseau %d] Sens de roulage %s\n", __LINE__, node->loco.sens() ? "anti-horaire" : "horaire");
 
             /*************************************************************************************
              * Information aupres des satellites environnants
              ************************************************************************************/
 
             // En fonction des aiguilles qui appartiennent a ce canton et de leur position
-            // on en deduit quel est le SP1 et le SM1
+            // on en recherche quel est le SP1 et le SM1
             auto rechercheSat = [node](bool satPos) -> byte
             {
                 uint8_t idxA = 0;
@@ -113,17 +108,24 @@ void GestionReseau::loop(void *pvParameters)
             // debug.printf("[GestionReseau %d] node->SP1_idx = %d\n", __LINE__, node->SP1_idx());
             // debug.printf("[GestionReseau %d] node->SM1_idx = %d\n", __LINE__, node->SM1_idx());
 
-            // Ce satellite envoie une demande d'informations à son SP1 et son SM1
-            const uint8_t idx[2] = {node->SP1_idx(), node->SM1_idx()};
-            for (byte i = 0; i < 2; i++)
-            {
-                if (node->nodeP[idx[i]] != nullptr)
-                {
-                    // Demande d'informations au SP1 et au SM1
-                    CanMsg::sendMsg(0, node->ID(), node->nodeP[idx[i]]->ID(), 0xA1 + i);
-                    vTaskDelay(pdMS_TO_TICKS(20)); // Attente de la reponse
-                }
-            }
+            /*************************************************************************************
+             * Envoi sur le bus CAN des informations concernant ce satellite
+             ************************************************************************************/
+
+            uint8_t nodeP_SP1_ID = 0;
+            if (node->nodeP[node->SP1_idx()] != nullptr)
+                nodeP_SP1_ID = node->nodeP[node->SP1_idx()]->ID();
+            uint8_t nodeP_SM1_ID = 0;
+            if (node->nodeP[node->SM1_idx()] != nullptr)
+                nodeP_SP1_ID = node->nodeP[node->SM1_idx()]->ID();
+
+            CanMsg::sendMsg(0, node->ID(), 0xE1, 0xE1,
+                            node->busy(),
+                            nodeP_SM1_ID,
+                            nodeP_SP1_ID);
+
+            // Il sera possible de completer les infos envoyees pour plus d'interactivite
+            // comme l'adresse de la loco, le sens de roulage...
 
             /*************************************************************************************
              * Commande des locomotives et de la signalisation
@@ -166,6 +168,10 @@ void GestionReseau::loop(void *pvParameters)
                 Rralentissement
             };
 
+            /*************************************************************************************
+             * Sens de roulage horaire
+             ************************************************************************************/
+
             if (node->nodeP[node->SP1_idx()] != nullptr)
             {
                 if (node->nodeP[node->SP1_idx()]->acces()) // Le canton SP1 est accessible
@@ -173,7 +179,7 @@ void GestionReseau::loop(void *pvParameters)
                     // debug.printf("[GestionReseau %d] Le canton SP1 est accessible\n", __LINE__);
                     if (node->nodeP[node->SP1_idx()]->busy()) // Le canton SP1 est occupé
                     {
-                        // debug.printf("[GestionReseau %d] Le canton SP1 est accessible mais occupe\n", __LINE__);
+                        debug.printf("[GestionReseau %d] Le canton SP1 est accessible mais occupe\n", __LINE__);
                         //  node->signal[0]->affiche(rouge); // Signalisation Rouge + oeilleton
 
                         //  Ordre loco Ralentissement à 30
@@ -185,11 +191,11 @@ void GestionReseau::loop(void *pvParameters)
                     }
                     else // Le canton SP1 est accessible et libre
                     {
-                        // debug.printf("[GestionReseau %d] Le canton SP1 est accessible et libre\n", __LINE__);
+                        debug.printf("[GestionReseau %d] Le canton SP1 est accessible et libre\n", __LINE__);
                         //   Vérification de l'état de SP2
-                        CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SP1_idx()]->ID(), 0xA5);
+                        // CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SP1_idx()]->ID(), 0xA5);
                         // debug.printf("[GestionReseau %d] SP1 : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
-                        vTaskDelay(pdMS_TO_TICKS(20)); // Attente de la reponse
+                        // vTaskDelay(pdMS_TO_TICKS(20)); // Attente de la reponse
 
                         if (node->SP2_acces()) // Le canton SP2 est-il accessible ?
                         {
@@ -197,24 +203,24 @@ void GestionReseau::loop(void *pvParameters)
                             if (node->SP2_busy()) // Le canton SP2 est-il occupé ?
                             {
                                 // debug.printf("[GestionReseau %d] SP2 occupe\n", __LINE__);
-                                //   Signalisation Ralentissement
+                                //    Signalisation Ralentissement
                             }
                             else // Le canton SP2 n'est pas occupé
                             {
                                 // debug.printf("[GestionReseau %d] SP2 libre\n", __LINE__);
-                                //  Signalisation vert
+                                //   Signalisation vert
                             }
                         }
                         else // Le canton SP2 n'est pas accessible
                         {
                             // debug.printf("[GestionReseau %d] SP2 non accessible\n", __LINE__);
-                            //  Signalisation Ralentissement
+                            //   Signalisation Ralentissement
                         }
                     }
                 }
                 else // Le canton SP1 est n'est pas accessible
                 {
-                    //    debug.printf("[GestionReseau %d] Le canton SP1 est n'est pas accessible\n", __LINE__);
+                    debug.printf("[GestionReseau %d] Le canton SP1 est n'est pas accessible\n", __LINE__);
                     //    /*
                     //    Signalisation ???
                     //    */
@@ -229,7 +235,7 @@ void GestionReseau::loop(void *pvParameters)
             }
             else // Le canton SP1 n'existe pas
             {
-                //debug.printf("[GestionReseau %d] Le canton SP1 n'existe pas\n", __LINE__);
+                debug.printf("[GestionReseau %d] Le canton SP1 n'existe pas\n", __LINE__);
                 /*
                 Signalisation Carré
                 */
@@ -241,7 +247,84 @@ void GestionReseau::loop(void *pvParameters)
                 if (node->sensor[horaire].state())
                     cmdLoco(0, 1);
             }
+
+            
+            /*************************************************************************************
+             * Sens de roulage anti-horaire
+             ************************************************************************************/
+
+            if (node->nodeP[node->SM1_idx()] != nullptr)
+            {
+                if (node->nodeP[node->SM1_idx()]->acces()) // Le canton SP1 est accessible
+                {
+                    // debug.printf("[GestionReseau %d] Le canton SP1 est accessible\n", __LINE__);
+                    if (node->nodeP[node->SM1_idx()]->busy()) // Le canton SP1 est occupé
+                    {
+                        debug.printf("[GestionReseau %d] Le canton SM1 est accessible mais occupe\n", __LINE__);
+                        //  node->signal[3]->affiche(rouge); // Signalisation Rouge + oeilleton
+
+                        //  Ordre loco Ralentissement à 30
+                        if (node->sensor[horaire].state())
+                            cmdLoco(30, 1);
+                        // arret au franchissement du capteur
+                        if (node->sensor[antiHor].state())
+                            cmdLoco(0, 1);
+                    }
+                    else // Le canton SP1 est accessible et libre
+                    {
+                        debug.printf("[GestionReseau %d] Le canton SM1 est accessible et libre\n", __LINE__);
+                
+                        if (node->SM2_acces()) // Le canton SP2 est-il accessible ?
+                        {
+                            // debug.printf("[GestionReseau %d] SP2 accessible\n", __LINE__);
+                            if (node->SM2_busy()) // Le canton SP2 est-il occupé ?
+                            {
+                                debug.printf("[GestionReseau %d] SM2 occupe\n", __LINE__);
+                                //    Signalisation Ralentissement
+                            }
+                            else // Le canton SP2 n'est pas occupé
+                            {
+                                debug.printf("[GestionReseau %d] SM2 libre\n", __LINE__);
+                                //   Signalisation vert
+                            }
+                        }
+                        else // Le canton SM2 n'est pas accessible
+                        {
+                            debug.printf("[GestionReseau %d] SM2 non accessible\n", __LINE__);
+                            //   Signalisation Ralentissement
+                        }
+                    }
+                }
+                else // Le canton SM1 est n'est pas accessible
+                {
+                    debug.printf("[GestionReseau %d] Le canton SM1 est n'est pas accessible\n", __LINE__);
+                    //    /*
+                    //    Signalisation ???
+                    //    */
+
+                    //  Ordre loco Ralentissement à 30
+                    if (node->sensor[horaire].state())
+                        cmdLoco(30, 1);
+                    // arret au franchissement du capteur
+                    if (node->sensor[antiHor].state())
+                        cmdLoco(0, 1);
+                }
+            }
+            else // Le canton SM1 n'existe pas
+            {
+                debug.printf("[GestionReseau %d] Le canton SM1 n'existe pas\n", __LINE__);
+                /*
+                Signalisation Carré
+                */
+
+                //  Ordre loco Ralentissement à 30
+                if (node->sensor[horaire].state())
+                    cmdLoco(30, 1);
+                // arret au franchissement du capteur
+                if (node->sensor[antiHor].state())
+                    cmdLoco(0, 1);
+            }
         }
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100));
     }
 }
