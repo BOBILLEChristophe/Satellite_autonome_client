@@ -47,21 +47,21 @@ void Settings::setup(Node *nd)
 bool Settings::begin()
 {
   //--- Test de la présence du Main
-  // do
-  // {
-  //   CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
-  //   if (!isMainReady)
-  //     debug.printf("[Settings %d] : Attente de reponse en provenance de la carte Main.\n", __LINE__);
-  //   delay(1000);
-  // } while (!isMainReady);
+  do
+  {
+    CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
+    if (!isMainReady)
+      debug.printf("[Settings %d] : Attente de reponse en provenance de la carte Main.\n", __LINE__);
+    delay(1000);
+  } while (!isMainReady);
 
   //--- Identifiant du Node
-  // while (node->ID() == NO_ID) // L'identifiant n'est pas en mémoire
-  // {
-  //   //--- Requete identifiant
-  //   CanMsg::sendMsg(0, node->ID(), 254, 0xB4);
-  //   delay(100);
-  // }
+  while (node->ID() == NO_ID) // L'identifiant n'est pas en mémoire
+  {
+    //--- Requete identifiant
+    CanMsg::sendMsg(0, node->ID(), 254, 0xB4);
+    delay(100);
+  }
 
  //writeFile();
 
