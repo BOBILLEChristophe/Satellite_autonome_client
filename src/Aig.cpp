@@ -29,7 +29,7 @@ void Aig::setup()
   m_curPos = m_posDroit;
   move(m_posDroit);
   m_estDroit = true;
-  delay(1000);
+  vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 void Aig::move(const uint16_t pos)

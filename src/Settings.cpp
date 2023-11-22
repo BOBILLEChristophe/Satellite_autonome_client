@@ -52,7 +52,7 @@ bool Settings::begin()
     CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
     if (!isMainReady)
       debug.printf("[Settings %d] : Attente de reponse en provenance de la carte Main.\n", __LINE__);
-    delay(1000);
+    vTaskDelay(pdMS_TO_TICKS(1000));
   } while (!isMainReady);
 
   //--- Identifiant du Node
@@ -60,7 +60,7 @@ bool Settings::begin()
   {
     //--- Requete identifiant
     CanMsg::sendMsg(0, node->ID(), 254, 0xB4);
-    delay(100);
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 
  //writeFile();
@@ -88,7 +88,7 @@ void Settings::readFile()
     debug.printf("\nInformations du fichier \"settings.json\" : \n\n");
     DynamicJsonDocument doc(4 * 1024);
     DeserializationError error = deserializeJson(doc, file);
-    delay(100);
+    vTaskDelay(pdMS_TO_TICKS(100));
     if (error)
       debug.printf("[Settings %d] Failed to read file, using default configuration\n\n", __LINE__);
     else

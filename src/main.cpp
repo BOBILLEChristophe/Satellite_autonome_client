@@ -70,12 +70,12 @@ void setup()
 #endif
 
   Settings::setup(node);
-  delay(100);
+  vTaskDelay(pdMS_TO_TICKS(100));
   //--- Configure ESP32 CAN
   CanConfig::setup(node->ID(), Settings::discoveryOn());
-  delay(100);
+  vTaskDelay(pdMS_TO_TICKS(100));
   CanMsg::setup(node);
-  delay(100);
+  vTaskDelay(pdMS_TO_TICKS(100));
 
   bool err = 0;
   if (err == Settings::begin())

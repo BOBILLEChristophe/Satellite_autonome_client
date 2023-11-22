@@ -247,7 +247,7 @@ void Discovery::createCiblesSignaux(void *pvParameters)
         else
         {                                                         // Il faut savoir s'il y a une aiguille 3 à SP2
           CanMsg::sendMsg(0, node->nodeP[idxSig]->ID(), 0, 0xC6); // On adresse une demande à SP2
-          delay(100);                                             // On attend 1/10 de sec
+          vTaskDelay(pdMS_TO_TICKS(100));                                             // On attend 1/10 de sec
           if (node->masqueAigSP2() & (1 << idxSig))               // Si oui
             // node->signal[idxSig]->type(2);                     // Ralentissement (avec Carré)
             typeCible = 2;

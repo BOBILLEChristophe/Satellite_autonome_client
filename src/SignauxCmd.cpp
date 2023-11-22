@@ -48,6 +48,6 @@ void IRAM_ATTR SignauxCmd::receiveData(void *p)
     {
       pThis->affiche(inByte);
     }
-    delay(1000);
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }

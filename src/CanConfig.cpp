@@ -37,7 +37,7 @@ void CanConfig::setup(const byte thisID, const bool discovery_on)
     else
     {
         debug.printf("[CanConfig %d] : configuration error 0x%x\n", __LINE__, errorCode);
-        delay(1000);
+        vTaskDelay(pdMS_TO_TICKS(1000));
         return;
     }
 }

@@ -27,7 +27,7 @@ void Fl_Wifi::start()
     WiFi.begin(Settings::ssid, Settings::password);
     while (WiFi.status() != WL_CONNECTED)
     {
-        delay(500);
+        vTaskDelay(pdMS_TO_TICKS(500));
         debug.print(".");
     }
 
@@ -45,7 +45,7 @@ void Fl_Wifi::start()
 //     {
 //         debug.print("Error setting up MDNS responder!\n");
 //         while (1)
-//             delay(1000);
+//             vTaskDelay(pdMS_TO_TICKS(1000));
 //     }
 
 // #ifdef DEBUG
