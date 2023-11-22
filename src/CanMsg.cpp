@@ -50,7 +50,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
     if (ACAN_ESP32::can.receive(frameIn))
     {
       const byte idSatExpediteur = (frameIn.id & 0x7F80000) >> 19; // ID du satellite qui envoie
-      const byte *idSatDestinataire = &idSatExpediteur;
+      // const byte *idSatDestinataire = &idSatExpediteur;
       const byte fonction = (frameIn.id & 0x7F8) >> 3;
 #ifdef DEBUG
       // debug.printf("\n------ Expediteur %d : Fonction 0x%0X, Destinataire %d \n", idSatExpediteur, fonction, (frameIn.id & 0X7F800) >> 11);
@@ -136,19 +136,76 @@ void CanMsg::canReceiveMsg(void *pvParameters)
         default:            // Messages en provenance des autres satellites que le Main
           switch (fonction) // fonction appelée
           {
+          /*****************************************************************************************************
+           * reception periodique des data envoyees par les sat (GestionReseau.cpp ligne 42)
+           ******************************************************************************************************/
+          case 0xE1:
+
+            // node->tabInvers[4] = 0;
+            debug.println();
+            debug.printf("[CanMsg %d] fonction 0xE1\n", __LINE__);
+            debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
+
+            // debug.printf("[CanMsg %d] nodeP[0]->ID() : %d\n", __LINE__, node->nodeP[0]->ID());
+            // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
+            // debug.printf("[CanMsg %d] node->tabInvers[idSatExpediteur] : %d\n", __LINE__, node->tabInvers[idSatExpediteur]);
+            debug.printf("[CanMsg %d] frameIn.data[1] : %d\n", __LINE__, frameIn.data[1]);
+            debug.printf("[CanMsg %d] frameIn.data[2] : %d\n", __LINE__, frameIn.data[2]);
+            if (node->nodeP[node->SP1_idx()] != nullptr)
+            {
+              if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // Si l'expediteur est SP1
+              {
+                // L'ID du SP1 que l'on recoit est il l'ID de ce sat ? => le sat est accessible : le sat n'est pas accessible
+                if (node->ID() == frameIn.data[2])
+                {
+                  node->nodeP[node->SP1_idx()]->acces(true);
+                  node->SP2_acces(frameIn.data[3]);
+                  node->SP2_busy(frameIn.data[4]);
+                }
+                else
+                  node->nodeP[node->SP1_idx()]->acces(false);
+                node->nodeP[node->SP1_idx()]->busy(frameIn.data[0]);
+                // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->acces());
+                // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->busy());
+              }
+            }
+
+            if (node->nodeP[node->SM1_idx()] != nullptr)
+            {
+              if (idSatExpediteur == node->nodeP[node->SM1_idx()]->ID()) // Si l'expediteur est SM1
+              {
+                // L'ID du SM1 que l'on recoit est il l'ID de ce sat ? => le sat est accessible : le sat n'est pas accessible
+                if (node->ID() == frameIn.data[1])
+                {
+                  node->nodeP[node->SM1_idx()]->acces(true);
+                  node->SM2_acces(frameIn.data[3]);
+                  node->SM2_busy(frameIn.data[4]);
+                }
+                else
+                  node->nodeP[node->SM1_idx()]->acces(false);
+                node->nodeP[node->SM1_idx()]->busy(frameIn.data[0]);
+                debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->acces());
+                debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->busy());
+              }
+            }
+            break;
+
+            /*****************************************************************************************************
+             * Anciennes fonctions
+             ******************************************************************************************************/
           case 0xA1: // Demande d'informations en tant que SP1 et reponse destinee a SM1
                      // debug.print("[CanMsg 139] Reception fonction 0xA1\n");
 
-            CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA3, node->SM1_idx(), node->busy(),
-                            (node->loco.address() & 0xFF00) >> 8, node->loco.address() & 0x00FF); // SP1 envoie l'ID de son SM1, son état d'occupation et l'adresse de la loco
+            // CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA3, node->SM1_idx(), node->busy(),
+            //(node->loco.address() & 0xFF00) >> 8, node->loco.address() & 0x00FF); // SP1 envoie l'ID de son SM1, son état d'occupation et l'adresse de la loco
             // debug.printf("[CanMsg %d] SP1 occupe : %d\n", __LINE__, node->loco.address() & 0x00FF);
             break;
 
           case 0xA2: // Demande d'informations en tant que SM1 et reponse destinee a SP1
             // debug.print("[CanMsg 147] Reception fonction 0xA2\n");
 
-            CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA4, node->SP1_idx(), node->busy(),
-                            (node->loco.address() & 0xFF00) >> 8, node->loco.address() & 0x00FF); // SM1 envoie l'ID de son SP1, son état d'occupation et l'adresse de la loco
+            // CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA4, node->SP1_idx(), node->busy(),
+            //(node->loco.address() & 0xFF00) >> 8, node->loco.address() & 0x00FF); // SM1 envoie l'ID de son SP1, son état d'occupation et l'adresse de la loco
 
             break;
 
@@ -206,11 +263,11 @@ void CanMsg::canReceiveMsg(void *pvParameters)
           case 0xA5:
             // debug.print("[CanMsg 205] Reception fonction 0xA5\n");
             if (node->nodeP[node->SP1_idx()] != nullptr)
-              CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA6,
-                              node->nodeP[node->SP1_idx()]->acces(), node->nodeP[node->SP1_idx()]->busy(), node->nodeP[node->SP1_idx()]->ID());
-            // else
+              // CanMsg::sendMsg(0, node->ID(), *idSatDestinataire, 0xA6,
+              // node->nodeP[node->SP1_idx()]->acces(), node->nodeP[node->SP1_idx()]->busy(), node->nodeP[node->SP1_idx()]->ID());
+              // else
 
-            break;
+              break;
 
           case 0xA6:                          // Reception fonction 0xA6
             node->SP2_acces(frameIn.data[0]); // Enregistrement dans S0 de l'état d'accessibilité de SP2
@@ -280,7 +337,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             //             //             //     break;
 
           case 0xC4: // Un satellite demande le masqueAig
-            CanMsg::sendMsg(2, node->ID(), *idSatDestinataire, 0xC5, node->masqueAig());
+            // CanMsg::sendMsg(2, node->ID(), *idSatDestinataire, 0xC5, node->masqueAig());
             break;
 
           case 0xC5: // Ce satellite recoit les masqueAig
@@ -291,14 +348,14 @@ void CanMsg::canReceiveMsg(void *pvParameters)
                 if (node->nodeP[i]->ID() == idSatExpediteur)
                 {
                   node->nodeP[i]->masqueAig(frameIn.data[0]);
-                  //debug.printf("[CanMsg %d] : Ce satellite recoit le masqueAig de sat %d = %d\n", __LINE__, idSatExpediteur, node->nodeP[i]->masqueAig());
+                  // debug.printf("[CanMsg %d] : Ce satellite recoit le masqueAig de sat %d = %d\n", __LINE__, idSatExpediteur, node->nodeP[i]->masqueAig());
                 }
               }
             }
             break;
 
           case 0xC6: // Un satellite demande le masqueAig du nodeP[p00] de ce node
-            CanMsg::sendMsg(2, node->ID(), *idSatDestinataire, 0xC7, node->nodeP[p00]->masqueAig());
+            // CanMsg::sendMsg(2, node->ID(), *idSatDestinataire, 0xC7, node->nodeP[p00]->masqueAig());
             break;
 
           case 0xC7: // Un satellite envoie le masqueAig de son nodeP[p00]
