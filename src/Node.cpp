@@ -100,6 +100,10 @@ void Node::SP2_acces(bool acces) { m_SP2_acces = acces; }
 bool Node::SP2_acces() { return m_SP2_acces; }
 void Node::SP2_busy(bool busy) { m_SP2_busy = busy; }
 bool Node::SP2_busy() { return m_SP2_busy; }
+void Node::SM2_acces(bool acces) { m_SP2_acces = acces; }
+bool Node::SM2_acces() { return m_SP2_acces; }
+void Node::SM2_busy(bool busy) { m_SP2_busy = busy; }
+bool Node::SM2_busy() { return m_SP2_busy; }
 
 void Node::ciblesSignaux()
 {
