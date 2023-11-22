@@ -16,7 +16,7 @@
 
 #include <Arduino.h>
 
-enum // Index des satellites périphériques
+enum : uint8_t // Index des satellites périphériques
 {
   p00,
   p01,
