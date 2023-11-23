@@ -13,7 +13,9 @@
 #include "Aig.h"
 #include "Config.h"
 #include "Loco.h"
-//#include "RFID.h"
+#ifdef RFID
+#include "RFID.h"
+#endif
 #include "Sensor.h"
 #include "Signal.h"
 
@@ -67,21 +69,18 @@ private:
   bool m_SM2_busy;
   byte m_masqueAigSP2;
   byte m_masqueAigSM2;
-  //uint16_t m_SP1_loco;
-  //uint16_t m_SM1_loco;
 
 public:
-  Node();                        
-  //Node(const Node &);            
-  ~Node();                       
-  //Node &operator=(const Node &);
-  //static void testMemory(void *);
+  Node();
+  // Node(const Node &);
+  ~Node();
+  // Node &operator=(const Node &);
+  // static void testMemory(void *);
   NodePeriph *nodeP[nodePsize];
   Aig *aig[aigSize];
   Loco loco;
   Sensor sensor[sensorSize];
   Signal *signal[aigSize];
-  // Rfid *rfid;
   void ID(uint8_t);
   uint8_t ID();
   void busy(bool);
@@ -92,7 +91,6 @@ public:
   byte masqueAigSP2();
   void masqueAigSM2(byte);
   byte masqueAigSM2();
-  //void setup();
   static void aigGoTo(void *);
   void ciblesSignaux();
   void aigRun(byte);
