@@ -141,22 +141,20 @@ void CanMsg::canReceiveMsg(void *pvParameters)
            ******************************************************************************************************/
           case 0xE1:
 
-            // node->tabInvers[4] = 0;
-            debug.println();
-            debug.printf("[CanMsg %d] fonction 0xE1\n", __LINE__);
-            debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
+            // debug.printf("[CanMsg %d] fonction 0xE1\n", __LINE__);
+            // debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
 
             // debug.printf("[CanMsg %d] nodeP[0]->ID() : %d\n", __LINE__, node->nodeP[0]->ID());
             // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
             // debug.printf("[CanMsg %d] node->tabInvers[idSatExpediteur] : %d\n", __LINE__, node->tabInvers[idSatExpediteur]);
-            debug.printf("[CanMsg %d] frameIn.data[1] : %d\n", __LINE__, frameIn.data[1]);
-            debug.printf("[CanMsg %d] frameIn.data[2] : %d\n", __LINE__, frameIn.data[2]);
+            // debug.printf("[CanMsg %d] SM1 ID : %d\n", __LINE__, frameIn.data[1]);
+            // debug.printf("[CanMsg %d] SP1 ID : %d\n", __LINE__, frameIn.data[2]);
             if (node->nodeP[node->SP1_idx()] != nullptr)
             {
               if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // Si l'expediteur est SP1
               {
                 // L'ID SP1 que l'on recoit est il l'ID de ce sat => ? le sat est accessible : le sat n'est pas accessible
-                if (node->ID() == frameIn.data[2])
+                if (node->ID() == frameIn.data[1])
                 {
                   node->nodeP[node->SP1_idx()]->acces(true);
                   node->SP2_acces(frameIn.data[3]);
@@ -175,7 +173,8 @@ void CanMsg::canReceiveMsg(void *pvParameters)
               if (idSatExpediteur == node->nodeP[node->SM1_idx()]->ID()) // Si l'expediteur est SM1
               {
                 // L'ID SM1 que l'on recoit est il l'ID de ce sat => ? le sat est accessible : le sat n'est pas accessible
-                if (node->ID() == frameIn.data[1])
+                //debug.printf("[CanMsg %d] node->ID() : %d\n", __LINE__, node->ID());
+                if (node->ID() == frameIn.data[2])
                 {
                   node->nodeP[node->SM1_idx()]->acces(true);
                   node->SM2_acces(frameIn.data[3]);
@@ -184,11 +183,54 @@ void CanMsg::canReceiveMsg(void *pvParameters)
                 else
                   node->nodeP[node->SM1_idx()]->acces(false);
                 node->nodeP[node->SM1_idx()]->busy(frameIn.data[0]);
-                debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->acces());
-                debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->busy());
+                //debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->acces());
+                //debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->busy());
               }
             }
             break;
+
+            // case 0xE2: // Même fonction que 0xE1 avec en plus l'adresse de la locomotive
+
+            //   // debug.println();
+            //   // debug.printf("[CanMsg %d] fonction 0xE2\n", __LINE__);
+            //   // debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
+
+            //   if (node->nodeP[node->SP1_idx()] != nullptr)
+            //   {
+            //     if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // Si l'expediteur est SP1
+            //     {
+            //       // L'ID SP1 que l'on recoit est il l'ID de ce sat => ? le sat est accessible : le sat n'est pas accessible
+            //       if (node->ID() == frameIn.data[2])
+            //       {
+            //         node->nodeP[node->SP1_idx()]->acces(true);
+            //         node->SP2_acces(frameIn.data[3]);
+            //         node->SP2_busy(frameIn.data[4]);
+            //       }
+            //       else
+            //         node->nodeP[node->SP1_idx()]->acces(false);
+            //       node->nodeP[node->SP1_idx()]->busy(frameIn.data[0]);
+            //    }
+            //     node->nodeP[node->SP1_idx()]->locoAddr((frameIn.data[3] << 8) + frameIn.data[4]);
+            //   }
+
+            //   if (node->nodeP[node->SM1_idx()] != nullptr)
+            //   {
+            //     if (idSatExpediteur == node->nodeP[node->SM1_idx()]->ID()) // Si l'expediteur est SM1
+            //     {
+            //       // L'ID SM1 que l'on recoit est il l'ID de ce sat => ? le sat est accessible : le sat n'est pas accessible
+            //       if (node->ID() == frameIn.data[1])
+            //       {
+            //         node->nodeP[node->SM1_idx()]->acces(true);
+            //         node->SM2_acces(frameIn.data[3]);
+            //         node->SM2_busy(frameIn.data[4]);
+            //       }
+            //       else
+            //         node->nodeP[node->SM1_idx()]->acces(false);
+            //       node->nodeP[node->SM1_idx()]->busy(frameIn.data[0]);
+            //     }
+            //     node->nodeP[node->SM1_idx()]->locoAddr((frameIn.data[3] << 8) + frameIn.data[4]);
+            //   }
+            //   break;
 
             /******************************************************************************************************************
             // Process de DECOUVERTE
