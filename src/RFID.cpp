@@ -28,16 +28,16 @@ void Rfid::setup()
   mfrc522->PCD_Init(); // Initialize MFRC522
   //  Show details of PCD - MFRC522 Card Reader details
   byte v = mfrc522->PCD_ReadRegister(mfrc522->VersionReg);
-  Serial.printf("MFRC522 Software Version: %0Xv", v);
+  debug.printf("MFRC522 Software Version: %0Xv", v);
   if (v == 0x91)
-    Serial.printf(" = v1.0\n");
+    debug.printf(" = v1.0\n");
   else if (v == 0x92)
-    Serial.printf(" = v2.0\n");
+    debug.printf(" = v2.0\n");
   else
-    Serial.printf(" (unknown)\n");
+    debug.printf(" (unknown)\n");
   //  When 0x00 or 0xFF is returned, communication probably failed
   if ((v == 0x00) || (v == 0xFF))
-    Serial.printf("WARNING: Communication failure, is the MFRC522 properly connected ?\n");
+    debug.printf("WARNING: Communication failure, is the MFRC522 properly connected ?\n");
 
   TaskHandle_t process = NULL;
   //xTaskCreatePinnedToCore(this->process, "Process", 2 * 1024, this, 3, &process, 1); // Création de la tâches pour MAJ adresse
