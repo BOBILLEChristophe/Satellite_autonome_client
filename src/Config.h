@@ -65,7 +65,7 @@ const uint8_t sensorSize = 2;
 #define RST_PIN GPIO_NUM_26
 #define SCL_PIN GPIO_NUM_14
 #define SDA_PIN GPIO_NUM_27
-//#define IRQ_PIN GPIO_NUM_25
+#define IRQ_PIN GPIO_NUM_25
 #define TEMPO_RFID 1UL * 1UL // tempo entre 2 lectures => 1 * 1UL = 1/1000 sec
 #endif
 
