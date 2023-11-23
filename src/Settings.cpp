@@ -13,14 +13,8 @@ String Settings::ssid_str;
 String Settings::password_str;
 char Settings::ssid[30] = {};
 char Settings::password[30] = {};
-// uint8_t Settings::idNode = NO_ID;
-// uint8_t Settings::nbLoco = 0;
 bool Settings::isMainReady = false;
 Node *Settings::node = nullptr;
-// uint8_t Settings::gIdNode() { return Settings::idNode; }
-// uint8_t Settings::gNbLoco() { return nbLoco; }
-// void Settings::sIdNode(uint8_t idNode) { Settings::idNode = idNode; }
-// void Settings::sNbLoco(uint8_t nbLoco) { Settings::nbLoco = nbLoco; }
 void Settings::sMainReady(bool val) { Settings::isMainReady = val; }
 bool Settings::discoveryOn() { return DISCOVERY_ON; }
 void Settings::discoveryOn(bool val) { Settings::DISCOVERY_ON = val; }
@@ -28,7 +22,7 @@ bool Settings::wifiOn() { return WIFI_ON; }
 void Settings::wifiOn(bool val) { Settings::WIFI_ON = val; }
 
 /*-------------------------------------------------------------
-                           begin
+                           setup
 --------------------------------------------------------------*/
 
 void Settings::setup(Node *nd)
@@ -43,6 +37,10 @@ void Settings::setup(Node *nd)
     debug.printf("[Settings %d] : SPIFFS ok mounting\n", __LINE__);
   readFile();
 }
+
+/*-------------------------------------------------------------
+                           begin
+--------------------------------------------------------------*/
 
 bool Settings::begin()
 {
