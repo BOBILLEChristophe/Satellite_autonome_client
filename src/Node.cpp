@@ -59,12 +59,12 @@ Node::Node()
       m_masqueAig(0x00),
       m_SP1_idx(0),
       m_SM1_idx(0),
-      m_SP2_busy(false),
       m_SP2_acces(true),
+      m_SP2_busy(false),
+      m_SM2_acces(true),
+      m_SM2_busy(false),
       m_masqueAigSP2(0x00),
       m_masqueAigSM2(0x00)
-      // m_SP1_loco(0),
-      // m_SM1_loco(0)
 {
   for (byte i = 0; i < nodePsize; i++)
     this->nodeP[i] = nullptr;
@@ -73,8 +73,6 @@ Node::Node()
     this->aig[i] = nullptr;
     this->signal[i] = nullptr;
   }
-
-  // rfid->setup(RST_PIN, SCL_PIN, SDA_PIN, IRQ_PIN, TEMPO_RFID);
 
   sensor[0].setup(CAPT_PONCT_ANTIHOR_PIN, CAPT_PONCT_TEMPO, INPUT_PULLUP);
   sensor[1].setup(CAPT_PONCT_HORAIRE_PIN, CAPT_PONCT_TEMPO, INPUT_PULLUP);
