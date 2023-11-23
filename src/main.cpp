@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.10.0"
+#define VERSION "v 0.10.1"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -25,7 +25,9 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #include "Discovery.h"
 #include "GestionReseau.h"
 #include "Node.h"
+#ifdef RAILCOM
 #include "Railcom.h"
+#endif
 #ifdef RFID
 #include "RFID.h"
 #endif
@@ -107,16 +109,6 @@ void setup()
   rfid.setup();
 #endif
 
-  //--- Signal::setup()
-  // if (! Settings::discoveryOn())
-  // {
-  //   for (byte i = 0; i < aigSize; i++)
-  //   {
-  //     if (node->signal[i] != nullptr)
-  //       node->signal[i]->setup(i);
-  //   }
-  // }
-
   GestionReseau::setup(node);
   debug.printf("[GestionResau] : setup\n\n");
 
@@ -136,12 +128,13 @@ void loop()
   if (!Settings::discoveryOn())
   {
     //************************* Railcom ****************************************
-
+#ifdef RAILCOM
     if (railcom.address())
     {
       node->busy(true);
       node->loco.address(railcom.address());
       //debug.printf("[main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+      //debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
     }
     else
     {
@@ -149,8 +142,9 @@ void loop()
       node->loco.address(0);
       // debug.printf("Railcom - Pas de loco.\n");
     }
-
+#endif
     //****************************** RFID **************************************
+
 #ifdef RFID
     if (rfid.address())
       debug.printf("RFID - Numero de loco : %d\n", rfid.address());
@@ -158,6 +152,8 @@ void loop()
       debug.printf("RFID - Pas de loco.\n");
 #endif
     //**************************************************************************
+
+    //node->aigRun(0);
   }
   vTaskDelay(pdMS_TO_TICKS(10));
 } // ->End loop
