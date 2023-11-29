@@ -7,47 +7,24 @@
 
 #include "SignauxCmd.h"
 
-// SignauxCmd::SignauxCmd() {}
 
 gpio_num_t SignauxCmd::m_pinVerrou(GPIO_NUM_18);
 gpio_num_t SignauxCmd::m_pinHorloge(GPIO_NUM_5);
 gpio_num_t SignauxCmd::m_pinData(GPIO_NUM_4);
-QueueHandle_t SignauxCmd::xQueueSignaux;
-
-byte SignauxCmd::data[] = {
-  0b00000000,
-  0b00001000,
-  0b00100000,
-  0b01010000,
-  0b00010100,
-  0b00000011
-};
 
 void SignauxCmd::setup()
 {
+  //debug.printf("[SignauxCmd %d] : setup\n", __LINE__);
   pinMode(m_pinVerrou, OUTPUT);
   pinMode(m_pinHorloge, OUTPUT);
   pinMode(m_pinData, OUTPUT);
 }
 
-void SignauxCmd::affiche(uint16_t x)
+void SignauxCmd::affiche(uint16_t data)
 {
     digitalWrite(m_pinVerrou, LOW);
-    shiftOut(m_pinData, m_pinHorloge, LSBFIRST, x);
+    shiftOut(m_pinData, m_pinHorloge, LSBFIRST, data);
     digitalWrite(m_pinVerrou, HIGH);
-}
-
-void IRAM_ATTR SignauxCmd::receiveData(void *p)
-{
-  uint8_t inByte;
-  SignauxCmd *pThis = (SignauxCmd *)p;
-
-  for (;;)
-  {
-    if (xQueueReceive(pThis->xQueueSignaux, &inByte, pdMS_TO_TICKS(portMAX_DELAY) == pdPASS))
-    {
-      pThis->affiche(inByte);
-    }
-    vTaskDelay(pdMS_TO_TICKS(1000));
-  }
+    debug.printf("[SignauxCmd %d] : affiche : ", __LINE__);
+    debug.println(data, BIN);
 }

@@ -37,8 +37,8 @@ public:
   static bool begin();
   static void writeFile();
   static void readFile();
-  static uint8_t gNbLoco();
-  static void sNbLoco(const uint8_t);
+  // static uint8_t gNbLoco();
+  // static void sNbLoco(const uint8_t);
   static void sMainReady(bool);
   static bool discoveryOn();
   static void discoveryOn(bool);

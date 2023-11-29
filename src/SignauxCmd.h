@@ -14,19 +14,14 @@
 class SignauxCmd
 {
   private:
-    
-
-  public:
-    SignauxCmd();
-    static byte data[6];
     static gpio_num_t m_pinVerrou;
     static gpio_num_t m_pinHorloge;
     static gpio_num_t m_pinData;
-    static QueueHandle_t xQueueSignaux;
-    static void affiche(uint16_t x);
+
+  public:
+    SignauxCmd() = delete;
     static void setup();
-    //static void setup(QueueHandle_t queue);
-    static void IRAM_ATTR receiveData(void *p);
+    static void affiche(uint16_t);
 };
 
 #endif

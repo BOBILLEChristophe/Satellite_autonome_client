@@ -15,7 +15,7 @@ https://www.jonroma.net/media/rail/opdocs/world/france/S%201%20A%20I-%20Signalis
 class Signal
 {
 private:
-  uint8_t m_id;
+  bool m_position;
   uint8_t m_type;
   uint8_t m_length;
   uint16_t m_decalage;
@@ -25,12 +25,15 @@ private:
 
 public:
   Signal();
-  void ID(const uint8_t);
-  void setup(const uint8_t);
+  Signal(const bool, const uint8_t);
+  ~Signal();
+  void setup();
   static void reset();
   uint16_t affiche(const uint16_t);
   void type(byte);
   byte type();
+  void position(byte);
+  byte position();
 };
 
 #endif

@@ -33,13 +33,13 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
   switch (type)
   {
   case WS_EVT_CONNECT:
-    #ifdef DEBUG
+#ifdef DEBUG
     debug.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
 #endif
     WebHandler::notifyClients();
     break;
   case WS_EVT_DISCONNECT:
-    #ifdef DEBUG
+#ifdef DEBUG
     debug.printf("WebSocket client #%u disconnected\n", client->id());
 #endif
     break;
@@ -51,11 +51,11 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
     //
     break;
   case WS_EVT_DATA:
-#ifdef DEBUG
-    debug.printf("WebSocket len %d\n", len);
-    debug.printf("WebSocket data %s\n\n", data);
-#endif
-    StaticJsonDocument<1024> doc1; // Memory pool
+
+    debug.printf("[WebHandler %d] : WebSocket len %d\n", __LINE__, len);
+    debug.printf("[WebHandler %d] : WebSocket data %d\n", __LINE__, data);
+
+    StaticJsonDocument<4066> doc1; // Memory pool
     DeserializationError error = deserializeJson(doc1, data);
 
     if (error) // Check for errors in parsing
@@ -93,7 +93,7 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
           // node->aig[servoName]->sSpeed((1 / (float)servoValue) * 10000);
           uint16_t speed = 11000 - (servoValue * 1000);
           node->aig[servoName]->speed(speed);
-          #ifdef DEBUG
+#ifdef DEBUG
           debug.printf("speed %d\n", node->aig[servoName]->speed());
           debug.println("------------------------------");
           debug.printf("servo    : %d\n", servoName);
@@ -105,7 +105,7 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
       // Test de déplacement "en vraie grandeur" de l'aiguille
       if (message.indexOf("servoTest") >= 0)
       {
-uint8_t servoName = doc1["servoTest"][0];
+        uint8_t servoName = doc1["servoTest"][0];
 #ifdef DEBUG
         debug.println("servoTest");
         debug.printf("servo     : %d\n", servoName);
@@ -117,37 +117,29 @@ uint8_t servoName = doc1["servoTest"][0];
 
       if (message.indexOf("wifi_on") >= 0)
       {
-#ifdef DEBUG
-        debug.println("wifi_on");
-#endif
         bool wifi_on = doc1["wifi_on"][0];
         Settings::wifiOn(wifi_on);
+        debug.printf("[discovery_on %d] : wifi_on %d\n", __LINE__, wifi_on);
       }
 
       if (message.indexOf("discovery_on") >= 0)
       {
-        #ifdef DEBUG
-        debug.println("discovery_on");
-#endif
         bool discovery_on = doc1["discovery_on"][0];
         Settings::discoveryOn(discovery_on);
+        debug.printf("[discovery_on %d] : discovery_on %d\n", __LINE__, discovery_on);
       }
 
       if (message.indexOf("save") >= 0)
       {
-        #ifdef DEBUG
         debug.println("save");
-#endif
         Settings::writeFile();
       }
 
       if (message.indexOf("restartEsp") >= 0)
       {
-        #ifdef DEBUG
         debug.println("restartEsp");
-#endif
         ESP.restart();
-      } 
+      }
     }
     break;
   }

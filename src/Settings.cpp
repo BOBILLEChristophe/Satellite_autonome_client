@@ -44,24 +44,25 @@ void Settings::setup(Node *nd)
 
 bool Settings::begin()
 {
-  //--- Test de la présence du Main
-  do
+  //--- Test de la présence de la carte Main
+  while (!isMainReady)
   {
     CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
     if (!isMainReady)
       debug.printf("[Settings %d] : Attente de reponse en provenance de la carte Main.\n", __LINE__);
-    vTaskDelay(pdMS_TO_TICKS(1000));
-  } while (!isMainReady);
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
 
   //--- Identifiant du Node
   while (node->ID() == NO_ID) // L'identifiant n'est pas en mémoire
   {
     //--- Requete identifiant
+    debug.printf("[Settings %d] : Le satellite ne possede pas d'identifiant.\n", __LINE__);
     CanMsg::sendMsg(0, node->ID(), 254, 0xB4);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
 
- //writeFile();
+  // writeFile();
 
   debug.printf("[Settings %d] : End settings\n", __LINE__);
   debug.printf("-----------------------------------\n\n");
@@ -133,9 +134,23 @@ void Settings::readFile()
           node->aig[i]->posDroit(doc["aig" + String(i) + "posDroit"]);
           node->aig[i]->posDevie(doc["aig" + String(i) + "posDevie"]);
           node->aig[i]->speed(doc["aig" + String(i) + "speed"]);
-          node->aig[i]->signalPin(doc["aig" + String(i) + "pin"]);
+          node->aig[i]->pin(doc["aig" + String(i) + "pin"]);
           node->aig[i]->setup();
           debug.printf("- Creation de l'aiguille %d\n", i);
+        }
+      }
+      debug.printf("---------------------------------\n");
+
+      // Signaux
+      for (byte i = 0; i < signalSize; i++)
+      {
+        if (doc["sign" + String(i)] != "null")
+        {
+          if (node->signal[i] == nullptr)
+            node->signal[i] = new Signal;
+          node->signal[i]->type(doc["sign" + String(i) + "type"]);
+          node->signal[i]->position(doc["sign" + String(i) + "position"]);
+          debug.printf("- Creation du signal %d\n", i);
         }
       }
       debug.printf("---------------------------------\n");
@@ -191,7 +206,19 @@ void Settings::writeFile()
         doc["aig" + String(i) + "posDroit"] = node->aig[i]->posDroit();
         doc["aig" + String(i) + "posDevie"] = node->aig[i]->posDevie();
         doc["aig" + String(i) + "speed"] = node->aig[i]->speed();
-        doc["aig" + String(i) + "pin"] = node->aig[i]->signalPin();
+        doc["aig" + String(i) + "pin"] = node->aig[i]->pin();
+      }
+    }
+
+    // Signaux
+    for (byte i = 0; i < signalSize; i++)
+    {
+      if (node->signal[i] == nullptr)
+        doc["sign" + String(i)] = "null";
+      else
+      {
+        doc["sign" + String(i) + "type"] = node->signal[i]->type();
+        doc["sign" + String(i) + "position"] = node->signal[i]->position();
       }
     }
 

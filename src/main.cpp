@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.10.1"
+#define VERSION "v 0.10.5"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -54,7 +54,7 @@ WebHandler webHandler;
 
 void setup()
 {
-
+  //vTaskDelay(pdMS_TO_TICKS(10000));
   Serial.begin(115200);
   while (!Serial)
     ;
@@ -74,7 +74,8 @@ void setup()
   Settings::setup(node);
   vTaskDelay(pdMS_TO_TICKS(100));
   //--- Configure ESP32 CAN
-  CanConfig::setup(node->ID(), Settings::discoveryOn());
+  CanConfig::setup(node->ID());
+  // CanConfig::setup(node->ID(), Settings::discoveryOn());
   vTaskDelay(pdMS_TO_TICKS(100));
   CanMsg::setup(node);
   vTaskDelay(pdMS_TO_TICKS(100));
@@ -84,7 +85,7 @@ void setup()
   {
     debug.printf("-----------------------------------\n");
     debug.printf("ID Node : %d\n", node->ID());
-    debug.printf("-----------------------------------\n");
+    debug.printf("-----------------------------------\n\n");
   }
   else
   {
@@ -99,19 +100,30 @@ void setup()
     webHandler.init(node, 80);
   }
   debug.printf(Settings::wifiOn() ? "[Wifi] : on\n" : "Wifi : off\n");
-
-  //--- Lancement de la méthode pour le procecuss de découverte
-  if (Settings::discoveryOn()) // Si option validée
-    Discovery::begin(node);
   debug.printf(Settings::discoveryOn() ? "[Discovery] : on\n" : "[Discovery] : off\n");
-  debug.println();
+  //debug.println();
+
+  if (Settings::discoveryOn()) // Si option validée, lancement de la méthode pour le procecuss de découverte
+  {
+    Discovery::begin(node);
 #ifdef RFID
-  rfid.setup();
+    rfid.setup();
 #endif
+  }
+  else
+  {
+    for (byte i = 0; i < signalSize; i++)
+    {
+      if (node->signal[i] == nullptr)
+        node->signal[i] = new Signal;
+      node->signal[i]->setup();
+    }
 
-  GestionReseau::setup(node);
-  debug.printf("[GestionResau] : setup\n\n");
+    SignauxCmd::setup();
+    GestionReseau::setup(node);
+  }
 
+  debug.printf("[Main %d] : End setup\n\n", __LINE__);
 } // ->End setup
 
 /*-------------------------------------------------------------
@@ -125,35 +137,31 @@ void loop()
   if (Settings::wifiOn()) // Si option validée
     webHandler.loop();    // ecoute des ports web 80 et 81
 
-  if (!Settings::discoveryOn())
-  {
     //************************* Railcom ****************************************
 #ifdef RAILCOM
-    if (railcom.address())
-    {
-      node->busy(true);
-      node->loco.address(railcom.address());
-      //debug.printf("[main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
-      //debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
-    }
-    else
-    {
-      node->busy(false);
-      node->loco.address(0);
-      // debug.printf("Railcom - Pas de loco.\n");
-    }
+  if (railcom.address())
+  {
+    node->busy(true);
+    node->loco.address(railcom.address());
+    // debug.printf("[main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+    //  debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
+  }
+  else
+  {
+    node->busy(false);
+    node->loco.address(0);
+    // debug.printf("Railcom - Pas de loco.\n");
+  }
 #endif
-    //****************************** RFID **************************************
+  //****************************** RFID **************************************
 
 #ifdef RFID
-    if (rfid.address())
-      debug.printf("RFID - Numero de loco : %d\n", rfid.address());
-    else
-      debug.printf("RFID - Pas de loco.\n");
+  if (rfid.address())
+    debug.printf("RFID - Numero de loco : %d\n", rfid.address());
+  else
+    debug.printf("RFID - Pas de loco.\n");
 #endif
-    //**************************************************************************
+  //**************************************************************************
 
-    //node->aigRun(0);
-  }
-  vTaskDelay(pdMS_TO_TICKS(10));
+  vTaskDelay(pdMS_TO_TICKS(50));
 } // ->End loop

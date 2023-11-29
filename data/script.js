@@ -247,12 +247,12 @@ for (var i = 0; i < 4; i++) {
   }
 }
 if (check == 0) {
-  alert("Choissisez une mangeoire");
+  alert("Choissisez une ");
   return;
 }
 var quantite = document.getElementById('quantite').selectedIndex;
 if (quantite == 0) {
-  alert("Choissisez une quantité");
+  alert("Choissisez une ");
   return;
 }
 msgStr += Number(numMangeoire);

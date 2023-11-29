@@ -68,8 +68,8 @@ void Aig::ID(const uint8_t id) { m_id = id; }
 uint8_t Aig::ID() const { return m_id; }
 void Aig::estDroit(const bool pos) { m_estDroit = pos; }
 bool Aig::estDroit() const { return m_estDroit; }
-void Aig::signalPin(const byte pin) { m_servoPin = pin; }
-uint8_t Aig::signalPin() const { return m_servoPin; }
+void Aig::pin(const byte pin) { m_servoPin = pin; }
+uint8_t Aig::pin() const { return m_servoPin; }
 uint16_t Aig::speed() const { return m_speed; }
 uint16_t Aig::posDroit() const { return m_posDroit; }
 uint16_t Aig::posDevie() const { return m_posDevie; }
@@ -78,3 +78,7 @@ bool Aig::sens() const { return m_sens; }
 void Aig::sens(const bool sens) { m_sens = sens; }
 bool Aig::isRunning() const { return m_run; }
 void Aig::run(const bool run) { m_run = run; }
+void Aig::nodePdroitIdx(const uint8_t nodePdroitIdx) { m_nodePdroitIdx = nodePdroitIdx; }
+uint8_t Aig::nodePdroitIdx() const { return m_nodePdroitIdx; }
+void Aig::nodePdevieIdx(const uint8_t nodePdevieIdx) { m_nodePdevieIdx = nodePdevieIdx; }
+uint8_t Aig::nodePdevieIdx() const { return m_nodePdevieIdx; }

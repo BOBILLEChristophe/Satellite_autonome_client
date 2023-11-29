@@ -31,16 +31,19 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) : m_rxPin(rxPin
   // Queue
   xQueue1 = xQueueCreate(QUEUE_1_SIZE, sizeof(uint8_t));
   xQueue2 = xQueueCreate(QUEUE_2_SIZE, sizeof(uint16_t));
-  TaskHandle_t railcomParseHandle = NULL;
-  TaskHandle_t railcomReceiveHandle = NULL;
-  TaskHandle_t railcomSetHandle = NULL;
   mySerial = &Serial1;
   mySerial->begin(250000, SERIAL_8N1, m_rxPin, m_txPin); // Define and start ESP32 HardwareSerial port
 
   const uint16_t x = 0;
   for (uint8_t i = 0; i < NB_ADDRESS_TO_COMPARE; i++) // On place des zéros dans le buffer de comparaison
     buffer.push(x);
+}
 
+void Railcom::setup()
+{
+  TaskHandle_t railcomParseHandle = NULL;
+  TaskHandle_t railcomReceiveHandle = NULL;
+  TaskHandle_t railcomSetHandle = NULL;
   xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 4, &railcomReceiveHandle, 0); // Création de la tâches pour la réception
   xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 5, &railcomParseHandle, 1);       // Création de la tâches pour le traitement
   xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 3, &railcomSetHandle, 1);       // Création de la tâches pour MAJ adresse
@@ -79,7 +82,7 @@ void IRAM_ATTR Railcom::receiveData(void *p)
       count++;
     }
     count = 0;
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10)); // toutes les x ms
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100)); // toutes les x ms
   }
 }
 
@@ -154,7 +157,7 @@ void IRAM_ATTR Railcom::parseData(void *p)
         temp = dccAddr[0];
       else
         temp += dccAddr[0];
-        
+
       bool testOk = true;
       uint16_t j = 0;
       buffer.pop(j);
@@ -173,7 +176,7 @@ void IRAM_ATTR Railcom::parseData(void *p)
     for (byte i = 0; i < 2; i++)
       rxArray[i] = 0;
 
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10)); // toutes les x ms
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100)); // toutes les x ms
   }
 }
 

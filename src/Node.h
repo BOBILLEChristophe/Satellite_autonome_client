@@ -33,6 +33,8 @@ protected:
   bool m_acces;
   uint16_t m_locoAddr;
   byte m_masqueAig;
+  byte m_signal; // ???
+  byte m_typeCible;
 
 public:
   NodePeriph();  // Constructeur sans argument
@@ -51,6 +53,8 @@ public:
   uint16_t locoAddr();
   void masqueAig(byte);
   byte masqueAig();
+  // byte signal();     // ???
+  // void signal(byte); // ???
 };
 
 class Node : public Aig
@@ -69,18 +73,19 @@ private:
   bool m_SM2_busy;
   byte m_masqueAigSP2;
   byte m_masqueAigSM2;
+  byte m_typeCible;
 
 public:
   Node();
   // Node(const Node &);
-  ~Node();
+  // ~Node();
   // Node &operator=(const Node &);
   // static void testMemory(void *);
   NodePeriph *nodeP[nodePsize];
   Aig *aig[aigSize];
   Loco loco;
   Sensor sensor[sensorSize];
-  Signal *signal[aigSize];
+  Signal *signal[signalSize];
   void ID(uint8_t);
   uint8_t ID();
   void busy(bool);
@@ -106,6 +111,8 @@ public:
   bool SM2_acces();
   void SM2_busy(bool);
   bool SM2_busy();
+  void typeCible(byte);
+  byte typeCible();
 };
 
 #endif

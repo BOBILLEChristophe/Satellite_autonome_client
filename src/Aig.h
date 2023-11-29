@@ -28,14 +28,16 @@ protected:
   uint16_t m_curPos;
   uint16_t m_speed;
   static uint8_t m_compt;
+  uint8_t m_nodePdroitIdx;
+  uint8_t m_nodePdevieIdx;
 
 public:
   Aig();
   ~Aig();
   void setup();
   void move(const uint16_t);
-  void signalPin(const byte);
-  uint8_t signalPin() const;
+  void pin(const byte);
+  uint8_t pin() const;
   void ID(const uint8_t);
   uint8_t ID() const;
   void speed(const uint16_t);
@@ -52,6 +54,10 @@ public:
   void sens(const bool);
   bool isRunning() const;
   void run(const bool);
+  void nodePdroitIdx(const uint8_t);
+  uint8_t nodePdroitIdx() const;
+  void nodePdevieIdx(const uint8_t);
+  uint8_t nodePdevieIdx() const;
 };
 
 #endif

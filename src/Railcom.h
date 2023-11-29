@@ -29,6 +29,7 @@ private:
 
 public:
   Railcom(const gpio_num_t, const gpio_num_t);
+  void setup();
   uint16_t address() const;
 };
 

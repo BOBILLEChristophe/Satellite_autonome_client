@@ -27,7 +27,8 @@ NodePeriph::NodePeriph() // Constructeur
       m_busy(false),
       m_acces(true),
       m_locoAddr(0),
-      m_masqueAig(0x00)
+      m_masqueAig(0x00),
+      m_signal(0)
 {
   ++comptInst;
 }
@@ -43,10 +44,12 @@ void NodePeriph::busy(bool busy) { m_busy = busy; }
 bool NodePeriph::busy() { return m_busy; }
 void NodePeriph::acces(bool acces) { m_acces = acces; }
 bool NodePeriph::acces() { return m_acces; }
-void NodePeriph::locoAddr(uint16_t addr) { m_locoAddr = addr; };
+void NodePeriph::locoAddr(uint16_t addr) { m_locoAddr = addr; }
 uint16_t NodePeriph::locoAddr() { return m_locoAddr; }
 void NodePeriph::masqueAig(byte masqueAig) { m_masqueAig = masqueAig; }
 byte NodePeriph::masqueAig() { return m_masqueAig; }
+// void NodePeriph::signal(byte signal) { m_signal = signal; }
+// byte NodePeriph::signal() { return m_signal; }
 
 /*-------------------------------------------------------------
                            Node
@@ -64,21 +67,21 @@ Node::Node()
       m_SM2_acces(true),
       m_SM2_busy(false),
       m_masqueAigSP2(0x00),
-      m_masqueAigSM2(0x00)
+      m_masqueAigSM2(0x00),
+      m_typeCible(0)
 {
   for (byte i = 0; i < nodePsize; i++)
     this->nodeP[i] = nullptr;
   for (byte i = 0; i < aigSize; i++)
-  {
     this->aig[i] = nullptr;
+  for (byte i = 0; i < signalSize; i++)
     this->signal[i] = nullptr;
-  }
 
   sensor[0].setup(CAPT_PONCT_ANTIHOR_PIN, CAPT_PONCT_TEMPO, INPUT_PULLUP);
   sensor[1].setup(CAPT_PONCT_HORAIRE_PIN, CAPT_PONCT_TEMPO, INPUT_PULLUP);
 }
 
-Node::~Node() {} // Destructeur
+// Node::~Node() {} // Destructeur
 
 void Node::ID(uint8_t id) { m_id = id; }
 uint8_t Node::ID() { return m_id; }
@@ -98,14 +101,16 @@ void Node::SP2_acces(bool acces) { m_SP2_acces = acces; }
 bool Node::SP2_acces() { return m_SP2_acces; }
 void Node::SP2_busy(bool busy) { m_SP2_busy = busy; }
 bool Node::SP2_busy() { return m_SP2_busy; }
-void Node::SM2_acces(bool acces) { m_SP2_acces = acces; }
-bool Node::SM2_acces() { return m_SP2_acces; }
-void Node::SM2_busy(bool busy) { m_SP2_busy = busy; }
-bool Node::SM2_busy() { return m_SP2_busy; }
+void Node::SM2_acces(bool acces) { m_SM2_acces = acces; }
+bool Node::SM2_acces() { return m_SM2_acces; }
+void Node::SM2_busy(bool busy) { m_SM2_busy = busy; }
+bool Node::SM2_busy() { return m_SM2_busy; }
+void Node::typeCible(byte typeCible) { m_typeCible = typeCible; }
+byte Node::typeCible() { return m_typeCible; }
 
-void Node::ciblesSignaux()
-{
-}
+// void Node::ciblesSignaux()
+// {
+// }
 
 void Node::aigRun(byte idx)
 {
@@ -161,11 +166,11 @@ void Node::aigGoTo(void *p)
     }
     else
     {
-#ifdef DEBUG
+
       debug.printf("m_curPos : %d\n", pThis->m_curPos);
       debug.printf("m_speed : %d\n", pThis->m_speed);
       debug.println("vTaskDelete");
-#endif
+
       vTaskDelete(NULL);
     }
   }

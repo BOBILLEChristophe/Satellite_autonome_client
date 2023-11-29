@@ -9,6 +9,8 @@
 
   Pin mapping pour cette application : https://alkans.fr/locoduino/satellites_autonomes/sat_autonome_pinMapping_v2.pdf
 
+  https://www-kvaser-com.translate.goog/can-protocol-tutorial/?_x_tr_sl=en&_x_tr_tl=fr&_x_tr_hl=fr&_x_tr_pto=rq#:~:text=The%20message%20arbitration%20(the%20process,has%20detected%20an%20idle%20bus.
+
 */
 
 #ifndef __CONFIG__
@@ -29,7 +31,7 @@ enum : uint8_t // Index des satellites périphériques
 };
 
 /* ----- Options   -------------------*/
-//#define SAUV_BY_MAIN  // Sauvegardes automatiques des paramètres commandées par la carte Main toutes les minutes
+//#define SAUV_BY_MAIN  // Sauvegardes automatiques des paramètres commandées par la carte Main
 #define CHIP_INFO
 #define RAILCOM
 //#define RFID
@@ -52,6 +54,7 @@ enum : uint8_t // Index des satellites périphériques
 const uint8_t nodePsize = 8;
 const uint8_t aigSize = 6;
 const uint8_t sensorSize = 2;
+const uint8_t signalSize = 2;
 
 /* ----- Railcom -------------------*/
 #define NB_ADDRESS_TO_COMPARE 10 // Nombre de valeurs à comparer pour obtenir l'adresse de la loco
@@ -92,5 +95,12 @@ const uint8_t sensorSize = 2;
 #define AIG_PIN_SIGNAL_2 GPIO_NUM_2
 #define AIG_PIN_SIGNAL_3 GPIO_NUM_13
 #define AIG_SPEED 6000.0000
+
+// Sur version v6 et > du PCB
+// #define AIG_PIN_SIGNAL_0 GPIO_NUM_2
+// #define AIG_PIN_SIGNAL_1 GPIO_NUM_21
+// #define AIG_PIN_SIGNAL_2 GPIO_NUM_19
+// #define AIG_PIN_SIGNAL_3 GPIO_NUM_13
+// #define AIG_SPEED 6000.0000
 
 #endif
