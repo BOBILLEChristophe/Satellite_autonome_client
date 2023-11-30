@@ -23,13 +23,16 @@ private:
   QueueHandle_t xQueue2;
   HardwareSerial *mySerial;
 
+  SemaphoreHandle_t parseSemaphore;
+  SemaphoreHandle_t addressSemaphore;
+
   static void IRAM_ATTR receiveData(void *);
   static void IRAM_ATTR parseData(void *);
   static void IRAM_ATTR setAddress(void *);
 
 public:
   Railcom(const gpio_num_t, const gpio_num_t);
-  void setup();
+  void begin();
   uint16_t address() const;
 };
 
