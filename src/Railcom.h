@@ -24,7 +24,7 @@ private:
   HardwareSerial *mySerial;
 
   SemaphoreHandle_t parseSemaphore;
-  SemaphoreHandle_t addressSemaphore;
+  //SemaphoreHandle_t addressSemaphore;
 
   static void IRAM_ATTR receiveData(void *);
   static void IRAM_ATTR parseData(void *);
