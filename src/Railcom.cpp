@@ -32,7 +32,7 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) : m_rxPin(rxPin
   xQueue1 = xQueueCreate(QUEUE_1_SIZE, sizeof(uint8_t));
   xQueue2 = xQueueCreate(QUEUE_2_SIZE, sizeof(uint16_t));
   parseSemaphore = xSemaphoreCreateBinary();
-  //addressSemaphore = xSemaphoreCreateBinary();
+  // addressSemaphore = xSemaphoreCreateBinary();
   mySerial = &Serial1;
   mySerial->begin(250000, SERIAL_8N1, m_rxPin, m_txPin); // Define and start ESP32 HardwareSerial port
 
@@ -127,67 +127,67 @@ void IRAM_ATTR Railcom::parseData(void *p)
 
   for (;;)
   {
-    if (xSemaphoreTake(pThis->parseSemaphore, pdMS_TO_TICKS(portMAX_DELAY)) == pdTRUE)
+    // if (xSemaphoreTake(pThis->parseSemaphore, pdMS_TO_TICKS(portMAX_DELAY)) == pdTRUE)
+    // {
+    do
     {
-      do
-      {
-        xQueueReceive(pThis->xQueue1, &inByte, pdMS_TO_TICKS(portMAX_DELAY));
-        if (inByte == '\0')
-          start = true;
-      } while (!start);
-      start = false;
+      xQueueReceive(pThis->xQueue1, &inByte, pdMS_TO_TICKS(portMAX_DELAY));
+      if (inByte == '\0')
+        start = true;
+    } while (!start);
+    start = false;
 
-      for (byte i = 0; i < 2; i++)
+    for (byte i = 0; i < 2; i++)
+    {
+      if (xQueueReceive(pThis->xQueue1, &inByte, pdMS_TO_TICKS(portMAX_DELAY)) == pdPASS)
       {
-        if (xQueueReceive(pThis->xQueue1, &inByte, pdMS_TO_TICKS(portMAX_DELAY)) == pdPASS)
+        if (inByte > 0x0F && inByte < 0xF0)
         {
-          if (inByte > 0x0F && inByte < 0xF0)
+          if (check_4_8_code())
           {
-            if (check_4_8_code())
-            {
-              rxArray[rxArrayCnt] = inByte;
-              rxArrayCnt++;
-            }
+            rxArray[rxArrayCnt] = inByte;
+            rxArrayCnt++;
           }
         }
       }
-
-      if (rxArrayCnt == 2)
-      {
-        if (rxArray[0] & CH1_ADR_HIGH)
-          dccAddr[0] = rxArray[1] | (rxArray[0] << 6);
-        if (rxArray[0] & CH1_ADR_LOW)
-          dccAddr[1] = rxArray[1] | (rxArray[0] << 6);
-        temp = (dccAddr[1] - 128) << 8;
-        if (temp < 0)
-          temp = dccAddr[0];
-        else
-          temp += dccAddr[0];
-
-        bool testOk = true;
-        uint16_t j = 0;
-        buffer.pop(j);
-        buffer.push(temp);
-        do
-        {
-          if (buffer[j] != temp)
-            testOk = false;
-          j++;
-        } while (testOk && j <= buffer.size());
-
-        if (testOk)
-        {
-          xQueueSend(pThis->xQueue2, &temp, 0);
-        }
-        xSemaphoreGive(pThis->parseSemaphore);
-      }
-      rxArrayCnt = 0;
-      for (byte i = 0; i < 2; i++)
-        rxArray[i] = 0;
     }
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250)); // toutes les x ms
+
+    if (rxArrayCnt == 2)
+    {
+      if (rxArray[0] & CH1_ADR_HIGH)
+        dccAddr[0] = rxArray[1] | (rxArray[0] << 6);
+      if (rxArray[0] & CH1_ADR_LOW)
+        dccAddr[1] = rxArray[1] | (rxArray[0] << 6);
+      temp = (dccAddr[1] - 128) << 8;
+      if (temp < 0)
+        temp = dccAddr[0];
+      else
+        temp += dccAddr[0];
+
+      bool testOk = true;
+      uint16_t j = 0;
+      buffer.pop(j);
+      buffer.push(temp);
+      do
+      {
+        if (buffer[j] != temp)
+          testOk = false;
+        j++;
+      } while (testOk && j <= buffer.size());
+
+      if (testOk)
+      {
+        xQueueSend(pThis->xQueue2, &temp, 0);
+      }
+    }
+    rxArrayCnt = 0;
+    for (byte i = 0; i < 2; i++)
+      rxArray[i] = 0;
   }
+  // xSemaphoreGive(pThis->parseSemaphore);
+  vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250)); // toutes les x ms
 }
+//}
 
 /* ----- setAddress   -------------------*/
 
@@ -201,13 +201,13 @@ void IRAM_ATTR Railcom::setAddress(void *p)
 
   for (;;)
   {
-    if (xSemaphoreTake(pThis->parseSemaphore, pdMS_TO_TICKS(portMAX_DELAY)) == pdTRUE)
-    {
-      address = 0;
-      xQueueReceive(pThis->xQueue2, &address, pdMS_TO_TICKS(0));
-      pThis->m_address = address;
-      xSemaphoreGive(pThis->parseSemaphore); // Libérer le sémaphore après le traitement
-    }
+    // if (xSemaphoreTake(pThis->parseSemaphore, pdMS_TO_TICKS(portMAX_DELAY)) == pdTRUE)
+    // {
+    address = 0;
+    xQueueReceive(pThis->xQueue2, &address, pdMS_TO_TICKS(0));
+    pThis->m_address = address;
+    //}
+    // xSemaphoreGive(pThis->parseSemaphore);               // Libérer le sémaphore après le traitement
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500)); // toutes les x ms
   }
 }
