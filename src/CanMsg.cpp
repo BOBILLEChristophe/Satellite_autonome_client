@@ -51,9 +51,9 @@ void CanMsg::canReceiveMsg(void *pvParameters)
     {
       const byte idSatExpediteur = (frameIn.id & 0x7F80000) >> 19; // ID du satellite qui envoie
       const byte fonction = (frameIn.id & 0x7F8) >> 3;
-#ifdef DEBUG
-      // debug.printf("\n------ Expediteur %d : Fonction 0x%0X, Destinataire %d \n", idSatExpediteur, fonction, (frameIn.id & 0X7F800) >> 11);
-#endif
+
+debug.printf("\n[CanMsg %d]------ Expediteur %d : Fonction 0x%0X\n", __LINE__, idSatExpediteur, fonction);
+
       if (frameIn.rtr) // Remote frame
       {
         debug.printf("Frame de remote\n");
@@ -129,7 +129,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
            * reception periodique des data envoyees par les sat (GestionReseau.cpp ligne 42)
            ******************************************************************************************************/
 
-          debug.printf("[CanMsg %d] fonction 0xE1\n", __LINE__);
+           debug.printf("[CanMsg %d] fonction 0xE1\n", __LINE__);
           // debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
           // debug.printf("[CanMsg %d] nodeP[0]->ID() : %d\n", __LINE__, node->nodeP[0]->ID());
           // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
