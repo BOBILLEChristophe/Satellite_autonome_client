@@ -49,5 +49,11 @@
 "aig2pin":0,
 "aig3pin":0,
 "aig4pin":0,
-"aig5pin":0
+"aig5pin":0,
+"sign0":"null",
+"sign1":"null",
+"sign0type":0,
+"sign1type":0,
+"sign0position":0,
+"sign1position":0
 }
