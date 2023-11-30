@@ -11,8 +11,8 @@ uint16_t GestionReseau::signalValue[2] = {0};
 
 void GestionReseau::setup(Node *node)
 {
-    xTaskCreatePinnedToCore(signauxTask, "SignauxTask", 1 * 1024, (void *)node, 3, NULL, 1); // Création de la tâches pour le traitement
-    xTaskCreatePinnedToCore(loopTask, "LoopTask", 4 * 1024, (void *)node, 5, NULL, 1);
+    xTaskCreatePinnedToCore(signauxTask, "SignauxTask", 4 * 1024, (void *)node, 7, NULL, 1); // Création de la tâches pour le traitement
+    xTaskCreatePinnedToCore(loopTask, "LoopTask", 4 * 1024, (void *)node, 3, NULL, 0);
 }
 
 void GestionReseau::signauxTask(void *p)
@@ -25,7 +25,6 @@ void GestionReseau::signauxTask(void *p)
 
     for (;;)
     {
-        // debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
 
         for (byte i = 0; i < 2; i++)
         {
@@ -33,6 +32,7 @@ void GestionReseau::signauxTask(void *p)
             {
                 SignauxCmd::affiche(node->signal[i]->affiche(signalValue[i]));
                 oldValue[i] = signalValue[i];
+        debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
             }
         }
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000));
@@ -251,7 +251,7 @@ void GestionReseau::loopTask(void *pvParameters)
                 break;
             }
 
-            // debug.printf("[GestionReseau %d] index %d \n", __LINE__, index);
+            debug.printf("[GestionReseau %d] index %d \n", __LINE__, index);
 
             // debug.printf("[GestionReseau %d] node->sensor[sens0].state() %d \n", __LINE__, node->sensor[sens0].state());
             // debug.printf("[GestionReseau %d] node->sensor[sens1].state() %d \n", __LINE__, node->sensor[sens1].state());
