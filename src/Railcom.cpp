@@ -31,6 +31,8 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) : m_rxPin(rxPin
   // Queue
   xQueue1 = xQueueCreate(QUEUE_1_SIZE, sizeof(uint8_t));
   xQueue2 = xQueueCreate(QUEUE_2_SIZE, sizeof(uint16_t));
+  parseSemaphore = xSemaphoreCreateBinary();
+  addressSemaphore = xSemaphoreCreateBinary();
   mySerial = &Serial1;
   mySerial->begin(250000, SERIAL_8N1, m_rxPin, m_txPin); // Define and start ESP32 HardwareSerial port
 
@@ -39,14 +41,18 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) : m_rxPin(rxPin
     buffer.push(x);
 }
 
-void Railcom::setup()
+void Railcom::begin()
 {
-  TaskHandle_t railcomParseHandle = NULL;
-  TaskHandle_t railcomReceiveHandle = NULL;
-  TaskHandle_t railcomSetHandle = NULL;
-  xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 4, &railcomReceiveHandle, 0); // Création de la tâches pour la réception
-  xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 5, &railcomParseHandle, 1);       // Création de la tâches pour le traitement
-  xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 3, &railcomSetHandle, 1);       // Création de la tâches pour MAJ adresse
+  // TaskHandle_t railcomParseHandle = NULL;
+  // TaskHandle_t railcomReceiveHandle = NULL;
+  // TaskHandle_t railcomSetHandle = NULL;
+  // xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 5, &railcomReceiveHandle, 0); // Création de la tâches pour la réception
+  // xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 7, &railcomParseHandle, 0);       // Création de la tâches pour le traitement
+  // xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 9, &railcomSetHandle, 0);       // Création de la tâches pour MAJ adresse
+
+  xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 5, NULL, 0); // Création de la tâches pour la réception
+  xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 7, NULL, 0);     // Création de la tâches pour le traitement
+  xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 9, NULL, 0);   // Création de la tâches pour MAJ adresse
 }
 
 /* ----- getAddress   -------------------*/
@@ -170,13 +176,16 @@ void IRAM_ATTR Railcom::parseData(void *p)
       } while (testOk && j <= buffer.size());
 
       if (testOk)
+      {
         xQueueSend(pThis->xQueue2, &temp, 0);
+        xSemaphoreGive(pThis->parseSemaphore); // Libérer le sémaphore après le traitement
+      }
     }
     rxArrayCnt = 0;
     for (byte i = 0; i < 2; i++)
       rxArray[i] = 0;
-
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100)); // toutes les x ms
+      
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250)); // toutes les x ms
   }
 }
 
@@ -195,6 +204,7 @@ void IRAM_ATTR Railcom::setAddress(void *p)
     address = 0;
     xQueueReceive(pThis->xQueue2, &address, pdMS_TO_TICKS(0));
     pThis->m_address = address;
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100)); // toutes les x ms
+    xSemaphoreGive(pThis->addressSemaphore); // Libérer le sémaphore après le traitement
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500)); // toutes les x ms
   }
 }
