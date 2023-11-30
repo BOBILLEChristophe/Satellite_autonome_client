@@ -73,8 +73,8 @@ const uint8_t signalSize = 2;
 #endif
 
 /* ----- Sensors ------------------*/
-#define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_15
-#define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_33
+#define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_33
+#define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_15
 #define CAPT_PONCT_TEMPO 10UL
 
 /* ----- Registres a decalage ------*/
