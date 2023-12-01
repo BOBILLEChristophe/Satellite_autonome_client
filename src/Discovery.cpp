@@ -162,7 +162,11 @@ void Discovery::process(void *p)
     }
     // debug.printf("[Discovery %d] : process runing\n", __LINE__);
     CanMsg::sendMsg(0, node->ID(), NO_ID, 0xE0, node->masqueAig()); // Envoi du masqueAig sur le bus CAN
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100));            // toutes les x ms
+    if (m_stopProcess)
+    {
+      vTaskDelete(NULL);
+    }
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100)); // toutes les x ms
   }
 }
 
@@ -315,131 +319,14 @@ void Discovery::createAiguilles(void *p) // Création des aiguilles
     }
     // xSemaphoreGive(xSemaphore);
   }
+  if (m_stopProcess)
+  {
+    Settings::discoveryOn(false);
+    Settings::writeFile();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP.restart();
+  }
+
   vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000)); // toutes les x ms
-  //}
-}
-
-void Discovery::createCiblesSignaux(void *p)
-{
-  // Type 0 : Feu orange  - rouge - vert
-  // Type 1 : Carré + oeilleton
-  // Type 2 : Ralentissement (avec Carré + oeilleton)
-  // Type 3 : RRalentissement (avec Carré + oeilleton)
-
-  // Node *node;
-  // node = (Node *)p;
-
-  // TickType_t xLastWakeTime;
-  // xLastWakeTime = xTaskGetTickCount();
-
-  // xSemaphore = xSemaphoreCreateMutex();
-  // if (xSemaphore == NULL)
-  // {
-  //   debug.printf("[Discovery %d] : Échec de la création du sémaphore\n", __LINE__);
-  //   vTaskDelay(pdMS_TO_TICKS(1000));
-  //   return;
-  // }
-
-  // // vTaskDelay(pdMS_TO_TICKS(1000)); // Pour desynchroniser les taches
-
-  // for (;;)
-  // {
-  //   if (xSemaphoreTake(xSemaphore, (TickType_t)1000) == pdTRUE)
-  //   {
-  //     uint8_t x = 0;
-  //     uint8_t y = 0;
-  //     uint8_t index = 0;
-
-  //     for (byte i = 0; i < 2; i++)
-  //     {
-  //       switch (i)
-  //       {
-  //       case 0: // Sens horaire
-  //         x = 0;
-  //         y = 3;
-  //         index = p00;
-  //         break;
-  //       case 1: // Sens anti-horaire
-  //         x = 3;
-  //         y = 0;
-  //         index = m00;
-  //         break;
-  //       }
-
-  //       byte typeCible = 0; // 3 feux
-
-  //       if ((node->masqueAig()) & (1 << x)) // Il y a une aiguille a pied a horaire du canton S0 => RRalentissement (avec Carré)
-  //       {
-  //         // cas 1
-  //         typeCible = 3; // Carre + RRalentissement -> pas besoin d'aller plus loin
-  //       }
-  //       else // Il n'y a pas d'aiguille a pied a horaire du canton S0
-  //       {
-  //         // On regarde si les nodeP directement relies ont des aiguilles à pied
-  //         if (node->nodeP[index] != nullptr)
-  //         {                                                 // Il y a un canton SP1 a horaire du canton
-  //           if (node->nodeP[index]->masqueAig() & (1 << y)) // On cherche si l'aiguille 3 (anti horaire) de SP1 existe
-  //           {
-  //             // SP1 a au moins une aiguille a anti-horaire
-  //             // cas 2
-  //             typeCible = 1; // -> la cible est (au moins) un carré
-  //           }
-
-  //           else // SP1 n'a pas d'aiguille a anti-horaire
-  //           {
-  //             if (node->nodeP[index]->masqueAig() & (1 << x)) // On cherche si l'aiguille 0 (horaire) de SP1 existe
-  //             {
-  //               // SP1 a au moins une aiguille a horaire
-  //               // cas 3
-  //               typeCible = 2; // -> la cible est un ralentissement
-  //             }
-  //             else
-  //             {
-  //               // SP1 n'a pas d'aiguille à horaire
-  //               // Si SP2 a une aiguille a anti-horaire
-
-  //               // Si SP2 na pas d'aiguille a anti horaire
-  //             }
-  //           }
-  //         }
-  //         else // Il n'y a pas de canton a horaire de node S0
-  //         {
-  //           // cas 4
-  //           typeCible = 1; // Signal "Carre" Arret imperatif
-  //         }
-  //       }
-
-  //       // if (index == p00)
-  //       // {
-
-  //       //   debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : ", __LINE__);
-  //       // }
-  //       // else if (index == m00)
-  //       // {
-
-  //       //   debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : ", __LINE__);
-  //       // }
-
-  //       // switch (typeCible)
-  //       // {
-  //       // case 0:
-  //       //   debug.printf(" = Feu orange  - rouge - vert\n");
-  //       //   break;
-  //       // case 1:
-  //       //   debug.printf(" = Carre + oeilleton\n");
-  //       //   break;
-  //       // case 2:
-  //       //   debug.printf(" = Ralentissement (avec Carre + oeilleton°\n");
-  //       //   break;
-  //       // case 3:
-  //       //   debug.printf(" = RRalentissement (avec Carre + oeilleton)\n");
-  //       //   break;
-  //       // }
-  //     }
-  //     xSemaphoreGive(xSemaphore);
-  //   }
-  //   if (m_stopProcess)
-  //     Settings::discoveryOn(false);
-  //   vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(3000)); // toutes les x ms
   //}
 }
