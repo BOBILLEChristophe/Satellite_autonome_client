@@ -89,14 +89,14 @@ void GestionReseau::loopTask(void *pvParameters)
          * Information aupres des satellites environnants
          ************************************************************************************/
 
-        // En fonction des aiguilles qui appartiennent a ce canton et de leur position
+        // En fonction des aiguilles qui appartiennent a ce canton et de leurs positions
         // on en recherche quel est le SP1 et le SM1
         auto rechercheSat = [node](bool satPos) -> byte
         {
-            uint8_t idxA = 0;
+            uint8_t idxA = 0; // Pour horaire
             uint8_t idxS = 0;
 
-            if (satPos == 1)
+            if (satPos == 1) // Pour anti-horaire
             {
                 idxA = 3;
                 idxS = 4;
@@ -190,10 +190,8 @@ void GestionReseau::loopTask(void *pvParameters)
 
         auto cmdLoco = [node](const uint8_t speed, const uint8_t direction)
         {
-            // debug.printf("[GestionReseau %d] Test passage programme %d\n ", __LINE__, speed);
             while (node->loco.address() == 0)
                 ;
-
             uint8_t *ptCompt(nullptr);
             // debug.printf("[GestionReseau %d] commande loco %d\n ", __LINE__, speed);
             switch (speed) // Selection du compteur selon la vitesse voulue
@@ -258,12 +256,11 @@ void GestionReseau::loopTask(void *pvParameters)
 
             if (node->nodeP[index] != nullptr)
             {
-                if (node->nodeP[index]->acces()) // Le canton SP1 est accessible
+                if (node->nodeP[index]->acces()) // Le canton SP1 ou SM1 est accessible
                 {
-                    // debug.printf("[GestionReseau %d] Le canton SP1 est accessible\n", __LINE__);
-                    if (node->nodeP[index]->busy()) // Le canton SP1 est occupé
+                    // debug.printf("[GestionReseau %d] Le canton %s est accessible\n", __LINE__, cantonName);
+                    if (node->nodeP[index]->busy()) // Le canton SP1 ou SM1 est occupé
                     {
-
                         //debug.printf("[GestionReseau %d] Le canton %s est accessible mais occupe\n", __LINE__, cantonName);
                         signalValue[i] = Rouge;
 
