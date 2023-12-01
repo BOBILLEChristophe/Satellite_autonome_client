@@ -54,7 +54,6 @@ WebHandler webHandler;
 
 void setup()
 {
-  // vTaskDelay(pdMS_TO_TICKS(10000));
   Serial.begin(115200);
   while (!Serial)
     ;
@@ -146,23 +145,23 @@ void loop()
     {
       node->busy(true);
       node->loco.address(railcom.address());
-      debug.printf("[main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+      debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
       //  debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
     }
     else
     {
       node->busy(false);
       node->loco.address(0);
-      debug.printf("[main %d ] Railcom - Pas de loco.\n", __LINE__);
+      debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
     }
 #endif
     //   //****************************** RFID **************************************
 
 #ifdef RFID
     if (rfid.address())
-      debug.printf("RFID - Numero de loco : %d\n", rfid.address());
+      debug.printf("[Main %d ] RFID - Numero de loco : %d\n", __LINE__, rfid.address());
     else
-      debug.printf("RFID - Pas de loco.\n");
+      debug.printf("[Main %d ] RFID - Pas de loco.\n", __LINE__);
 #endif
     //**************************************************************************
   }
