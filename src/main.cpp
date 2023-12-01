@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.10.6"
+#define VERSION "v 0.10.7"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -138,31 +138,33 @@ void loop()
   if (Settings::wifiOn()) // Si option validée
     webHandler.loop();    // ecoute des ports web 80 et 81
 
+  if (!Settings::discoveryOn()) // Si option non validée
+  {
     //************************* Railcom ****************************************
 #ifdef RAILCOM
-  if (railcom.address())
-  {
-    node->busy(true);
-    node->loco.address(railcom.address());
-    debug.printf("[main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
-    //  debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
-  }
-  else
-  {
-    node->busy(false);
-    node->loco.address(0);
-    //debug.printf("Railcom - Pas de loco.\n");
-  }
+    if (railcom.address())
+    {
+      node->busy(true);
+      node->loco.address(railcom.address());
+      debug.printf("[main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+      //  debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
+    }
+    else
+    {
+      node->busy(false);
+      node->loco.address(0);
+      debug.printf("[main %d ] Railcom - Pas de loco.\n", __LINE__);
+    }
 #endif
-//   //****************************** RFID **************************************
+    //   //****************************** RFID **************************************
 
-// #ifdef RFID
-//   if (rfid.address())
-//     debug.printf("RFID - Numero de loco : %d\n", rfid.address());
-//   else
-//     debug.printf("RFID - Pas de loco.\n");
-// #endif
-  //**************************************************************************
-
+#ifdef RFID
+    if (rfid.address())
+      debug.printf("RFID - Numero de loco : %d\n", rfid.address());
+    else
+      debug.printf("RFID - Pas de loco.\n");
+#endif
+    //**************************************************************************
+  }
   vTaskDelay(pdMS_TO_TICKS(200));
 } // ->End loop
