@@ -31,8 +31,6 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) : m_rxPin(rxPin
   // Queue
   xQueue1 = xQueueCreate(QUEUE_1_SIZE, sizeof(uint8_t));
   xQueue2 = xQueueCreate(QUEUE_2_SIZE, sizeof(uint16_t));
-  parseSemaphore = xSemaphoreCreateBinary();
-  // addressSemaphore = xSemaphoreCreateBinary();
   mySerial = &Serial1;
   mySerial->begin(250000, SERIAL_8N1, m_rxPin, m_txPin); // Define and start ESP32 HardwareSerial port
 
@@ -43,13 +41,6 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) : m_rxPin(rxPin
 
 void Railcom::begin()
 {
-  // TaskHandle_t railcomParseHandle = NULL;
-  // TaskHandle_t railcomReceiveHandle = NULL;
-  // TaskHandle_t railcomSetHandle = NULL;
-  // xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 5, &railcomReceiveHandle, 0); // Création de la tâches pour la réception
-  // xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 7, &railcomParseHandle, 0);       // Création de la tâches pour le traitement
-  // xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 9, &railcomSetHandle, 0);       // Création de la tâches pour MAJ adresse
-
   xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 5, NULL, 0); // Création de la tâches pour la réception
   xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 7, NULL, 0);     // Création de la tâches pour le traitement
   xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 9, NULL, 0);   // Création de la tâches pour MAJ adresse
@@ -127,8 +118,6 @@ void IRAM_ATTR Railcom::parseData(void *p)
 
   for (;;)
   {
-    // if (xSemaphoreTake(pThis->parseSemaphore, pdMS_TO_TICKS(portMAX_DELAY)) == pdTRUE)
-    // {
     do
     {
       xQueueReceive(pThis->xQueue1, &inByte, pdMS_TO_TICKS(portMAX_DELAY));
@@ -184,10 +173,9 @@ void IRAM_ATTR Railcom::parseData(void *p)
     for (byte i = 0; i < 2; i++)
       rxArray[i] = 0;
   }
-  // xSemaphoreGive(pThis->parseSemaphore);
   vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250)); // toutes les x ms
 }
-//}
+
 
 /* ----- setAddress   -------------------*/
 
@@ -201,13 +189,9 @@ void IRAM_ATTR Railcom::setAddress(void *p)
 
   for (;;)
   {
-    // if (xSemaphoreTake(pThis->parseSemaphore, pdMS_TO_TICKS(portMAX_DELAY)) == pdTRUE)
-    // {
     address = 0;
     xQueueReceive(pThis->xQueue2, &address, pdMS_TO_TICKS(0));
     pThis->m_address = address;
-    //}
-    // xSemaphoreGive(pThis->parseSemaphore);               // Libérer le sémaphore après le traitement
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500)); // toutes les x ms
   }
 }
