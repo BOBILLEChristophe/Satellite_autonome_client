@@ -70,37 +70,24 @@ void CanMsg::canReceiveMsg(void *pvParameters)
         {
         case 0xB3: // fn : Reponse à demande de test du bus CAN
           if (frameIn.data[0])
-          {
             Settings::sMainReady(true);
-#ifdef DEBUG
-            debug.printf("------ Rec->Test bus CAN : OK\n");
-#endif
-          }
           break;
-        case 0xB5: // fn : Reponse à demande d'identifiant (0xB4) faite par ce sat
+        case 0xB5: // fn : Reponse à demande d'identifiant (0xB4)
           if (node->ID() == NO_ID)
-          {
             node->ID(frameIn.data[0]);
-#ifdef DEBUG
-            debug.printf("------ Rec->ID node : %d\n", frameIn.data[0]);
-#endif
-          }
           break;
-          
         case 0xBD: // Activation  - desactivation du WiFi
           Settings::wifiOn(frameIn.data[0]);
           break;
-
         case 0xBE: // Activation  - desactivation du mode Discovery
           if (frameIn.data[0])
             Discovery::stopProcess(true);
           else
             Settings::discoveryOn(true);
           break;
-
         case 0xBF: // fn : Enreistrement périodique des données en mémoire flash
 #ifdef SAUV_BY_MAIN
-          debug.printf("------ Rec->sauvegarde automatique\n");
+          debug.printf("------ Rec->sauvegarde distante\n");
           Settings::writeFile();
 #else
           debug.printf("Sauvegarde automatique desactivee.\n");
@@ -111,12 +98,12 @@ void CanMsg::canReceiveMsg(void *pvParameters)
           Discovery::ID_satPeriph(idSatExpediteur);
           break;
 
-        case 0xE0:
+        case 0xC1:
           /*****************************************************************************************************
            * reception periodique des data envoyees par les sat pendant le processus de decouverte
            ******************************************************************************************************/
 
-          // debug.printf("[CanMsg %d] : Fonction 0xE0, ID exped %d \n", __LINE__, idSatExpediteur);
+          // debug.printf("[CanMsg %d] : Fonction 0xC1, ID exped %d \n", __LINE__, idSatExpediteur);
 
           for (byte i = 0; i < aigSize; i++)
           {
@@ -127,12 +114,12 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             }
           }
           break;
-        case 0xE1:
+        case 0xE0:
           /*****************************************************************************************************
            * reception periodique des data envoyees par les sat (GestionReseau.cpp ligne 42)
            ******************************************************************************************************/
 
-          debug.printf("[CanMsg %d] fonction 0xE1\n", __LINE__);
+          debug.printf("[CanMsg %d] fonction 0xE0\n", __LINE__);
           // debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
           // debug.printf("[CanMsg %d] nodeP[0]->ID() : %d\n", __LINE__, node->nodeP[0]->ID());
           // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
@@ -144,15 +131,19 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // Si l'expediteur est SP1
             {
               // L'ID SP1 que l'on recoit est il l'ID de ce sat => ? le sat est accessible : le sat n'est pas accessible
-              if (node->ID() == frameIn.data[1])
+              if (node->ID() == frameIn.data[2])
               {
                 node->nodeP[node->SP1_idx()]->acces(true);
-                node->SP2_acces(frameIn.data[3]);
-                node->SP2_busy(frameIn.data[4]);
+                node->SP2_acces(frameIn.data[4]);
+                node->SP2_busy(frameIn.data[5]);
               }
               else
                 node->nodeP[node->SP1_idx()]->acces(false);
-              node->nodeP[node->SP1_idx()]->busy(frameIn.data[0]);
+              node->nodeP[node->SP1_idx()]->locoAddr((frameIn.data[0] << 8) + frameIn.data[1]);
+              if (node->nodeP[node->SP1_idx()]->locoAddr())
+                node->nodeP[node->SP1_idx()]->busy(true);
+              else
+                node->nodeP[node->SP1_idx()]->busy(false);
               // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->acces());
               // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->busy());
             }
@@ -164,15 +155,19 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             {
               // L'ID SM1 que l'on recoit est il l'ID de ce sat => ? le sat est accessible : le sat n'est pas accessible
               // debug.printf("[CanMsg %d] node->ID() : %d\n", __LINE__, node->ID());
-              if (node->ID() == frameIn.data[2])
+              if (node->ID() == frameIn.data[3])
               {
                 node->nodeP[node->SM1_idx()]->acces(true);
-                node->SM2_acces(frameIn.data[5]);
-                node->SM2_busy(frameIn.data[6]);
+                node->SM2_acces(frameIn.data[6]);
+                node->SM2_busy(frameIn.data[7]);
               }
               else
                 node->nodeP[node->SM1_idx()]->acces(false);
-              node->nodeP[node->SM1_idx()]->busy(frameIn.data[0]);
+              node->nodeP[node->SM1_idx()]->locoAddr((frameIn.data[0] << 8) + frameIn.data[1]);
+              if (node->nodeP[node->SM1_idx()]->locoAddr())
+                node->nodeP[node->SM1_idx()]->busy(true);
+              else
+                node->nodeP[node->SM1_idx()]->busy(false);
               // debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->acces());
               // debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->busy());
             }
