@@ -37,8 +37,11 @@ enum : uint8_t // Index des satellites périphériques
 //#define RFID
 
 /* ----- Debug   -------------------*/
-//#define DEBUG
+#define DEBUG
+#ifdef DEBUG
 #define debug Serial
+#endif
+
 //#define TEST_MEMORY_TASK
 
 /* ---------------------------------*/
