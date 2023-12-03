@@ -25,7 +25,6 @@ void GestionReseau::signauxTask(void *p)
 
     for (;;)
     {
-
         for (byte i = 0; i < 2; i++)
         {
             if (signalValue[i] > 0 && oldValue[i] != signalValue[i])
@@ -165,8 +164,9 @@ void GestionReseau::loopTask(void *pvParameters)
         // debug.printf("[GestionReseau %d ] nodeP_SM1_ID : %d\n", __LINE__, nodeP_SP1_ID);
         // debug.printf("[GestionReseau %d ] this node busy : %d\n", __LINE__, node->busy());
 
-        CanMsg::sendMsg(0, node->ID(), 0xE1, 0xE1,
-                        node->busy(),
+        CanMsg::sendMsg(0, node->ID(), 0xE0, 0xE0,
+                        node->loco.address() & 0xFF00,
+                        node->loco.address() & 0x00FF);
                         nodeP_SP1_ID,
                         nodeP_SM1_ID,
                         nodeP_SP2_ACCES,
