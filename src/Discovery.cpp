@@ -161,7 +161,7 @@ void Discovery::process(void *p)
       break;
     }
     // debug.printf("[Discovery %d] : process runing\n", __LINE__);
-    CanMsg::sendMsg(0, node->ID(), NO_ID, 0xE0, node->masqueAig()); // Envoi du masqueAig sur le bus CAN
+    CanMsg::sendMsg(0, node->ID(), NO_ID, 0xC1, node->masqueAig()); // Envoi du masqueAig sur le bus CAN
     if (m_stopProcess)
     {
       vTaskDelete(NULL);
