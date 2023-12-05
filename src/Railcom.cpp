@@ -77,7 +77,7 @@ void IRAM_ATTR Railcom::receiveData(void *p)
       count++;
     }
     count = 0;
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100)); // toutes les x ms
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10)); // toutes les x ms
   }
 }
 
@@ -130,7 +130,7 @@ void IRAM_ATTR Railcom::parseData(void *p)
     {
       if (xQueueReceive(pThis->xQueue1, &inByte, pdMS_TO_TICKS(portMAX_DELAY)) == pdPASS)
       {
-        if (inByte > 0x0F && inByte < 0xF0)
+        if (inByte >= 0x0F && inByte <= 0xF0)
         {
           if (check_4_8_code())
           {
@@ -173,7 +173,7 @@ void IRAM_ATTR Railcom::parseData(void *p)
     for (byte i = 0; i < 2; i++)
       rxArray[i] = 0;
   }
-  vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250)); // toutes les x ms
+  vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10)); // toutes les x ms
 }
 
 
@@ -192,6 +192,6 @@ void IRAM_ATTR Railcom::setAddress(void *p)
     address = 0;
     xQueueReceive(pThis->xQueue2, &address, pdMS_TO_TICKS(0));
     pThis->m_address = address;
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500)); // toutes les x ms
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10)); // toutes les x ms
   }
 }
