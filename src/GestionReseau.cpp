@@ -12,7 +12,7 @@ uint16_t GestionReseau::signalValue[2] = {0};
 void GestionReseau::setup(Node *node)
 {
     xTaskCreatePinnedToCore(signauxTask, "SignauxTask", 4 * 1024, (void *)node, 7, NULL, 1); // Création de la tâches pour le traitement
-    xTaskCreatePinnedToCore(loopTask, "LoopTask", 4 * 1024, (void *)node, 3, NULL, 0);
+    xTaskCreatePinnedToCore(loopTask, "LoopTask", 8 * 1024, (void *)node, 3, NULL, 0);
 }
 
 void GestionReseau::signauxTask(void *p)
@@ -31,7 +31,7 @@ void GestionReseau::signauxTask(void *p)
             {
                 SignauxCmd::affiche(node->signal[i]->affiche(signalValue[i]));
                 oldValue[i] = signalValue[i];
-        debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
+                // debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
             }
         }
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000));
@@ -166,7 +166,7 @@ void GestionReseau::loopTask(void *pvParameters)
 
         CanMsg::sendMsg(0, node->ID(), 0xE0, 0xE0,
                         node->loco.address() & 0xFF00,
-                        node->loco.address() & 0x00FF);
+                        node->loco.address() & 0x00FF,
                         nodeP_SP1_ID,
                         nodeP_SM1_ID,
                         nodeP_SP2_ACCES,
@@ -249,7 +249,7 @@ void GestionReseau::loopTask(void *pvParameters)
                 break;
             }
 
-            debug.printf("[GestionReseau %d] index %d \n", __LINE__, index);
+            // debug.printf("[GestionReseau %d] index %d \n", __LINE__, index);
 
             // debug.printf("[GestionReseau %d] node->sensor[sens0].state() %d \n", __LINE__, node->sensor[sens0].state());
             // debug.printf("[GestionReseau %d] node->sensor[sens1].state() %d \n", __LINE__, node->sensor[sens1].state());
@@ -261,7 +261,7 @@ void GestionReseau::loopTask(void *pvParameters)
                     // debug.printf("[GestionReseau %d] Le canton %s est accessible\n", __LINE__, cantonName);
                     if (node->nodeP[index]->busy()) // Le canton SP1 ou SM1 est occupé
                     {
-                        //debug.printf("[GestionReseau %d] Le canton %s est accessible mais occupe\n", __LINE__, cantonName);
+                        // debug.printf("[GestionReseau %d] Le canton %s est accessible mais occupe\n", __LINE__, cantonName);
                         signalValue[i] = Rouge;
 
                         // Ordre loco Ralentissement à 30
@@ -273,11 +273,11 @@ void GestionReseau::loopTask(void *pvParameters)
                     }
                     else // Le canton SP1 est accessible et libre
                     {
-                        //debug.printf("[GestionReseau %d] Le canton %s est accessible et libre\n", __LINE__, cantonName);
-                        //    Vérification de l'état de SP2
-                        //  CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SP1_idx()]->ID(), 0xA5);
-                        //  debug.printf("[GestionReseau %d] SP1 : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
-                        //  vTaskDelay(pdMS_TO_TICKS(20)); // Attente de la reponse
+                        // debug.printf("[GestionReseau %d] Le canton %s est accessible et libre\n", __LINE__, cantonName);
+                        //     Vérification de l'état de SP2
+                        //   CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SP1_idx()]->ID(), 0xA5);
+                        //   debug.printf("[GestionReseau %d] SP1 : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
+                        //   vTaskDelay(pdMS_TO_TICKS(20)); // Attente de la reponse
 
                         signalValue[i] = Vert;
 
@@ -304,13 +304,14 @@ void GestionReseau::loopTask(void *pvParameters)
                 }
                 else // Le canton SP1 est n'est pas accessible
                 {
-                    //debug.printf("[GestionReseau %d] Le canton %s n'est pas accessible\n", __LINE__, cantonName);
-                    //    /*
-                    //    Signalisation ???
-                    //    */
+                    // debug.printf("[GestionReseau %d] Le canton %s n'est pas accessible\n", __LINE__, cantonName);
+                    //     /*
+                    //     Signalisation ???
+                    //     */
 
-                    // Ordre loco Ralentissement à 30 if (node->sensor[sens1].state())
-                    cmdLoco(30, 1);
+                    // Ordre loco Ralentissement à 30
+                    if (node->sensor[sens1].state())
+                        cmdLoco(30, 1);
                     // arret au franchissement du capteur
                     if (node->sensor[sens0].state())
                         cmdLoco(0, 1);
@@ -318,7 +319,7 @@ void GestionReseau::loopTask(void *pvParameters)
             }
             else // Le canton SP1 n'existe pas
             {
-                //debug.printf("[GestionReseau %d] Le canton %s n'existe pas\n", __LINE__, cantonName);
+                // debug.printf("[GestionReseau %d] Le canton %s n'existe pas\n", __LINE__, cantonName);
                 signalValue[i] = Carre;
 
                 // Ordre loco Ralentissement à 30
@@ -329,6 +330,6 @@ void GestionReseau::loopTask(void *pvParameters)
                     cmdLoco(0, 1);
             }
         }
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200));
     }
 }
