@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.10.7"
+#define VERSION "v 0.10.8"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -95,8 +95,8 @@ void setup()
   //--- Wifi et web serveur
   if (Settings::wifiOn()) // Si option validée
   {
-    wifi.start();
-    webHandler.init(node, 80);
+    // wifi.start();
+    // webHandler.init(node, 80);
   }
   debug.printf(Settings::wifiOn() ? "[Wifi] : on\n" : "Wifi : off\n");
   debug.printf(Settings::discoveryOn() ? "[Discovery] : on\n" : "[Discovery] : off\n");
@@ -134,8 +134,8 @@ void loop()
 {
   //******************** Ecouteur page web **********************************
 
-  if (Settings::wifiOn()) // Si option validée
-    webHandler.loop();    // ecoute des ports web 80 et 81
+  // if (Settings::wifiOn()) // Si option validée
+  //   webHandler.loop();    // ecoute des ports web 80 et 81
 
   if (!Settings::discoveryOn()) // Si option non validée
   {
@@ -145,14 +145,14 @@ void loop()
     {
       node->busy(true);
       node->loco.address(railcom.address());
-      debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+      //debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
       //  debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
     }
     else
     {
       node->busy(false);
       node->loco.address(0);
-      debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
+      //debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
     }
 #endif
     //   //****************************** RFID **************************************
@@ -165,5 +165,5 @@ void loop()
 #endif
     //**************************************************************************
   }
-  vTaskDelay(pdMS_TO_TICKS(200));
+  vTaskDelay(pdMS_TO_TICKS(10));
 } // ->End loop
