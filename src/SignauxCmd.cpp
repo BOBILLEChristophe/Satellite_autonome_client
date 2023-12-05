@@ -25,6 +25,6 @@ void SignauxCmd::affiche(uint16_t data)
     digitalWrite(m_pinVerrou, LOW);
     shiftOut(m_pinData, m_pinHorloge, LSBFIRST, data);
     digitalWrite(m_pinVerrou, HIGH);
-    debug.printf("[SignauxCmd %d] : affiche : ", __LINE__);
-    debug.println(data, BIN);
+    // debug.printf("[SignauxCmd %d] : affiche : ", __LINE__);
+    // debug.println(data, BIN);
 }
