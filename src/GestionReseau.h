@@ -17,14 +17,12 @@
 class GestionReseau
 {
 private:
-    static bool isRun;
     static uint16_t signalValue[2];
 public:
     GestionReseau() = delete;
     static void setup(Node *);
-    static void loopTask(void *);
+    static void IRAM_ATTR loopTask(void *);
     static void signauxTask(void *);
-    //static void run(bool);
 };
 
 #endif

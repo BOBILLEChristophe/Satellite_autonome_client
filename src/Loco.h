@@ -15,17 +15,20 @@ class Loco
 
 private:
   uint16_t m_address;
-  bool m_sens; // 0 sens horaire - 1 sens anti horaire
+  uint8_t m_sens;               // 0 inderterminé - 1 sens horaire - 2 sens anti horaire
+  uint8_t m_speed;
 
 public:
   Loco(); // Constructor
   void address(uint16_t);
   uint16_t address();
-  void sens(bool);
-  bool sens();
-
-  uint8_t m_comptCmd0;
-  uint8_t m_comptCmd30;
+  void sens(uint8_t);
+  uint8_t sens();
+  void speed(uint8_t);
+  uint8_t speed();
+  //void cmd();
+  void ralentis(uint8_t);
+  void stop();
 };
 
 #endif

@@ -5,8 +5,7 @@
 
 */
 
-#ifndef __NODE_H__
-#define __NODE_H__
+#pragma once
 
 #include <Arduino.h>
 
@@ -74,6 +73,7 @@ private:
   byte m_masqueAigSP2;
   byte m_masqueAigSM2;
   byte m_typeCible;
+  uint8_t m_maxSpeed;
 
 public:
   Node();
@@ -113,6 +113,6 @@ public:
   bool SM2_busy();
   void typeCible(byte);
   byte typeCible();
+  void maxSpeed(uint8_t);
+  uint8_t maxSpeed();
 };
-
-#endif

@@ -326,7 +326,5 @@ void Discovery::createAiguilles(void *p) // Création des aiguilles
     vTaskDelay(pdMS_TO_TICKS(1000));
     ESP.restart();
   }
-
   vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000)); // toutes les x ms
-  //}
 }

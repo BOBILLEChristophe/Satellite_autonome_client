@@ -68,7 +68,8 @@ Node::Node()
       m_SM2_busy(false),
       m_masqueAigSP2(0x00),
       m_masqueAigSM2(0x00),
-      m_typeCible(0)
+      m_typeCible(0),
+      m_maxSpeed(128)
 {
   for (byte i = 0; i < nodePsize; i++)
     this->nodeP[i] = nullptr;
@@ -107,6 +108,8 @@ void Node::SM2_busy(bool busy) { m_SM2_busy = busy; }
 bool Node::SM2_busy() { return m_SM2_busy; }
 void Node::typeCible(byte typeCible) { m_typeCible = typeCible; }
 byte Node::typeCible() { return m_typeCible; }
+void Node::maxSpeed(uint8_t maxSpeed) { m_maxSpeed = maxSpeed; }
+uint8_t Node::maxSpeed() { return m_maxSpeed; }
 
 // void Node::ciblesSignaux()
 // {

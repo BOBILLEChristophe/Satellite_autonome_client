@@ -66,7 +66,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
       }
       else
       {
-        switch (fonction) // Fonction appelée
+        switch (fonction) // Fonction appelee
         {
         case 0xB3: // fn : Reponse à demande de test du bus CAN
           if (frameIn.data[0])
@@ -105,14 +105,24 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 
           // debug.printf("[CanMsg %d] : Fonction 0xC1, ID exped %d \n", __LINE__, idSatExpediteur);
 
-          for (byte i = 0; i < aigSize; i++)
+          // for (byte i = 0; i < aigSize; i++)
+          // {
+          //   if (node->nodeP[i] != nullptr)
+          //   {
+          //     if (idSatExpediteur == node->nodeP[i]->ID()) // Si l'expediteur est un SP1 ou un SM1
+          //       node->nodeP[i]->masqueAig(frameIn.data[0]);
+          //   }
+          // }
+
+          for (auto el : node->nodeP)
           {
-            if (node->nodeP[i] != nullptr)
+            if (el != nullptr)
             {
-              if (idSatExpediteur == node->nodeP[i]->ID()) // Si l'expediteur est un SP1 ou un SM1
-                node->nodeP[i]->masqueAig(frameIn.data[0]);
+              if (idSatExpediteur == el->ID()) // Si l'expediteur est un SP1 ou un SM1
+                el->masqueAig(frameIn.data[0]);
             }
           }
+
           break;
         case 0xE0:
           /*****************************************************************************************************

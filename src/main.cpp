@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.10.8"
+#define VERSION "v 0.11.0"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus

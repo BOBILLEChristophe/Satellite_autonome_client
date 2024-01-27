@@ -38,7 +38,7 @@ void GestionReseau::signauxTask(void *p)
     }
 }
 
-void GestionReseau::loopTask(void *pvParameters)
+void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
 {
     Node *node;
     node = (Node *)pvParameters;
@@ -54,9 +54,16 @@ void GestionReseau::loopTask(void *pvParameters)
     bool sens1 = 0;
     bool access = 0;
     bool busy = 0;
-    String cantonName;
 
-    uint16_t valueToSend;
+    uint16_t oldLocAddress = 0;
+    uint8_t oldLocSpeed = 0;
+    uint8_t oldLocSens = 0;
+    uint8_t comptCmdLoco = 0;
+
+#ifdef debug
+    char *cantonName;
+    cantonName = new char[4];
+#endif
 
     TickType_t xLastWakeTime;
     xLastWakeTime = xTaskGetTickCount();
@@ -73,10 +80,13 @@ void GestionReseau::loopTask(void *pvParameters)
         {
             node->sensor[horaire].state(LOW); // Desactivation des capteurs ponctuels si aucune loco reconnue
             node->sensor[antiHor].state(LOW);
-            node->loco.m_comptCmd0 = 0;
-            node->loco.m_comptCmd30 = 0;
+            node->loco.speed(0);
             node->loco.sens(0);
         }
+        else
+            // Adapte la vitesse de la loco à la vitesse maxi du canton
+            if (node->maxSpeed() < node->loco.speed())
+                node->loco.speed(node->maxSpeed());
 
         // Sens de roulage des locos,
         if (node->sensor[antiHor].state() && !node->sensor[horaire].state())
@@ -188,30 +198,22 @@ void GestionReseau::loopTask(void *pvParameters)
          * Commande des locomotives et de la signalisation
          ************************************************************************************/
 
-        auto cmdLoco = [node](const uint8_t speed, const uint8_t direction)
-        {
-            while (node->loco.address() == 0)
-                ;
-            uint8_t *ptCompt(nullptr);
-            // debug.printf("[GestionReseau %d] commande loco %d\n ", __LINE__, speed);
-            switch (speed) // Selection du compteur selon la vitesse voulue
-            {
-            case 0:
-                ptCompt = &node->loco.m_comptCmd0;
-                break;
-            case 30:
-                ptCompt = &node->loco.m_comptCmd30;
-                break;
-            }
-
-            if (*ptCompt < 5)
-            {
-                CanMsg::sendMsg(1, node->ID(), 253, 0xF0, node->loco.address() & 0xFF00, node->loco.address() & 0x00FF, speed, direction); // Message à la centrale DCC++
-                ++*ptCompt;
-                vTaskDelay(pdMS_TO_TICKS(200));
-                // debug.printf("[GestionReseau %d] Envoi de commade loco vitesse %d\n ", __LINE__, speed);
-            }
-        };
+        // auto cmdLoco = [node]()
+        // {
+        //     if (node->loco.address() > 0)
+        //     {
+        //         // debug.printf("[GestionReseau %d] Envoi de commade loco vitesse %d\n ", __LINE__, node->loco.speed());
+        //         for (uint8_t i = 0; i < 5; i++)
+        //         {
+        //             CanMsg::sendMsg(1, node->ID(), 253, 0xF0,
+        //                             node->loco.address() & 0xFF00,
+        //                             node->loco.address() & 0x00FF,
+        //                             node->loco.speed(),
+        //                             node->loco.sens()); // Message à la centrale DCC++
+        //             vTaskDelay(pdMS_TO_TICKS(100));
+        //         }
+        //     }
+        // };
 
         enum : uint8_t
         {
@@ -237,48 +239,44 @@ void GestionReseau::loopTask(void *pvParameters)
                 sens1 = antiHor;
                 access = node->SP2_acces();
                 busy = node->SP2_busy();
-                cantonName = "SP1";
+#ifdef debug
+                strcpy(cantonName, "SP1");
+#endif
                 break;
             case 1:
                 index = node->SM1_idx();
-                sens0 = horaire;
-                sens1 = antiHor;
+                sens0 = antiHor;
+                sens1 = horaire;
                 access = node->SM2_acces();
                 busy = node->SM2_busy();
-                cantonName = "SM1";
+#ifdef debug
+                strcpy(cantonName, "SM1");
+#endif
                 break;
             }
 
             // debug.printf("[GestionReseau %d] index %d \n", __LINE__, index);
-
             // debug.printf("[GestionReseau %d] node->sensor[sens0].state() %d \n", __LINE__, node->sensor[sens0].state());
             // debug.printf("[GestionReseau %d] node->sensor[sens1].state() %d \n", __LINE__, node->sensor[sens1].state());
 
             if (node->nodeP[index] != nullptr)
             {
-                if (node->nodeP[index]->acces()) // Le canton SP1 ou SM1 est accessible
+                if (node->nodeP[index]->acces()) // Le canton SP1/SM1 est accessible
                 {
                     // debug.printf("[GestionReseau %d] Le canton %s est accessible\n", __LINE__, cantonName);
-                    if (node->nodeP[index]->busy()) // Le canton SP1 ou SM1 est occupé
+                    if (node->nodeP[index]->busy()) // Le canton SP1/SM1 est occupé
                     {
                         // debug.printf("[GestionReseau %d] Le canton %s est accessible mais occupe\n", __LINE__, cantonName);
                         signalValue[i] = Rouge;
 
-                        // Ordre loco Ralentissement à 30
-                        if (node->sensor[sens1].state())
-                            cmdLoco(30, 1);
-                        // arret au franchissement du capteur
                         if (node->sensor[sens0].state())
-                            cmdLoco(0, 1);
+                            node->loco.stop();
+                        else
+                            node->loco.ralentis(30);
                     }
-                    else // Le canton SP1 est accessible et libre
+                    else // Le canton SP1/SM1 est accessible et libre
                     {
                         // debug.printf("[GestionReseau %d] Le canton %s est accessible et libre\n", __LINE__, cantonName);
-                        //     Vérification de l'état de SP2
-                        //   CanMsg::sendMsg(0, node->ID(), node->nodeP[node->SP1_idx()]->ID(), 0xA5);
-                        //   debug.printf("[GestionReseau %d] SP1 : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
-                        //   vTaskDelay(pdMS_TO_TICKS(20)); // Attente de la reponse
-
                         signalValue[i] = Vert;
 
                         if (access) // Le canton SP2 est-il accessible ?
@@ -302,32 +300,46 @@ void GestionReseau::loopTask(void *pvParameters)
                         }
                     }
                 }
-                else // Le canton SP1 est n'est pas accessible
+                else // Le canton SP1/SM1 est n'est pas accessible
                 {
                     // debug.printf("[GestionReseau %d] Le canton %s n'est pas accessible\n", __LINE__, cantonName);
-                    //     /*
-                    //     Signalisation ???
-                    //     */
+                    signalValue[i] = Carre;
 
-                    // Ordre loco Ralentissement à 30
-                    if (node->sensor[sens1].state())
-                        cmdLoco(30, 1);
-                    // arret au franchissement du capteur
                     if (node->sensor[sens0].state())
-                        cmdLoco(0, 1);
+                        node->loco.stop();
+                    else
+                        node->loco.ralentis(30);
                 }
             }
-            else // Le canton SP1 n'existe pas
+            else // Le canton SP1/SM1 n'existe pas
             {
                 // debug.printf("[GestionReseau %d] Le canton %s n'existe pas\n", __LINE__, cantonName);
                 signalValue[i] = Carre;
-
-                // Ordre loco Ralentissement à 30
-                if (node->sensor[sens1].state())
-                    cmdLoco(30, 1);
-                // arret au franchissement du capteur
                 if (node->sensor[sens0].state())
-                    cmdLoco(0, 1);
+                    node->loco.stop();
+                else
+                    node->loco.ralentis(30);
+            }
+        }
+
+        // Envoi des commandes à la loco
+        if (node->loco.address() > 0)
+        {
+            if (node->loco.address() != oldLocAddress || node->loco.speed() != oldLocSpeed || node->loco.sens() != oldLocSens)
+                comptCmdLoco = 0;
+
+            if (comptCmdLoco < 5)
+            {
+                CanMsg::sendMsg(1, node->ID(), 253, 0xF0,
+                                (node->loco.address() & 0xFF00) >> 8,
+                                node->loco.address() & 0x00FF,
+                                node->loco.speed(),
+                                node->loco.sens()); // Message à la centrale DCC++
+
+                oldLocAddress = node->loco.address();
+                oldLocSpeed = node->loco.speed();
+                oldLocSens = node->loco.sens();
+                comptCmdLoco++;
             }
         }
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200));
