@@ -7,9 +7,7 @@
 
 #include "CanConfig.h"
 
-//void CanConfig::setup(const byte thisID, const bool discovery_on)
-
-void CanConfig::setup(const byte thisIDn)
+void CanConfig::setup()
 {
     debug.printf("[CanConfig %d] : Configure ESP32 CAN\n", __LINE__);
     ACAN_ESP32_Settings settings(CAN_BITRATE);

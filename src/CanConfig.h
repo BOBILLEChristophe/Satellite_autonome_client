@@ -18,8 +18,7 @@ class CanConfig
 private:
 public:
   CanConfig() = delete;
-  static void setup(const byte);
-  //static void setup(const byte, const bool);
+  static void setup();
 };
 
 #endif

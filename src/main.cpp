@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.11.0"
+#define VERSION "v 0.11.1"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -73,8 +73,7 @@ void setup()
   Settings::setup(node);
   vTaskDelay(pdMS_TO_TICKS(100));
   //--- Configure ESP32 CAN
-  CanConfig::setup(node->ID());
-  // CanConfig::setup(node->ID(), Settings::discoveryOn());
+  CanConfig::setup();
   vTaskDelay(pdMS_TO_TICKS(100));
   CanMsg::setup(node);
   vTaskDelay(pdMS_TO_TICKS(100));
@@ -95,8 +94,8 @@ void setup()
   //--- Wifi et web serveur
   if (Settings::wifiOn()) // Si option validée
   {
-    // wifi.start();
-    // webHandler.init(node, 80);
+    wifi.start();
+    webHandler.init(node, 80);
   }
   debug.printf(Settings::wifiOn() ? "[Wifi] : on\n" : "Wifi : off\n");
   debug.printf(Settings::discoveryOn() ? "[Discovery] : on\n" : "[Discovery] : off\n");
@@ -134,8 +133,8 @@ void loop()
 {
   //******************** Ecouteur page web **********************************
 
-  // if (Settings::wifiOn()) // Si option validée
-  //   webHandler.loop();    // ecoute des ports web 80 et 81
+  if (Settings::wifiOn()) // Si option validée
+    webHandler.loop();    // ecoute des ports web 80 et 81
 
   if (!Settings::discoveryOn()) // Si option non validée
   {
