@@ -66,6 +66,53 @@ function onMessage(event) {
   document.getElementById('ss51').value = data.ss51;
   document.getElementById('ss52').value = data.ss52;
 
+  document.getElementById('vitesseMax').value = data.vitesseMax;
+
+ switch(data.sensMarche)
+{
+  case 0 :
+    document.getElementById('indifferent').checked = true;
+    break;
+  case 1 :
+    document.getElementById('horaire').checked = true;
+    break;
+  case 2 :
+    document.getElementById('antihoraire').checked = true;
+    break;
+} 
+
+switch(data.cibleHoraire)
+{
+  case 0 :
+    document.getElementById('imageHoraire').src = 'cible_0.jpg';
+    break;
+  case 1 :
+    document.getElementById('imageHoraire').src = 'cible_1.jpg';
+    break;
+  case 2 :
+    document.getElementById('imageHoraire').src = 'cible_2.jpg';
+    break;
+  case 3 :
+    document.getElementById('imageHoraire').src = 'cible_3.jpg';
+    break;
+}
+
+switch(data.cibleAntiHor)
+{
+  case 0 :
+    document.getElementById('imageAntiHor').src = 'cible_0.jpg';
+    break;
+  case 1 :
+    document.getElementById('imageAntiHor').src = 'cible_1.jpg';
+    break;
+  case 2 :
+    document.getElementById('imageAntiHor').src = 'cible_2.jpg';
+    break;
+  case 3 :
+    document.getElementById('imageAntiHor').src = 'cible_3.jpg';
+    break;
+}
+  
   document.getElementById('discovery_on').checked = data.discovery_on;
   document.getElementById('wifi_on').checked = data.wifi_on;
 
@@ -101,66 +148,58 @@ function onLoad(event) {
 //fonction OK
 function sendJson() {
 // Construct a msg object containing the data the server needs to process the message from the chat client.
-const msg = {
-  idNode: document.getElementById('idNode').value,
-  comptAig: document.getElementById('comptAig').value,
-  p00: document.getElementById('p00').value,
-  p01: document.getElementById('p01').value,
-  p10: document.getElementById('p10').value,
-  p11: document.getElementById('p11').value,
-  m00: document.getElementById('m00').value,
-  m01: document.getElementById('m01').value,
-  m10: document.getElementById('m10').value,
-  m11: document.getElementById('m11').value
+  const msg = {
+    idNode: document.getElementById('idNode').value,
+    comptAig: document.getElementById('comptAig').value,
+    p00: document.getElementById('p00').value,
+    p01: document.getElementById('p01').value,
+    p10: document.getElementById('p10').value,
+    p11: document.getElementById('p11').value,
+    m00: document.getElementById('m00').value,
+    m01: document.getElementById('m01').value,
+    m10: document.getElementById('m10').value,
+    m11: document.getElementById('m11').value
 
-  //date: Date.now()
-};
-// Send the msg object as a JSON-formatted string.
-websocket.send(JSON.stringify(msg));
+    //date: Date.now()
+  };
+  // Send the msg object as a JSON-formatted string.
+  websocket.send(JSON.stringify(msg));
 }
 
 function servoSettings(obj)
 {
-const msg = {
-  "servoSettings":[obj.id, obj.value, obj.name]
-}
-websocket.send(JSON.stringify(msg));
+  const msg = {"servoSettings":[obj.id, obj.value, obj.name]}
+  websocket.send(JSON.stringify(msg));
 }
 
 function servoTest(obj)
 {
-const msg = {
-  "servoTest":[obj.name]
-}
-websocket.send(JSON.stringify(msg));
+  const msg = {"servoTest":[obj.name]}
+  websocket.send(JSON.stringify(msg));
 }
 
 function wifi_on(obj)
 {
-const msg = {
-  "wifi_on":[obj.checked]
-}
-websocket.send(JSON.stringify(msg));
+  const msg = {"wifi_on":[obj.checked]}
+  websocket.send(JSON.stringify(msg));
 }
 
 function discovery_on(obj)
 {
-const msg = {
-  "discovery_on":[obj.checked]
-}
-websocket.send(JSON.stringify(msg));
+  const msg = {"discovery_on":[obj.checked]}
+  websocket.send(JSON.stringify(msg));
 }
 
 function restartEsp(obj)
 {
-const msg = {"restartEsp":[obj.id]}
-websocket.send(JSON.stringify(msg));
+  const msg = {"restartEsp":[obj.id]}
+  websocket.send(JSON.stringify(msg));
 }
 
 function save(obj)
 {
-const msg = {"save":[obj.id]}
-websocket.send(JSON.stringify(msg));
+  const msg = {"save":[obj.id]}
+  websocket.send(JSON.stringify(msg));
 }
 
 
@@ -180,16 +219,6 @@ let annee = tempDateVal.substr(0);
 
 let dateValidite = annee+'-'+mois+'-'+jour;
 
-document.getElementById('numSerie').value = jsondata.numSerie;
-document.getElementById('client').value = jsondata.client;
-document.getElementById('dateValidite').value = dateValidite;
-document.getElementById('numVersion').value = jsondata.numVersion;
-document.getElementById('constHall').value = jsondata.constHall;
-document.getElementById('constLux').value = jsondata.constLux;
-document.getElementById('constTemp').value = jsondata.constTemp;
-document.getElementById('constUv').value = jsondata.constUv;
-document.getElementById('constTemp').value = jsondata.constTemp;
-document.getElementById('constUv').value = jsondata.constUv;
 
 if(1 == modeExpert)
   document.getElementById('exp_1').checked = 'checked';
