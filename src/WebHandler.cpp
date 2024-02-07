@@ -68,8 +68,8 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
       if (message.indexOf("servoSettings") >= 0)
       {
         const char *servoId = doc1["servoSettings"][0];
-        uint16_t servoValue = doc1["servoSettings"][1];
-        uint8_t servoName = doc1["servoSettings"][2];
+        const uint16_t servoValue = doc1["servoSettings"][1];
+        const uint8_t servoName = doc1["servoSettings"][2];
 #ifdef DEBUG
         debug.printf("servoId %s\n", servoId);
         debug.printf("servoValue %d\n", servoValue);
@@ -105,7 +105,7 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
       // Test de déplacement "en vraie grandeur" de l'aiguille
       if (message.indexOf("servoTest") >= 0)
       {
-        uint8_t servoName = doc1["servoTest"][0];
+        const uint8_t servoName = doc1["servoTest"][0];
 #ifdef DEBUG
         debug.println("servoTest");
         debug.printf("servo     : %d\n", servoName);
@@ -117,16 +117,23 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
 
       if (message.indexOf("wifi_on") >= 0)
       {
-        bool wifi_on = doc1["wifi_on"][0];
+        const bool wifi_on = doc1["wifi_on"][0];
         Settings::wifiOn(wifi_on);
         debug.printf("[discovery_on %d] : wifi_on %d\n", __LINE__, wifi_on);
       }
 
       if (message.indexOf("discovery_on") >= 0)
       {
-        bool discovery_on = doc1["discovery_on"][0];
+        const bool discovery_on = doc1["discovery_on"][0];
         Settings::discoveryOn(discovery_on);
         debug.printf("[discovery_on %d] : discovery_on %d\n", __LINE__, discovery_on);
+      }
+
+      if (message.indexOf("maxSpeed") >= 0)
+      {
+        const uint8_t maxSpeed = doc1["maxSpeed"][0];
+        node->maxSpeed(maxSpeed);
+        debug.printf("[maxSpeed %d] : maxSpeed %d\n", __LINE__, maxSpeed);
       }
 
       if (message.indexOf("save") >= 0)
@@ -181,6 +188,12 @@ void WebHandler::notifyClients()
   doc["wifi_on"] = Settings::wifiOn();
   doc["discovery_on"] = Settings::discoveryOn();
 
+  doc["vitesseMax"] = node->maxSpeed();
+  doc["sensMarche"] = node->sensMarche();
+
+  doc["cibleHoraire"] = node->signal[0]->type();
+  doc["cibleAntiHor"] = node->signal[1]->type();
+
   String output;
   serializeJson(doc, output);
   _ws->textAll(output);
@@ -206,6 +219,18 @@ void WebHandler::route()
 
   _server->on("/favicon.png", HTTP_GET, [](AsyncWebServerRequest *request)
               { request->send(SPIFFS, "/favicon.png", "image/png"); });
+
+  _server->on("/cible_0.jpg", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/cible_0.jpg", "image/jpg"); });
+
+  _server->on("/cible_1.jpg", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/cible_1.jpg", "image/jpg"); });
+
+  _server->on("/cible_2.jpg", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/cible_2.jpg", "image/jpg"); });
+
+  _server->on("/cible_3.jpg", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/cible_3.jpg", "image/jpg"); });
 
   _server->onNotFound([](AsyncWebServerRequest *request)
                       {
