@@ -48,8 +48,6 @@ void NodePeriph::locoAddr(uint16_t addr) { m_locoAddr = addr; }
 uint16_t NodePeriph::locoAddr() { return m_locoAddr; }
 void NodePeriph::masqueAig(byte masqueAig) { m_masqueAig = masqueAig; }
 byte NodePeriph::masqueAig() { return m_masqueAig; }
-// void NodePeriph::signal(byte signal) { m_signal = signal; }
-// byte NodePeriph::signal() { return m_signal; }
 
 /*-------------------------------------------------------------
                            Node
@@ -68,7 +66,6 @@ Node::Node()
       m_SM2_busy(false),
       m_masqueAigSP2(0x00),
       m_masqueAigSM2(0x00),
-      m_typeCible(0),
       m_maxSpeed(128)
 {
   for (byte i = 0; i < nodePsize; i++)
@@ -106,14 +103,10 @@ void Node::SM2_acces(bool acces) { m_SM2_acces = acces; }
 bool Node::SM2_acces() { return m_SM2_acces; }
 void Node::SM2_busy(bool busy) { m_SM2_busy = busy; }
 bool Node::SM2_busy() { return m_SM2_busy; }
-void Node::typeCible(byte typeCible) { m_typeCible = typeCible; }
-byte Node::typeCible() { return m_typeCible; }
 void Node::maxSpeed(uint8_t maxSpeed) { m_maxSpeed = maxSpeed; }
 uint8_t Node::maxSpeed() { return m_maxSpeed; }
-
-// void Node::ciblesSignaux()
-// {
-// }
+void Node::sensMarche(uint8_t sensMarche) { m_sensMarche = sensMarche; }
+uint8_t Node::sensMarche() { return m_sensMarche; }
 
 void Node::aigRun(byte idx)
 {
@@ -169,7 +162,6 @@ void Node::aigGoTo(void *p)
     }
     else
     {
-
       debug.printf("m_curPos : %d\n", pThis->m_curPos);
       debug.printf("m_speed : %d\n", pThis->m_speed);
       debug.println("vTaskDelete");

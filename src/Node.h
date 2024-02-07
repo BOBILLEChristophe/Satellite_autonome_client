@@ -72,8 +72,8 @@ private:
   bool m_SM2_busy;
   byte m_masqueAigSP2;
   byte m_masqueAigSM2;
-  byte m_typeCible;
   uint8_t m_maxSpeed;
+  uint8_t m_sensMarche;
 
 public:
   Node();
@@ -97,7 +97,7 @@ public:
   void masqueAigSM2(byte);
   byte masqueAigSM2();
   static void aigGoTo(void *);
-  void ciblesSignaux();
+  //void ciblesSignaux();
   void aigRun(byte);
   void SP1_idx(uint8_t);
   uint8_t SP1_idx();
@@ -111,8 +111,8 @@ public:
   bool SM2_acces();
   void SM2_busy(bool);
   bool SM2_busy();
-  void typeCible(byte);
-  byte typeCible();
   void maxSpeed(uint8_t);
   uint8_t maxSpeed();
+  void sensMarche(uint8_t);
+  uint8_t sensMarche();
 };

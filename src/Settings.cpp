@@ -47,7 +47,7 @@ bool Settings::begin()
   //--- Test de la présence de la carte Main
   while (!isMainReady)
   {
-    CanMsg::sendMsg(0, node->ID(), 254, 0xB2);
+    CanMsg::sendMsg(0, 0xB2, node->ID(), 254, 0);
     if (!isMainReady)
       debug.printf("[Settings %d] : Attente de reponse en provenance de la carte Main.\n", __LINE__);
     vTaskDelay(pdMS_TO_TICKS(100));
@@ -58,7 +58,7 @@ bool Settings::begin()
   {
     //--- Requete identifiant
     debug.printf("[Settings %d] : Le satellite ne possede pas d'identifiant.\n", __LINE__);
-    CanMsg::sendMsg(0, node->ID(), 254, 0xB4);
+    CanMsg::sendMsg(0, 0xB4, node->ID(), 254, 0);
     vTaskDelay(pdMS_TO_TICKS(100));
   }
 
@@ -105,6 +105,8 @@ void Settings::readFile()
       password_str = doc["password"].as<String>();
       strcpy(ssid, ssid_str.c_str());
       strcpy(password, password_str.c_str());
+      node->maxSpeed(doc["maxSpeed"]);
+      node->sensMarche(doc["sensMarche"]);
 
       // Nœuds
       const char *index[] = {"p00", "p01", "p10", "p11", "m00", "m01", "m10", "m11"};
@@ -184,6 +186,8 @@ void Settings::writeFile()
     doc["discovery_on"] = DISCOVERY_ON;
     doc["ssid"] = ssid;
     doc["password"] = password;
+    doc["maxSpeed"] = node->maxSpeed();
+    doc["sensMarche"] = node->sensMarche();
 
     // Nœuds
     const String index[] = {"p00", "p01", "p10", "p11", "m00", "m01", "m10", "m11"};
