@@ -49,10 +49,11 @@ void CanMsg::canReceiveMsg(void *pvParameters)
     CANMessage frameIn;
     if (ACAN_ESP32::can.receive(frameIn))
     {
-      const byte idSatExpediteur = (frameIn.id & 0x7F80000) >> 19; // ID du satellite qui envoie
-      const byte fonction = (frameIn.id & 0x7F8) >> 3;
+      const byte idSatExpediteur = (frameIn.id & 0x7F800) >> 11; // ID du satellite qui envoie
+      const byte fonction = (frameIn.id & 0x7F80000) >> 19;
+      const bool response = (frameIn.id & 0x08) >> 3;
 
-      //debug.printf("\n[CanMsg %d]------ Expediteur %d : Fonction 0x%0X\n", __LINE__, idSatExpediteur, fonction);
+      debug.printf("\n[CanMsg %d]------ Expediteur %d : Fonction 0x%0X\n", __LINE__, idSatExpediteur, fonction);
 
       if (frameIn.rtr) // Remote frame
       {
@@ -129,13 +130,13 @@ void CanMsg::canReceiveMsg(void *pvParameters)
            * reception periodique des data envoyees par les sat (GestionReseau.cpp ligne 42)
            ******************************************************************************************************/
 
-          //debug.printf("[CanMsg %d] fonction 0xE0\n", __LINE__);
-          // debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
-          // debug.printf("[CanMsg %d] nodeP[0]->ID() : %d\n", __LINE__, node->nodeP[0]->ID());
-          // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
-          // debug.printf("[CanMsg %d] node->tabInvers[idSatExpediteur] : %d\n", __LINE__, node->tabInvers[idSatExpediteur]);
-          // debug.printf("[CanMsg %d] SM1 ID : %d\n", __LINE__, frameIn.data[1]);
-          // debug.printf("[CanMsg %d] SP1 ID : %d\n", __LINE__, frameIn.data[2]);
+          // debug.printf("[CanMsg %d] fonction 0xE0\n", __LINE__);
+          //  debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
+          //  debug.printf("[CanMsg %d] nodeP[0]->ID() : %d\n", __LINE__, node->nodeP[0]->ID());
+          //  debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
+          //  debug.printf("[CanMsg %d] node->tabInvers[idSatExpediteur] : %d\n", __LINE__, node->tabInvers[idSatExpediteur]);
+          //  debug.printf("[CanMsg %d] SM1 ID : %d\n", __LINE__, frameIn.data[1]);
+          //  debug.printf("[CanMsg %d] SP1 ID : %d\n", __LINE__, frameIn.data[2]);
           if (node->nodeP[node->SP1_idx()] != nullptr)
           {
             if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // Si l'expediteur est SP1
@@ -204,47 +205,48 @@ void CanMsg::sendMsg(CANMessage &frame)
 #endif
 }
 
-auto parseMsg = [](CANMessage &frame, byte priorite, byte idExp, byte idDes, byte fonct) -> CANMessage
+auto parseMsg = [](CANMessage &frame, byte priorite, byte fonct, byte idExp, byte idDes, bool resp) -> CANMessage
 {
   frame.id |= priorite << 27; // Priorite 0, 1 ou 2
-  frame.id |= idExp << 19;    // ID expediteur
-  frame.id |= idDes << 11;    // ID destinataire
-  frame.id |= fonct << 3;     // Fonction appelée
+  frame.id |= fonct << 19;    // Fonction appelée
+  frame.id |= idExp << 11;    // ID expediteur
+  frame.id |= idDes << 3;     // ID destinataire
+  frame.id |= resp << 2;     // Response
   frame.ext = true;
   return frame;
 };
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 0;
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte data0)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 1;
   frame.data[0] = data0; // Fonction
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte data0, byte data1)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 2;
   frame.data[0] = data0; // Fonction
   frame.data[1] = data1;
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte data0, byte data1, byte data2)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 3;
   frame.data[0] = data0; // Fonction
   frame.data[1] = data1;
@@ -252,10 +254,10 @@ void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte dat
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte data0, byte data1, byte data2, byte data3)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 4;
   frame.data[0] = data0; // Fonction
   frame.data[1] = data1;
@@ -264,10 +266,10 @@ void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte dat
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte data0, byte data1, byte data2, byte data3, byte data4)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 5;
   frame.data[0] = data0; // Fonction
   frame.data[1] = data1;
@@ -277,10 +279,10 @@ void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte dat
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 6;
   frame.data[0] = data0; // Fonction
   frame.data[1] = data1;
@@ -291,10 +293,10 @@ void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte dat
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5, byte data6)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5, byte data6)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 7;
   frame.data[0] = data0; // Fonction
   frame.data[1] = data1;
@@ -306,10 +308,10 @@ void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte dat
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte idExp, byte idDes, byte fonct, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5, byte data6, byte data7)
+void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5, byte data6, byte data7)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, idExp, idDes, fonct);
+  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
   frame.len = 8;
   frame.data[0] = data0; // Fonction
   frame.data[1] = data1;

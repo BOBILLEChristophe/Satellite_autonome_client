@@ -26,7 +26,6 @@ public:
   uint8_t sens();
   void speed(uint8_t);
   uint8_t speed();
-  //void cmd();
   void ralentis(uint8_t);
   void stop();
 };

@@ -18,29 +18,11 @@ uint8_t Loco::sens() { return m_sens; }
 void Loco::speed(uint8_t speed) { m_speed = speed; }
 uint8_t Loco::speed() { return m_speed; }
 
-// void Loco::cmd()
-// {
-//   if (m_address > 0)
-//   {
-//     // debug.printf("[GestionReseau %d] Envoi de commade loco vitesse %d\n ", __LINE__, node->loco.speed());
-//     for (uint8_t i = 0; i < 5; i++)
-//     {
-//       CanMsg::sendMsg(1, node->ID(), 253, 0xF0,
-//                       m_address & 0xFF00,
-//                       m_address & 0x00FF,
-//                       m_speed,
-//                       m_sens); // Message à la centrale DCC++
-//       vTaskDelay(pdMS_TO_TICKS(100));
-//     }
-//   }
-// };
-
 void Loco::stop()
 {
   if (m_speed > 0)
   {
     m_speed = 0;
-    //cmd();
   }
 };
 
@@ -49,6 +31,5 @@ void Loco::ralentis(uint8_t speed)
   if (m_speed > speed)
   {
     m_speed = speed;
-    //cmd();
   }
 };

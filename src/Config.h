@@ -7,8 +7,8 @@
 
   ESP32 datasheet : https://www.espressif.com/sites/default/files/documentation/esp32-wrover-e_esp32-wrover-ie_datasheet_en.pdf
 
-  Pin mapping pour cette application : https://alkans.fr/locoduino/satellites_autonomes/sat_autonome_pinMapping_v2.pdf
-
+  Pin mapping pour cette application : https://www.locoduino.org/IMG/png/sat_autonome_pinmapping_v5.png
+  
   https://www-kvaser-com.translate.goog/can-protocol-tutorial/?_x_tr_sl=en&_x_tr_tl=fr&_x_tr_hl=fr&_x_tr_pto=rq#:~:text=The%20message%20arbitration%20(the%20process,has%20detected%20an%20idle%20bus.
 
 */
@@ -31,7 +31,7 @@ enum : uint8_t // Index des satellites périphériques
 };
 
 /* ----- Options   -------------------*/
-//#define SAUV_BY_MAIN  // Sauvegardes automatiques des paramètres commandées par la carte Main
+#define SAUV_BY_MAIN  // Sauvegardes des paramètres commandées par la carte Main
 #define CHIP_INFO
 #define RAILCOM
 //#define RFID
@@ -64,15 +64,6 @@ const uint8_t signalSize = 2;
 #ifdef RAILCOM
 #define RAILCOM_RX GPIO_NUM_0
 #define RAILCOM_TX GPIO_NUM_17
-#endif
-
-/* ----- RFID --------------------*/
-#ifdef RFID
-#define RST_PIN GPIO_NUM_26
-#define SCL_PIN GPIO_NUM_14
-#define SDA_PIN GPIO_NUM_27
-#define IRQ_PIN GPIO_NUM_25
-#define TEMPO_RFID 1UL * 1UL // tempo entre 2 lectures => 1 * 1UL = 1/1000 sec
 #endif
 
 /* ----- Sensors ------------------*/

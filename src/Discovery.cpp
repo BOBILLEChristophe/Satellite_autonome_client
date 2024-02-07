@@ -77,7 +77,7 @@ void Discovery::process(void *p)
   auto btnPush = [&](uint8_t btnNum)
   {
     // Envoi sur le bus CAN de l'ID du satellite, fonction 0xC0
-    CanMsg::sendMsg(0, node->ID(), NO_ID, 0xC0);
+    CanMsg::sendMsg(0, 0xC0, node->ID(), NO_ID, 0);
 
     if (m_ID_satPeriph < 253)
     {
@@ -161,7 +161,7 @@ void Discovery::process(void *p)
       break;
     }
     // debug.printf("[Discovery %d] : process runing\n", __LINE__);
-    CanMsg::sendMsg(0, node->ID(), NO_ID, 0xC1, node->masqueAig()); // Envoi du masqueAig sur le bus CAN
+    CanMsg::sendMsg(0, 0xC1, node->ID(), NO_ID, 0, node->masqueAig()); // Envoi du masqueAig sur le bus CAN
     if (m_stopProcess)
     {
       vTaskDelete(NULL);
@@ -178,23 +178,14 @@ void Discovery::createAiguilles(void *p) // Création des aiguilles
   TickType_t xLastWakeTime;
   xLastWakeTime = xTaskGetTickCount();
 
-  // xSemaphore = xSemaphoreCreateMutex();
-  // if (xSemaphore == NULL)
-  // {
-  //   // Gestion de l'échec de la création du sémaphore
-  //   debug.printf("[Discovery %d] : Échec de la création du sémaphore\n", __LINE__);
-  //   vTaskDelay(pdMS_TO_TICKS(1000)); // Attendez un moment avant de réessayer
-  //   return;
-  // }
-
   for (;;)
   {
-    // if (xSemaphoreTake(xSemaphore, (TickType_t)500) == pdTRUE)
-    // {
     node->masqueAig(0x00);
     m_comptAig = 0;
     for (Aig *el : node->aig)
       el = nullptr;
+    // node->cibleHoraire(0);
+    // node->cibleAntiHor(0);
 
     auto createAig = [&](uint8_t index, uint8_t nodP0, uint8_t nodP1)
     {
@@ -211,8 +202,8 @@ void Discovery::createAiguilles(void *p) // Création des aiguilles
 
         node->m_masqueAig |= (1 << index);
 
-        debug.printf("[Discovery %d] : Creation de l'aiguille %d; masqueAig = 0b", __LINE__, m_comptAig);
-        debug.println(node->m_masqueAig, BIN);
+        // debug.printf("[Discovery %d] : Creation de l'aiguille %d; masqueAig = 0b", __LINE__, m_comptAig);
+        // debug.println(node->m_masqueAig, BIN);
         m_comptAig++;
       }
     };
@@ -292,32 +283,15 @@ void Discovery::createAiguilles(void *p) // Création des aiguilles
 
       if (index == p00)
       {
-
-        debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : ", __LINE__);
+        node->signal[0]->type(typeCible);
+        // debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : ", __LINE__);
       }
       else if (index == m00)
       {
-
-        debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : ", __LINE__);
-      }
-
-      switch (typeCible)
-      {
-      case 0:
-        debug.printf(" = Feu orange  - rouge - vert\n");
-        break;
-      case 1:
-        debug.printf(" = Carre + oeilleton\n");
-        break;
-      case 2:
-        debug.printf(" = Ralentissement (avec Carre + oeilleton°\n");
-        break;
-      case 3:
-        debug.printf(" = RRalentissement (avec Carre + oeilleton)\n");
-        break;
+        node->signal[1]->type(typeCible);
+        // debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : ", __LINE__);
       }
     }
-    // xSemaphoreGive(xSemaphore);
   }
   if (m_stopProcess)
   {

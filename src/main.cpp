@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.11.1"
+#define VERSION "v 0.11.2"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -25,12 +25,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #include "Discovery.h"
 #include "GestionReseau.h"
 #include "Node.h"
-#ifdef RAILCOM
 #include "Railcom.h"
-#endif
-#ifdef RFID
-#include "RFID.h"
-#endif
 #include "Settings.h"
 #include "SignauxCmd.h"
 #include "WebHandler.h"
@@ -39,12 +34,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 
 // Instances
 Node *node = new Node();
-#ifdef RAILCOM
 Railcom railcom(RAILCOM_RX, RAILCOM_TX);
-#endif
-#ifdef RFID
-Rfid rfid(RST_PIN, SCL_PIN, SDA_PIN, TEMPO_RFID);
-#endif
 Fl_Wifi wifi;
 WebHandler webHandler;
 
@@ -104,9 +94,6 @@ void setup()
   if (Settings::discoveryOn()) // Si option validée, lancement de la méthode pour le procecuss de découverte
   {
     Discovery::begin(node);
-#ifdef RFID
-    rfid.setup();
-#endif
   }
   else
   {
@@ -145,7 +132,7 @@ void loop()
       node->busy(true);
       node->loco.address(railcom.address());
       //debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
-      //  debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
+      //debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
     }
     else
     {
@@ -153,14 +140,6 @@ void loop()
       node->loco.address(0);
       //debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
     }
-#endif
-    //   //****************************** RFID **************************************
-
-#ifdef RFID
-    if (rfid.address())
-      debug.printf("[Main %d ] RFID - Numero de loco : %d\n", __LINE__, rfid.address());
-    else
-      debug.printf("[Main %d ] RFID - Pas de loco.\n", __LINE__);
 #endif
     //**************************************************************************
   }

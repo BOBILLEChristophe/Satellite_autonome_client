@@ -21,7 +21,6 @@ public:
   static void testMemory(void *);
   static void canReceiveMsg(void *);
   static void sendMsg(CANMessage &);
-  static void sendMsg(byte, byte, byte, byte);
   static void sendMsg(byte, byte, byte, byte, byte);
   static void sendMsg(byte, byte, byte, byte, byte, byte);
   static void sendMsg(byte, byte, byte, byte, byte, byte, byte);
@@ -30,6 +29,7 @@ public:
   static void sendMsg(byte, byte, byte, byte, byte, byte, byte, byte, byte, byte);
   static void sendMsg(byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte);
   static void sendMsg(byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte);
+  static void sendMsg(byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte, byte);
 };
 
 #endif

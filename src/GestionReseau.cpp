@@ -174,7 +174,7 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
         // debug.printf("[GestionReseau %d ] nodeP_SM1_ID : %d\n", __LINE__, nodeP_SP1_ID);
         // debug.printf("[GestionReseau %d ] this node busy : %d\n", __LINE__, node->busy());
 
-        CanMsg::sendMsg(0, node->ID(), 0xE0, 0xE0,
+        CanMsg::sendMsg(1, 0xE0, node->ID(), 0xE0, 0,
                         node->loco.address() & 0xFF00,
                         node->loco.address() & 0x00FF,
                         nodeP_SP1_ID,
