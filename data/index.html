@@ -82,63 +82,89 @@ div {
 <body>
 <!--Titre-->
 <div class="w3-card w3-blue w3-padding-small w3-center">
-  <h3>Locoduino : Satellites autonomes v1</h3>
+  <h3>Locoduino : Satellites autonomes</h3>
 </div>
 <p class="w3-margin w3-center w3-padding-12"> <span id='messages' class="w3-wide w3-text-red"></span> </p>
 <div class="w3-margin w3-card w3-padding-24">
   <table width="80%" align="center">
     <tr>
-      <td>Satellite ID : </td>
-      <td><input id="idNode" name="idNode" size="10" type="text"></td>
-       <td></td>
-      <td></td>
+      <td width="30%">Satellite ID : </td>
+      <td width="20%"><input id="idNode" name="idNode" size="10" type="text" value="10"></td>
+       <td width="20%"></td>
+      <td width="20%"></td>
     </tr>
      <tr>
       <td>Wifi :</td>
       <td><input name="wifi_on" type="checkbox" id="wifi_on" onclick="wifi_on(this)" size="10" checked></td>
       <td>Discovery : </td>
       <td><input name="discovery_on" type="checkbox" id="discovery_on" size="10" checked onclick="discovery_on(this)"></td>
+      </tr>
+     <tr>
+      <td>Sens de la marche :</td>
+      <td><input type="radio" id="horaire" name="sensMarche" value="horaire"/>
+    <label for="horaire">Horaire</label></td>
+       <td><input type="radio" id="antihoraire" name="sensMarche" value="antihoraire"/>
+    <label for="antihoraire">Anti horaire</label></td>
+      <td><input type="radio" id="indifferent" name="sensMarche" value="indifferent" checked />
+    <label for="indifferent">Indifférent</label></td>
+    </tr>
+    <tr>
+      <td>Vitesse maxi :</td>
+      <td><input name="maxSpeed" type="number" id="maxSpeed" value="128" size="5"></td>
+      <td></td>
+      <td></td>
     </tr>
      <tr>
       <td>p00 :</td>
-      <td><input id="p00" name="p00" size="10" type="text"></td>
+      <td><input name="p00" type="text" id="p00" value="null" size="10" readonly></td>
       <td>m00 : </td>
-      <td><input id="m00" name="m00" size="10" type="text"></td>
+      <td><input name="m00" type="text" id="m00" value="null" size="10" readonly></td>
     </tr>
     <tr>
       <td>p01 :</td>
-      <td><input id="p01" name="p01" size="10" type="text"></td>
+      <td><input name="p01" type="text" id="p01" value="null" size="10" readonly></td>
       <td>m01 :</td>
-      <td><input id="m01" name="m01" size="10" type="text"></td>
+      <td><input name="m01" type="text" id="m01" value="null" size="10" readonly></td>
     </tr>
     <tr>
       <td>p10 :</td>
-      <td><input id="p10" name="p10" size="10" type="text"></td>
+      <td><input name="p10" type="text" id="p10" value="null" size="10" readonly></td>
       <td>m10 :</td>
-      <td><input id="m10" name="m10" size="10" type="text"></td>
+      <td><input name="m10" type="text" id="m10" value="null" size="10" readonly></td>
     </tr>
     <tr>
       <td>p11 :</td>
-      <td><input id="p11" name="p11" size="10" type="text"></td>
+      <td><input name="p11" type="text" id="p11" value="null" size="10" readonly></td>
       <td>m11 :</td>
-      <td><input id="m11" name="m11" size="10" type="text"></td>
-    </tr>
-
-    <tr>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td></td>
-      <td></td>
+      <td><input name="m11" type="text" id="m11" value="null" size="10" readonly></td>
     </tr>
   </table>
 </div>
+
+<!--cibles signaux-->
+<div class="w3-margin w3-card w3-padding-24">
+  <table width="80%" align="center">
+  <tr>
+       <td width="15%">Types de cibles</td>
+       <td width="35%"></td>
+       <td width="15%"></td>
+       <td width="35%"></td>
+    </tr>
+    <tr>
+      <td>Horaire :</td>
+       <td><img id="imageHoraire" src="" alt=""></td>
+       <td>Anti horaire :</td>
+       <td><img id="imageAntiHor" src="" alt=""></td>
+    </tr>
+
+  </table>
+</div>
+
 <!--servos-->
 <div class="w3-margin w3-card w3-padding-24">
   <table width="80%" align="center">
     <tr>
-      <td></td>
+      <td>Aiguilles</td>
       <td>Etat</td>
       <td>Aig droite</td>
       <td>Aig déviée</td>
@@ -147,44 +173,44 @@ div {
     </tr>
      <tr>
       <td>Servo 0 :</td>
-      <td><input id="s0" name="" size="5" type="text"></td>
-      <td><input id="ss00" name="0" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
-      <td><input id="ss01" name="0" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
-      <td><input id="ss02" name="0" size="40" type="number" value="" min="1" max="10" onChange="servoSettings(this)"></td>
+      <td><input id="s0" name="" size="5" type="text" value="Actif"></td>
+      <td><input id="ss00" name="0" size="40" type="number" value="1324" min="800" max="2100" onChange="servoSettings(this)"></td>
+      <td><input id="ss01" name="0" size="40" type="number" value="1580" min="800" max="2100" onChange="servoSettings(this)"></td>
+      <td><input id="ss02" name="0" size="40" type="number" value="1" min="1" max="10" onChange="servoSettings(this)"></td>
       <td><button id="servoTest0" name="0" onclick="servoTest(this)" class="w3-button w3-green w3-large w3-ripple" style="">test</button></td>
     </tr>
     <tr>
       <td>Servo 1 :</td>
-      <td><input id="s1" name="" size="5" type="text"></td>
-      <td><input id="ss10" name="1" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
-      <td><input id="ss11" name="1" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
-      <td><input id="ss12" name="1" size="40" type="number" value="" min="1" max="10" onChange="servoSettings(this)"></td>
+      <td><input id="s1" name="" size="5" type="text" value="Actif"></td>
+      <td><input id="ss10" name="1" size="40" type="number" value="1400" min="800" max="2100" onChange="servoSettings(this)"></td>
+      <td><input id="ss11" name="1" size="40" type="number" value="1620" min="800" max="2100" onChange="servoSettings(this)"></td>
+      <td><input id="ss12" name="1" size="40" type="number" value="1" min="1" max="10" onChange="servoSettings(this)"></td>
       <td><button id="servoTest1" name="1" onclick="servoTest(this)" class="w3-button w3-green w3-large w3-ripple" style="">test</button></td>
     </tr>
     <tr>
       <td>Servo 2 :</td>
-      <td><input id="s2" name="" size="5" type="text"></td>
+      <td><input id="s2" name="" size="5" type="text" value="null"></td>
       <td><input id="ss20" name="2" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
       <td><input id="ss21" name="2" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
       <td><input id="ss22" name="2" size="40" type="number" value="" min="1" max="10" onChange="servoSettings(this)"></td>
       <td><button id="servoTest2" name="2" onclick="servoTest(this)" class="w3-button w3-green w3-large w3-ripple" style="">test</button></td>
     </tr>
     <td>Servo 3 :</td>
-    <td><input id="s3" name="" size="5" type="text"></td>
-      <td><input id="ss30" name="3" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
-      <td><input id="ss31" name="3" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
-      <td><input id="ss32" name="3" size="40" type="number" value="" min="1" max="10" onChange="servoSettings(this)"></td>
+    <td><input id="s3" name="" size="5" type="text" value="Actif"></td>
+      <td><input id="ss30" name="3" size="40" type="number" value="1290" min="800" max="2100" onChange="servoSettings(this)"></td>
+      <td><input id="ss31" name="3" size="40" type="number" value="1450" min="800" max="2100" onChange="servoSettings(this)"></td>
+      <td><input id="ss32" name="3" size="40" type="number" value="1" min="1" max="10" onChange="servoSettings(this)"></td>
       <td><button id="servoTest3" name="3" onclick="servoTest(this)" class="w3-button w3-green w3-large w3-ripple" style="">test</button></td>
     </tr>
     <td>Servo 4 :</td>
-    <td><input id="s4" name="" size="5" type="text"></td>
+    <td><input id="s4" name="" size="5" type="text" value="null"></td>
       <td><input id="ss40" name="4" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
       <td><input id="ss41" name="4" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
       <td><input id="ss42" name="4" size="40" type="number" value="" min="1" max="10" onChange="servoSettings(this)"></td>
       <td><button id="servoTest4" name="4" onclick="servoTest(this)" class="w3-button w3-green w3-large w3-ripple" style="">test</button></td>
     </tr>
     <td>Servo 5 :</td>
-    <td><input id="s5" name="" size="5" type="text"></td>
+    <td><input id="s5" name="" size="5" type="text" value="null"></td>
       <td><input id="ss50" name="5" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
       <td><input id="ss51" name="5" size="40" type="number" value="" min="800" max="2100" onChange="servoSettings(this)"></td>
       <td><input id="ss52" name="5" size="40" type="number" value="" min="1" max="10" onChange="servoSettings(this)"></td>
