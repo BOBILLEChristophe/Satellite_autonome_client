@@ -70,9 +70,8 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
 
     for (;;)
     {
-
         /*************************************************************************************
-         * Occupation du canton detectee par Railcom
+         * Occupation du canton
          * et etat des capteurs
          ************************************************************************************/
 
@@ -175,7 +174,7 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
         // debug.printf("[GestionReseau %d ] this node busy : %d\n", __LINE__, node->busy());
 
         CanMsg::sendMsg(1, 0xE0, node->ID(), 0xE0, 0,
-                        node->loco.address() & 0xFF00,
+                        (node->loco.address() & 0xFF00) >> 8,
                         node->loco.address() & 0x00FF,
                         nodeP_SP1_ID,
                         nodeP_SM1_ID,
@@ -183,37 +182,6 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                         nodeP_SP2_BUSY,
                         nodeP_SM2_ACCES,
                         nodeP_SM2_BUSY);
-
-        // Il sera possible de completer les infos envoyees pour plus d'interactivite
-        // comme l'adresse de la loco, le sens de roulage...
-
-        // CanMsg::sendMsg(0, node->ID(), 0xE2, 0xE2,
-        //                 node->busy(),
-        //                 nodeP_SP1_ID,
-        //                 nodeP_SM1_ID,
-        //                 node->loco.address() & 0xFF00,
-        //                 node->loco.address() & 0x00FF);
-
-        /*************************************************************************************
-         * Commande des locomotives et de la signalisation
-         ************************************************************************************/
-
-        // auto cmdLoco = [node]()
-        // {
-        //     if (node->loco.address() > 0)
-        //     {
-        //         // debug.printf("[GestionReseau %d] Envoi de commade loco vitesse %d\n ", __LINE__, node->loco.speed());
-        //         for (uint8_t i = 0; i < 5; i++)
-        //         {
-        //             CanMsg::sendMsg(1, node->ID(), 253, 0xF0,
-        //                             node->loco.address() & 0xFF00,
-        //                             node->loco.address() & 0x00FF,
-        //                             node->loco.speed(),
-        //                             node->loco.sens()); // Message à la centrale DCC++
-        //             vTaskDelay(pdMS_TO_TICKS(100));
-        //         }
-        //     }
-        // };
 
         enum : uint8_t
         {
@@ -329,19 +297,17 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                 comptCmdLoco = 0;
 
             if (comptCmdLoco < 5)
-            {
-                CanMsg::sendMsg(1, node->ID(), 253, 0xF0,
+                CanMsg::sendMsg(1, 0xF0, node->ID(), 253, 0,
                                 (node->loco.address() & 0xFF00) >> 8,
                                 node->loco.address() & 0x00FF,
                                 node->loco.speed(),
                                 node->loco.sens()); // Message à la centrale DCC++
 
-                oldLocAddress = node->loco.address();
-                oldLocSpeed = node->loco.speed();
-                oldLocSens = node->loco.sens();
-                comptCmdLoco++;
-            }
+            oldLocAddress = node->loco.address();
+            oldLocSpeed = node->loco.speed();
+            oldLocSens = node->loco.sens();
+            comptCmdLoco++;
         }
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200));
     }
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200));
 }

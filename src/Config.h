@@ -7,10 +7,8 @@
 
   ESP32 datasheet : https://www.espressif.com/sites/default/files/documentation/esp32-wrover-e_esp32-wrover-ie_datasheet_en.pdf
 
-  Pin mapping pour cette application : https://www.locoduino.org/IMG/png/sat_autonome_pinmapping_v5.png
+  Pin mapping pour cette application : https://www.locoduino.org/IMG/png/pin_mapping_v6.png
   
-  https://www-kvaser-com.translate.goog/can-protocol-tutorial/?_x_tr_sl=en&_x_tr_tl=fr&_x_tr_hl=fr&_x_tr_pto=rq#:~:text=The%20message%20arbitration%20(the%20process,has%20detected%20an%20idle%20bus.
-
 */
 
 #ifndef __CONFIG__
@@ -67,9 +65,12 @@ const uint8_t signalSize = 2;
 #endif
 
 /* ----- Sensors ------------------*/
-#define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_15
-#define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_33
+#define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_12
+#define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_15
 #define CAPT_PONCT_TEMPO 10UL
+
+/* ----- Mesure de courant ---------*/
+#define MESURE_COURANT GPIO_NUM_33 // ADC1 canal 5
 
 /* ----- Registres a decalage ------*/
 #define SHREG_PIN_VERROU GPIO_NUM_4
@@ -90,7 +91,7 @@ const uint8_t signalSize = 2;
 #define AIG_PIN_SIGNAL_3 GPIO_NUM_13
 #define AIG_SPEED 6000.0000
 
-// Sur version v6 et > du PCB
+// Sur version v6 et < du PCB
 // #define AIG_PIN_SIGNAL_0 GPIO_NUM_2
 // #define AIG_PIN_SIGNAL_1 GPIO_NUM_21
 // #define AIG_PIN_SIGNAL_2 GPIO_NUM_19

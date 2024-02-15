@@ -31,7 +31,7 @@ class WebHandler
     WebHandler();
     void init(Node*, uint16_t);
     void loop();
-    void handleWebSocketMessage(void*, uint8_t*, size_t, AsyncWebSocket*, AsyncWebSocketClient*);
+    //void handleWebSocketMessage(void*, uint8_t*, size_t, AsyncWebSocket*, AsyncWebSocketClient*);
     void notifyClients();
     void route();
 };

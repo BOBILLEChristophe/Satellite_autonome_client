@@ -45,8 +45,7 @@ void Discovery::begin(Node *nd)
 
   TaskHandle_t discoveryProcessHandle = nullptr;
   xTaskCreatePinnedToCore(process, "Process", 4 * 1024, (void *)node, 7, NULL, 1);
-  xTaskCreatePinnedToCore(createAiguilles, "CreateAiguilles", 2 * 1024, (void *)node, 4, NULL, 0);
-  // xTaskCreatePinnedToCore(createCiblesSignaux, "CreateCiblesSignaux", 2 * 1024, (void *)node, 5, NULL, 0);
+  xTaskCreatePinnedToCore(createAigEtCibles, "CreateAiguilles", 4 * 1024, (void *)node, 4, NULL, 0);
 }
 
 void Discovery::process(void *p)
@@ -76,7 +75,7 @@ void Discovery::process(void *p)
 
   auto btnPush = [&](uint8_t btnNum)
   {
-    // Envoi sur le bus CAN de l'ID du satellite, fonction 0xC0
+    // Envoi sur le bus CAN de l'ID du satellite, commande 0xC0
     CanMsg::sendMsg(0, 0xC0, node->ID(), NO_ID, 0);
 
     if (m_ID_satPeriph < 253)
@@ -170,7 +169,7 @@ void Discovery::process(void *p)
   }
 }
 
-void Discovery::createAiguilles(void *p) // Création des aiguilles
+void Discovery::createAigEtCibles(void *p) // Création des aiguilles
 {
   Node *node;
   node = (Node *)p;
@@ -267,7 +266,7 @@ void Discovery::createAiguilles(void *p) // Création des aiguilles
             }
             else
             {
-              // SP1 n'a pas d'aiguille à horaire
+              // SP1 n'a pas d'aiguille a horaire
               // Si SP2 a une aiguille a anti-horaire
 
               // Si SP2 na pas d'aiguille a anti horaire
@@ -283,13 +282,17 @@ void Discovery::createAiguilles(void *p) // Création des aiguilles
 
       if (index == p00)
       {
+        if (node->signal[0] == nullptr)
+          node->signal[0] = new Signal;
         node->signal[0]->type(typeCible);
-        // debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : ", __LINE__);
+        //debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : %d\n", __LINE__, typeCible);
       }
       else if (index == m00)
       {
+        if (node->signal[1] == nullptr)
+          node->signal[1] = new Signal;
         node->signal[1]->type(typeCible);
-        // debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : ", __LINE__);
+        //debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : %d\n", __LINE__, typeCible);
       }
     }
   }

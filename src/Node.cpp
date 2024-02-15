@@ -66,7 +66,8 @@ Node::Node()
       m_SM2_busy(false),
       m_masqueAigSP2(0x00),
       m_masqueAigSM2(0x00),
-      m_maxSpeed(128)
+      m_maxSpeed(128),
+      m_sensMarche(0)
 {
   for (byte i = 0; i < nodePsize; i++)
     this->nodeP[i] = nullptr;
@@ -162,9 +163,11 @@ void Node::aigGoTo(void *p)
     }
     else
     {
+#ifdef DEBUG
       debug.printf("m_curPos : %d\n", pThis->m_curPos);
       debug.printf("m_speed : %d\n", pThis->m_speed);
       debug.println("vTaskDelete");
+#endif
 
       vTaskDelete(NULL);
     }

@@ -52,15 +52,20 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
     break;
   case WS_EVT_DATA:
 
+#ifdef DEBUG
     debug.printf("[WebHandler %d] : WebSocket len %d\n", __LINE__, len);
     debug.printf("[WebHandler %d] : WebSocket data %d\n", __LINE__, data);
+#endif
 
     StaticJsonDocument<4066> doc1; // Memory pool
     DeserializationError error = deserializeJson(doc1, data);
 
     if (error) // Check for errors in parsing
+    {
+#ifdef DEBUG
       debug.println("Parsing failed");
-
+#endif
+    }
     else
     {
       String message = (char *)data;
@@ -119,32 +124,42 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
       {
         const bool wifi_on = doc1["wifi_on"][0];
         Settings::wifiOn(wifi_on);
+#ifdef DEBUG
         debug.printf("[discovery_on %d] : wifi_on %d\n", __LINE__, wifi_on);
+#endif
       }
 
       if (message.indexOf("discovery_on") >= 0)
       {
         const bool discovery_on = doc1["discovery_on"][0];
         Settings::discoveryOn(discovery_on);
+#ifdef DEBUG
         debug.printf("[discovery_on %d] : discovery_on %d\n", __LINE__, discovery_on);
+#endif
       }
 
       if (message.indexOf("maxSpeed") >= 0)
       {
         const uint8_t maxSpeed = doc1["maxSpeed"][0];
         node->maxSpeed(maxSpeed);
+#ifdef DEBUG
         debug.printf("[maxSpeed %d] : maxSpeed %d\n", __LINE__, maxSpeed);
+#endif
       }
 
       if (message.indexOf("save") >= 0)
       {
+#ifdef DEBUG
         debug.println("save");
+#endif
         Settings::writeFile();
       }
 
       if (message.indexOf("restartEsp") >= 0)
       {
+#ifdef DEBUG
         debug.println("restartEsp");
+#endif
         ESP.restart();
       }
     }

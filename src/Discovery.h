@@ -26,14 +26,12 @@ private:
   static byte m_ID_satPeriph;
   static byte m_btnState;
   static bool m_stopProcess;
-  //static SemaphoreHandle_t xSemaphore;
 
 public:
   Discovery() = delete;
   static void begin(Node *);
   static void process(void *);
-  static void createAiguilles(void *);
-  static void createCiblesSignaux(void *);
+  static void createAigEtCibles(void *);
   static void comptAig(byte);
   static byte comptAig();
   static void ID_satPeriph(byte);

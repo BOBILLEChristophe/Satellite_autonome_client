@@ -39,19 +39,27 @@ void Signal::setup()
   {
   case 0: // Feu orange  - rouge - vert
     m_length = 3;
+#ifdef DEBUG
     debug.printf("[Signal %d] : Creation d'un signal orange-vert-rouge\n", __LINE__);
+#endif
     break;
   case 1: // Carré + oeilleton
     m_length = 5;
+#ifdef DEBUG
     debug.printf("[Signal %d] : Creation d'un signal Carré + oeilleton\n", __LINE__);
+#endif
     break;
   case 2: // Ralentissement (avec Carré + oeilleton)
     m_length = 7;
+#ifdef DEBUG
     debug.printf("[Signal %d] : Creation d'un signal Ralentissement (avec Carré + oeilleton)\n", __LINE__);
+#endif
     break;
   case 3: // RRalentissement (avec Carré + oeilleton)
     m_length = 7;
+#ifdef DEBUG
     debug.printf("[Signal %d] : Creation d'un signal RRalentissement (avec Carré + oeilleton)\n", __LINE__);
+#endif
     break;
   }
   m_compt += m_length;

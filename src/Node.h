@@ -77,10 +77,6 @@ private:
 
 public:
   Node();
-  // Node(const Node &);
-  // ~Node();
-  // Node &operator=(const Node &);
-  // static void testMemory(void *);
   NodePeriph *nodeP[nodePsize];
   Aig *aig[aigSize];
   Loco loco;
@@ -97,7 +93,6 @@ public:
   void masqueAigSM2(byte);
   byte masqueAigSM2();
   static void aigGoTo(void *);
-  //void ciblesSignaux();
   void aigRun(byte);
   void SP1_idx(uint8_t);
   uint8_t SP1_idx();

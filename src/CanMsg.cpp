@@ -9,7 +9,9 @@
 
 void CanMsg::setup(Node *node)
 {
+#ifdef DEBUG
   debug.printf("[CanMsg %d] : setup\n", __LINE__);
+#endif
   TaskHandle_t canReceiveHandle = NULL;
   xTaskCreatePinnedToCore(canReceiveMsg, "CanReceiveMsg", 2 * 1024, (void *)node, 6, &canReceiveHandle, 0); // Création de la tâches pour le traitement
 #ifdef TEST_MEMORY_TASK
@@ -49,16 +51,18 @@ void CanMsg::canReceiveMsg(void *pvParameters)
     CANMessage frameIn;
     if (ACAN_ESP32::can.receive(frameIn))
     {
+      const byte commande = (frameIn.id & 0x7F80000) >> 19;
       const byte idSatExpediteur = (frameIn.id & 0x7F800) >> 11; // ID du satellite qui envoie
-      const byte fonction = (frameIn.id & 0x7F80000) >> 19;
       const bool response = (frameIn.id & 0x08) >> 3;
-
-      debug.printf("\n[CanMsg %d]------ Expediteur %d : Fonction 0x%0X\n", __LINE__, idSatExpediteur, fonction);
-
+#ifdef DEBUG
+      debug.printf("\n[CanMsg %d]------ Expediteur %d : commande 0x%0X\n", __LINE__, idSatExpediteur, commande);
+#endif
       if (frameIn.rtr) // Remote frame
       {
+#ifdef DEBUG
         debug.printf("[CanMsg %d Frame de remote \n", __LINE__);
-        switch (fonction)
+#endif
+        switch (commande)
         {
         case 0x0F:
           ACAN_ESP32::can.tryToSend(frameIn);
@@ -67,7 +71,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
       }
       else
       {
-        switch (fonction) // Fonction appelee
+        switch (commande) // commande appelee
         {
         case 0xB3: // fn : Reponse à demande de test du bus CAN
           if (frameIn.data[0])
@@ -86,15 +90,16 @@ void CanMsg::canReceiveMsg(void *pvParameters)
           else
             Settings::discoveryOn(true);
           break;
-        case 0xBF: // fn : Enreistrement périodique des données en mémoire flash
+        case 0xBF: // fn : Enreistrement des données en mémoire flash
 #ifdef SAUV_BY_MAIN
+#ifdef DEBUG
           debug.printf("------ Rec->sauvegarde distante\n");
+#endif
           Settings::writeFile();
 #else
           debug.printf("Sauvegarde automatique desactivee.\n");
 #endif
           break;
-
         case 0xC0: // fn : Réception de l'ID d'un satellite
           Discovery::ID_satPeriph(idSatExpediteur);
           break;
@@ -104,16 +109,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
            * reception periodique des data envoyees par les sat pendant le processus de decouverte
            ******************************************************************************************************/
 
-          // debug.printf("[CanMsg %d] : Fonction 0xC1, ID exped %d \n", __LINE__, idSatExpediteur);
-
-          // for (byte i = 0; i < aigSize; i++)
-          // {
-          //   if (node->nodeP[i] != nullptr)
-          //   {
-          //     if (idSatExpediteur == node->nodeP[i]->ID()) // Si l'expediteur est un SP1 ou un SM1
-          //       node->nodeP[i]->masqueAig(frameIn.data[0]);
-          //   }
-          // }
+          // debug.printf("[CanMsg %d] : commande 0xC1, ID exped %d \n", __LINE__, idSatExpediteur);
 
           for (auto el : node->nodeP)
           {
@@ -123,20 +119,20 @@ void CanMsg::canReceiveMsg(void *pvParameters)
                 el->masqueAig(frameIn.data[0]);
             }
           }
-
           break;
         case 0xE0:
           /*****************************************************************************************************
-           * reception periodique des data envoyees par les sat (GestionReseau.cpp ligne 42)
+           * reception periodique des data envoyees par les sat en exploitation (GestionReseau.cpp ligne 42)
            ******************************************************************************************************/
 
-          // debug.printf("[CanMsg %d] fonction 0xE0\n", __LINE__);
+          //  debug.printf("[CanMsg %d] commande 0xE0\n", __LINE__);
           //  debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
           //  debug.printf("[CanMsg %d] nodeP[0]->ID() : %d\n", __LINE__, node->nodeP[0]->ID());
           //  debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
           //  debug.printf("[CanMsg %d] node->tabInvers[idSatExpediteur] : %d\n", __LINE__, node->tabInvers[idSatExpediteur]);
           //  debug.printf("[CanMsg %d] SM1 ID : %d\n", __LINE__, frameIn.data[1]);
           //  debug.printf("[CanMsg %d] SP1 ID : %d\n", __LINE__, frameIn.data[2]);
+
           if (node->nodeP[node->SP1_idx()] != nullptr)
           {
             if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // Si l'expediteur est SP1
@@ -197,81 +193,83 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 
 void CanMsg::sendMsg(CANMessage &frame)
 {
+#ifdef DEBUG
   if (0 == ACAN_ESP32::can.tryToSend(frame))
     debug.printf("Echec envoi message CAN\n");
-#ifdef DEBUG
-    // else
-    //   debug.printf("Envoi fonction 0x%0X\n", frame.data[0]);
+  else
+    debug.printf("Envoi commande 0x%0X\n", (frame.id & 0x7F80000) >> 19);
+#else
+  ACAN_ESP32::can.tryToSend(frame);
 #endif
 }
 
-auto parseMsg = [](CANMessage &frame, byte priorite, byte fonct, byte idExp, byte idDes, bool resp) -> CANMessage
+auto formatMsg = [](CANMessage &frame, byte priorite, byte cmde, byte idExp, byte idDes, bool resp) -> CANMessage
 {
   frame.id |= priorite << 27; // Priorite 0, 1 ou 2
-  frame.id |= fonct << 19;    // Fonction appelée
+  frame.id |= cmde << 19;     // commande appelée
   frame.id |= idExp << 11;    // ID expediteur
   frame.id |= idDes << 3;     // ID destinataire
-  frame.id |= resp << 2;     // Response
+  frame.id |= resp << 2;      // Response
   frame.ext = true;
   return frame;
 };
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 0;
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp, byte data0)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 1;
-  frame.data[0] = data0; // Fonction
+  frame.data[0] = data0;
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp, byte data0, byte data1)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 2;
-  frame.data[0] = data0; // Fonction
+  frame.data[0] = data0;
   frame.data[1] = data1;
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 3;
-  frame.data[0] = data0; // Fonction
+  frame.data[0] = data0;
   frame.data[1] = data1;
   frame.data[2] = data2;
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 4;
-  frame.data[0] = data0; // Fonction
+  frame.data[0] = data0;
   frame.data[1] = data1;
   frame.data[2] = data2;
   frame.data[3] = data3;
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 5;
-  frame.data[0] = data0; // Fonction
+  frame.data[0] = data0;
   frame.data[1] = data1;
   frame.data[2] = data2;
   frame.data[3] = data3;
@@ -279,12 +277,12 @@ void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte res
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 6;
-  frame.data[0] = data0; // Fonction
+  frame.data[0] = data0;
   frame.data[1] = data1;
   frame.data[2] = data2;
   frame.data[3] = data3;
@@ -293,12 +291,12 @@ void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte res
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5, byte data6)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5, byte data6)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 7;
-  frame.data[0] = data0; // Fonction
+  frame.data[0] = data0;
   frame.data[1] = data1;
   frame.data[2] = data2;
   frame.data[3] = data3;
@@ -308,12 +306,12 @@ void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte res
   CanMsg::sendMsg(frame);
 }
 
-void CanMsg::sendMsg(byte priorite, byte fonct, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5, byte data6, byte data7)
+void CanMsg::sendMsg(byte priorite, byte cmde, byte idExp, byte idDes, byte resp, byte data0, byte data1, byte data2, byte data3, byte data4, byte data5, byte data6, byte data7)
 {
   CANMessage frame;
-  frame = parseMsg(frame, priorite, fonct, idExp, idDes, resp);
+  frame = formatMsg(frame, priorite, cmde, idExp, idDes, resp);
   frame.len = 8;
-  frame.data[0] = data0; // Fonction
+  frame.data[0] = data0;
   frame.data[1] = data1;
   frame.data[2] = data2;
   frame.data[3] = data3;

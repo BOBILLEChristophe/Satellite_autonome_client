@@ -10,11 +10,10 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.11.2"
+#define VERSION "v 0.11.5"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
-
 #include <Arduino.h>
 #include "CanMsg.h"
 #include "CanConfig.h"
@@ -47,18 +46,20 @@ void setup()
   Serial.begin(115200);
   while (!Serial)
     ;
-
-  debug.printf("\nProject :    %s", PROJECT);
-  debug.printf("\nVersion   :    %s", VERSION);
-  debug.printf("\nAuteur    :    %s", AUTHOR);
-  debug.printf("\nFichier   :    %s", __FILE__);
-  debug.printf("\nCompiled  :    %s", __DATE__);
-  debug.printf(" - %s\n\n", __TIME__);
+  delay(100);
 
 //--- Infos ESP32 (desactivable)
 #ifdef CHIP_INFO
   ChipInfo::print();
 #endif
+
+  Serial.printf("\nProject   :    %s", PROJECT);
+  Serial.printf("\nVersion   :    %s", VERSION);
+  Serial.printf("\nAuteur    :    %s", AUTHOR);
+  Serial.printf("\nFichier   :    %s", __FILE__);
+  Serial.printf("\nCompiled  :    %s", __DATE__);
+  Serial.printf(" - %s\n\n", __TIME__);
+  Serial.printf("-----------------------------------\n\n");
 
   Settings::setup(node);
   vTaskDelay(pdMS_TO_TICKS(100));
@@ -71,28 +72,27 @@ void setup()
   bool err = 0;
   if (err == Settings::begin())
   {
-    debug.printf("-----------------------------------\n");
-    debug.printf("ID Node : %d\n", node->ID());
-    debug.printf("-----------------------------------\n\n");
+    Serial.printf("-----------------------------------\n");
+    Serial.printf("ID Node : %d\n", node->ID());
+    Serial.printf("-----------------------------------\n\n");
   }
   else
   {
-    debug.printf("[Settings] : Echec de la configuration\n");
+    Serial.printf("[Settings] : Echec de la configuration\n");
     return;
   }
 
-  //--- Wifi et web serveur
-  if (Settings::wifiOn()) // Si option validée
-  {
-    wifi.start();
-    webHandler.init(node, 80);
-  }
-  debug.printf(Settings::wifiOn() ? "[Wifi] : on\n" : "Wifi : off\n");
-  debug.printf(Settings::discoveryOn() ? "[Discovery] : on\n" : "[Discovery] : off\n");
-  // debug.println();
+  Serial.printf(Settings::discoveryOn() ? "[Discovery] : on\n\n" : "[Discovery] : off\n\n");
+  Serial.printf("-----------------------------------\n\n");
 
   if (Settings::discoveryOn()) // Si option validée, lancement de la méthode pour le procecuss de découverte
   {
+    //--- Wifi et web serveur
+    if (Settings::wifiOn()) // Si option validée
+    {
+      wifi.start();
+      webHandler.init(node, 80);
+    }
     Discovery::begin(node);
   }
   else
@@ -107,9 +107,15 @@ void setup()
     railcom.begin();
     SignauxCmd::setup();
     GestionReseau::setup(node);
-  }
 
-  debug.printf("[Main %d] : End setup\n\n", __LINE__);
+    Settings::wifiOn(false);
+    Serial.end(); // Desactivation de Serial en exploitation
+  }
+  Serial.printf(Settings::wifiOn() ? "[Wifi] : on\n" : "Wifi : off\n");
+  Serial.printf("[Main %d] : End setup\n\n", __LINE__);
+#ifndef debug
+  Serial.end(); // Desactivation de Serial
+#endif
 } // ->End setup
 
 /*-------------------------------------------------------------
@@ -126,21 +132,23 @@ void loop()
   if (!Settings::discoveryOn()) // Si option non validée
   {
     //************************* Railcom ****************************************
-#ifdef RAILCOM
+
     if (railcom.address())
     {
       node->busy(true);
       node->loco.address(railcom.address());
-      //debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
-      //debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
+#ifdef debug
+      debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+      debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
+#endif
     }
     else
     {
-      node->busy(false);
       node->loco.address(0);
-      //debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
-    }
+#ifdef debug
+      debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
 #endif
+    }
     //**************************************************************************
   }
   vTaskDelay(pdMS_TO_TICKS(10));

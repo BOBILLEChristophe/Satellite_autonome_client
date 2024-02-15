@@ -1,5 +1,5 @@
 /*
-   
+
    Wifi_fl.cpp
 
 
@@ -13,45 +13,43 @@ void Fl_Wifi::start()
 #ifdef WIFI_AP_MODE
     WiFi.softAP(WIFI_SSID, WIFI_PSW);
 
-#ifdef DEBUG
-    debug.print("\n");
-    debug.print("\n------------WIFI------------");
-    debug.print("\nConnected to : ");
-    debug.print(WIFI_SSID);
-    debug.print("\nIP address :   ");
-    debug.print(WiFi.softAPIP());
-    debug.print("\n\n");
-#endif
+    Serial.print("\n");
+    Serial.print("\n------------WIFI------------");
+    Serial.print("\nConnected to : ");
+    Serial.print(WIFI_SSID);
+    Serial.print("\nIP address :   ");
+    Serial.print(WiFi.softAPIP());
+    Serial.print("\n\n");
 
 #else
     WiFi.begin(Settings::ssid, Settings::password);
     while (WiFi.status() != WL_CONNECTED)
     {
         vTaskDelay(pdMS_TO_TICKS(500));
-        debug.print(".");
+        Serial.print(".");
     }
 
-    debug.print("\n");
-    debug.print("\n------------WIFI------------");
-    debug.print("\nConnected to : ");
-    debug.print(Settings::ssid);
-    debug.print("\nIP address :   ");
-    debug.print(WiFi.localIP());
-    debug.print("\n----------------------------\n\n");
+    Serial.print("\n");
+    Serial.print("\n------------WIFI------------");
+    Serial.print("\nConnected to : ");
+    Serial.print(Settings::ssid);
+    Serial.print("\nIP address :   ");
+    Serial.print(WiFi.localIP());
+    Serial.print("\n----------------------------\n\n");
 
 #endif
 
-//     if (!MDNS.begin(MDNS_NAME))
-//     {
-//         debug.print("Error setting up MDNS responder!\n");
-//         while (1)
-//             vTaskDelay(pdMS_TO_TICKS(1000));
-//     }
+    //     if (!MDNS.begin(MDNS_NAME))
+    //     {
+    //         debug.print("Error setting up MDNS responder!\n");
+    //         while (1)
+    //             vTaskDelay(pdMS_TO_TICKS(1000));
+    //     }
 
-// #ifdef DEBUG
-//     debug.print("MDNS responder started @ http://");
-//     debug.print(MDNS_NAME);
-//     debug.print(".local");
-//     debug.print("\n\n");
-// #endif
+    // #ifdef DEBUG
+    //     debug.print("MDNS responder started @ http://");
+    //     debug.print(MDNS_NAME);
+    //     debug.print(".local");
+    //     debug.print("\n\n");
+    // #endif
 }

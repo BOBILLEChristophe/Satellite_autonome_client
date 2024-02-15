@@ -2,7 +2,7 @@
 
   CanMsg.h
 
-
+  Structure des identifiants CAN : https://www.locoduino.org/IMG/png/satautonomes_messageriecan_v1.png
 */
 
 #ifndef __CAN_MSG__
