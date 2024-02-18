@@ -101,7 +101,7 @@ uint16_t Signal::affiche(uint16_t x)
     case 2: // vert - voie libre
       m_data = B1000 << m_decalage;
       break;
-    case 3: // rouge - carré + oeilleton°
+    case 3: // rouge - carré + oeilleton
       m_data = B10100 << m_decalage;
       break;
     case 4: // ralentissement ou Rralentissement
@@ -121,7 +121,7 @@ uint16_t Signal::affiche(uint16_t x)
     case 2: // vert - voie libre
       m_data = B1000 << m_decalage;
       break;
-    case 3: // rouge - carré
+    case 3: // rouge - carré + oeilleton
       m_data = B10100 << m_decalage;
       break;
     case 4: // ralentissement ou Rralentissement

@@ -10,7 +10,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.11.5"
+#define VERSION "v 0.11.6"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -85,10 +85,10 @@ void setup()
   Serial.printf(Settings::discoveryOn() ? "[Discovery] : on\n\n" : "[Discovery] : off\n\n");
   Serial.printf("-----------------------------------\n\n");
 
-  if (Settings::discoveryOn()) // Si option validée, lancement de la méthode pour le procecuss de découverte
+  if (Settings::discoveryOn()) // Si option validee, lancement de la méthode pour le procecuss de decouverte
   {
     //--- Wifi et web serveur
-    if (Settings::wifiOn()) // Si option validée
+    if (Settings::wifiOn()) // Si option validee
     {
       wifi.start();
       webHandler.init(node, 80);
