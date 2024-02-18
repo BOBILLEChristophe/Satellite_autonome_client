@@ -7,7 +7,7 @@
 
   ESP32 datasheet : https://www.espressif.com/sites/default/files/documentation/esp32-wrover-e_esp32-wrover-ie_datasheet_en.pdf
 
-  Pin mapping pour cette application : https://www.locoduino.org/IMG/png/pin_mapping_v6.png
+  Pin mapping pour cette application : https://www.locoduino.org/IMG/png/pin_mapping_v7.png
   
 */
 
@@ -90,12 +90,5 @@ const uint8_t signalSize = 2;
 #define AIG_PIN_SIGNAL_2 GPIO_NUM_2
 #define AIG_PIN_SIGNAL_3 GPIO_NUM_13
 #define AIG_SPEED 6000.0000
-
-// Sur version v6 et < du PCB
-// #define AIG_PIN_SIGNAL_0 GPIO_NUM_2
-// #define AIG_PIN_SIGNAL_1 GPIO_NUM_21
-// #define AIG_PIN_SIGNAL_2 GPIO_NUM_19
-// #define AIG_PIN_SIGNAL_3 GPIO_NUM_13
-// #define AIG_SPEED 6000.0000
 
 #endif
