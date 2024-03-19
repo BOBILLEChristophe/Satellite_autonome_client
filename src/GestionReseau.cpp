@@ -11,8 +11,9 @@ uint16_t GestionReseau::signalValue[2] = {0};
 
 void GestionReseau::setup(Node *node)
 {
-    xTaskCreatePinnedToCore(signauxTask, "SignauxTask", 4 * 1024, (void *)node, 7, NULL, 1); // Création de la tâches pour le traitement
-    xTaskCreatePinnedToCore(loopTask, "LoopTask", 8 * 1024, (void *)node, 3, NULL, 0);
+    xTaskCreatePinnedToCore(signauxTask, "SignauxTask", 2 * 1024, (void *)node, 8, NULL, 0); // Création de la tâches pour les signaux
+    xTaskCreatePinnedToCore(loopTask, "LoopTask", 4 * 1024, (void *)node, 10, NULL, 0);      // Création de la tâches pour le traitement
+    // tskIDLE_PRIORITY
 }
 
 void GestionReseau::signauxTask(void *p)
@@ -89,9 +90,9 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
 
         // Sens de roulage des locos,
         if (node->sensor[antiHor].state() && !node->sensor[horaire].state())
-            node->loco.sens(1);
+            node->loco.sens(2); // Anti Horaire
         else if (node->sensor[horaire].state() && !node->sensor[antiHor].state())
-            node->loco.sens(2);
+            node->loco.sens(1); // Horaire
 
         /*************************************************************************************
          * Information aupres des satellites environnants
@@ -183,6 +184,8 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                         nodeP_SM2_ACCES,
                         nodeP_SM2_BUSY);
 
+        // vTaskDelay(pdMS_TO_TICKS(10));
+
         enum : uint8_t
         {
             Orange,
@@ -224,8 +227,8 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
             }
 
             // debug.printf("[GestionReseau %d] index %d \n", __LINE__, index);
-            // debug.printf("[GestionReseau %d] node->sensor[sens0].state() %d \n", __LINE__, node->sensor[sens0].state());
-            // debug.printf("[GestionReseau %d] node->sensor[sens1].state() %d \n", __LINE__, node->sensor[sens1].state());
+            //  debug.printf("[GestionReseau %d] node->sensor[sens0].state() %d \n", __LINE__, node->sensor[sens0].state());
+            //  debug.printf("[GestionReseau %d] node->sensor[sens1].state() %d \n", __LINE__, node->sensor[sens1].state());
 
             if (node->nodeP[index] != nullptr)
             {
@@ -236,11 +239,28 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                     {
                         // debug.printf("[GestionReseau %d] Le canton %s est accessible mais occupe\n", __LINE__, cantonName);
                         signalValue[i] = Rouge;
+                        //debug.printf("[GestionReseau %d] loco sens %d\n", __LINE__, node->loco.sens());
+                        if (node->loco.sens() == 1)
+                        {
+                            if (node->sensor[antiHor].state())
+                                node->loco.stop();
+                            else if (node->sensor[horaire].state())
+                                node->loco.speed(30);
 
-                        if (node->sensor[sens0].state())
-                            node->loco.stop();
-                        else
-                            node->loco.ralentis(30);
+                            // CanMsg::sendMsg(1, 0xF0, node->ID(), 253, 0,
+                            //                 (node->loco.address() & 0xFF00) >> 8,
+                            //                 node->loco.address() & 0x00FF,
+                            //                 node->loco.speed(),
+                            //                 node->loco.sens()); // Message à la centrale DCC++
+
+                        }
+                        if (node->loco.sens() == 2)
+                        {
+                            if (node->sensor[antiHor].state())
+                                node->loco.stop();
+                            else if (node->sensor[horaire].state())
+                                node->loco.ralentis(30);
+                        }
                     }
                     else // Le canton SP1/SM1 est accessible et libre
                     {
@@ -273,41 +293,46 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                     // debug.printf("[GestionReseau %d] Le canton %s n'est pas accessible\n", __LINE__, cantonName);
                     signalValue[i] = Carre;
 
-                    if (node->sensor[sens0].state())
-                        node->loco.stop();
-                    else
-                        node->loco.ralentis(30);
+                    // if (node->sensor[sens0].state())
+                    //     node->loco.stop();
+                    // else
+                    //     node->loco.ralentis(30);
                 }
             }
             else // Le canton SP1/SM1 n'existe pas
             {
                 // debug.printf("[GestionReseau %d] Le canton %s n'existe pas\n", __LINE__, cantonName);
                 signalValue[i] = Carre;
-                if (node->sensor[sens0].state())
-                    node->loco.stop();
-                else
-                    node->loco.ralentis(30);
+                // if (node->sensor[sens0].state())
+                //     node->loco.stop();
+                // else
+                //     node->loco.ralentis(30);
             }
         }
 
         // Envoi des commandes à la loco
         if (node->loco.address() > 0)
         {
-            if (node->loco.address() != oldLocAddress || node->loco.speed() != oldLocSpeed || node->loco.sens() != oldLocSens)
+            // if (node->loco.address() != oldLocAddress || node->loco.speed() != oldLocSpeed || node->loco.sens() != oldLocSens)
+            if (node->loco.speed() != oldLocSpeed)
                 comptCmdLoco = 0;
 
             if (comptCmdLoco < 5)
+            {
                 CanMsg::sendMsg(1, 0xF0, node->ID(), 253, 0,
                                 (node->loco.address() & 0xFF00) >> 8,
                                 node->loco.address() & 0x00FF,
                                 node->loco.speed(),
                                 node->loco.sens()); // Message à la centrale DCC++
 
-            oldLocAddress = node->loco.address();
-            oldLocSpeed = node->loco.speed();
-            oldLocSens = node->loco.sens();
-            comptCmdLoco++;
+                debug.printf("[GestionReseau %d] Loco %d vitesse %d\n", __LINE__, node->loco.address(), node->loco.speed());
+
+                oldLocAddress = node->loco.address();
+                oldLocSpeed = node->loco.speed();
+                oldLocSens = node->loco.sens();
+                comptCmdLoco++;
+            }
         }
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
     }
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200));
 }
