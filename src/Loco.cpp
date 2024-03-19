@@ -20,16 +20,10 @@ uint8_t Loco::speed() { return m_speed; }
 
 void Loco::stop()
 {
-  if (m_speed > 0)
-  {
     m_speed = 0;
-  }
 };
 
 void Loco::ralentis(uint8_t speed)
 {
-  if (m_speed > speed)
-  {
     m_speed = speed;
-  }
 };
