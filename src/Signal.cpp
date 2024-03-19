@@ -89,23 +89,20 @@ uint16_t Signal::affiche(uint16_t x)
       break;
     }
     break;
-  case 1: // Carré + oeilleton
+  case 1:
     switch (x)
     {
     case 0: // orange - avertissement
       m_data = B10 << m_decalage;
       break;
-    case 1: // rouge - sémaphore
+    case 1: // rouge - sémaphore + oeilleton
       m_data = B101 << m_decalage;
       break;
     case 2: // vert - voie libre
       m_data = B1000 << m_decalage;
       break;
-    case 3: // rouge - carré + oeilleton
+    case 3: // rouge - carré
       m_data = B10100 << m_decalage;
-      break;
-    case 4: // ralentissement ou Rralentissement
-      m_data = B1100000 << m_decalage;
       break;
     }
   case 2:
@@ -115,13 +112,13 @@ uint16_t Signal::affiche(uint16_t x)
     case 0: // orange - avertissement
       m_data = B10 << m_decalage;
       break;
-    case 1: // rouge - sémaphore
+    case 1: // rouge - sémaphore + oeilleton
       m_data = B101 << m_decalage;
       break;
     case 2: // vert - voie libre
       m_data = B1000 << m_decalage;
       break;
-    case 3: // rouge - carré + oeilleton
+    case 3: // rouge - carré
       m_data = B10100 << m_decalage;
       break;
     case 4: // ralentissement ou Rralentissement
