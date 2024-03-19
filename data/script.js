@@ -66,7 +66,7 @@ function onMessage(event) {
   document.getElementById('ss51').value = data.ss51;
   document.getElementById('ss52').value = data.ss52;
 
-  document.getElementById('vitesseMax').value = data.vitesseMax;
+  document.getElementById('maxSpeed').value = data.maxSpeed;
 
  switch(data.sensMarche)
 {
