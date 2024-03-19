@@ -41,9 +41,9 @@ Railcom::Railcom(const gpio_num_t rxPin, const gpio_num_t txPin) : m_rxPin(rxPin
 
 void Railcom::begin()
 {
-  xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 5, NULL, 0); // Création de la tâches pour la réception
-  xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 7, NULL, 0);     // Création de la tâches pour le traitement
-  xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 9, NULL, 0);   // Création de la tâches pour MAJ adresse
+  xTaskCreatePinnedToCore(this->receiveData, "ReceiveData", 4 * 1024, this, 5, NULL, 1); // Création de la tâches pour la réception
+  xTaskCreatePinnedToCore(this->parseData, "ParseData", 4 * 1024, this, 7, NULL, 1);     // Création de la tâches pour le traitement
+  xTaskCreatePinnedToCore(this->setAddress, "SetAddress", 2 * 1024, this, 9, NULL, 1);   // Création de la tâches pour MAJ adresse
 }
 
 /* ----- getAddress   -------------------*/
