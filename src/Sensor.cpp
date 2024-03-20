@@ -30,8 +30,8 @@ void IRAM_ATTR Sensor::loop(void *p)
     if (!pThis->m_state) // Si l'état est à LOW
       pThis->m_state = !digitalRead(pThis->m_pin);
     // else
-    //   debug.printf("[Sensor %d] Le capteur est actif\n", __LINE__);
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50)); // toutes les x ms
+    //   debug.printf("[Sensor %d] Le capteur %d est actif\n", __LINE__, pThis->m_pin);
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(pThis->m_tempo)); // toutes les x ms
   }
 }
 
