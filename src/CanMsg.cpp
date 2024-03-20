@@ -13,7 +13,7 @@ void CanMsg::setup(Node *node)
   debug.printf("[CanMsg %d] : setup\n", __LINE__);
 #endif
   TaskHandle_t canReceiveHandle = NULL;
-  xTaskCreatePinnedToCore(canReceiveMsg, "CanReceiveMsg", 2 * 1024, (void *)node, 6, &canReceiveHandle, 0); // Création de la tâches pour le traitement
+  xTaskCreatePinnedToCore(canReceiveMsg, "CanReceiveMsg", 4 * 1024, (void *)node, 6, &canReceiveHandle, 0); // Création de la tâches pour le traitement
 #ifdef TEST_MEMORY_TASK
   xTaskCreate(testMemory, "TestMemory", 2 * 1024, (void *)canReceiveHandle, 2, NULL); // Création de la tâches pour le traitement
 #endif
@@ -55,7 +55,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
       const byte idSatExpediteur = (frameIn.id & 0x7F800) >> 11; // ID du satellite qui envoie
       const bool response = (frameIn.id & 0x08) >> 3;
 #ifdef DEBUG
-      debug.printf("\n[CanMsg %d]------ Expediteur %d : commande 0x%0X\n", __LINE__, idSatExpediteur, commande);
+      //debug.printf("\n[CanMsg %d]------ Expediteur %d : commande 0x%0X\n", __LINE__, idSatExpediteur, commande);
 #endif
       if (frameIn.rtr) // Remote frame
       {
@@ -81,14 +81,29 @@ void CanMsg::canReceiveMsg(void *pvParameters)
           if (node->ID() == NO_ID)
             node->ID(frameIn.data[0]);
           break;
+        case 0xBC: // Reset ESP32
+          ESP.restart();
+          break;
         case 0xBD: // Activation  - desactivation du WiFi
-          Settings::wifiOn(frameIn.data[0]);
+          if (frameIn.data[0])
+            Settings::wifiOn(true);
+          else
+            Settings::wifiOn(false);
+          Settings::writeFile();
+          delay(1000);
+          ESP.restart();
           break;
         case 0xBE: // Activation  - desactivation du mode Discovery
           if (frameIn.data[0])
-            Discovery::stopProcess(true);
-          else
+          {
             Settings::discoveryOn(true);
+          }
+          else
+          {
+            Settings::discoveryOn(false);
+            Discovery::stopProcess(true);
+          }
+          Settings::writeFile();
           break;
         case 0xBF: // fn : Enreistrement des données en mémoire flash
 #ifdef SAUV_BY_MAIN
@@ -180,6 +195,13 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             }
           }
           break;
+        case 0xE1:
+          /*****************************************************************************************************
+           * reception d'une commande d'aiguillage
+           ******************************************************************************************************/
+          if (node->ID() == (frameIn.data[0]))
+            node->aigRun(frameIn.data[1]);
+          break;
         }
       }
     }
@@ -193,14 +215,14 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 
 void CanMsg::sendMsg(CANMessage &frame)
 {
-#ifdef DEBUG
-  if (0 == ACAN_ESP32::can.tryToSend(frame))
-    debug.printf("Echec envoi message CAN\n");
-  else
-    debug.printf("Envoi commande 0x%0X\n", (frame.id & 0x7F80000) >> 19);
-#else
+// #ifdef DEBUG
+//   if (0 == ACAN_ESP32::can.tryToSend(frame))
+//     debug.printf("Echec envoi message CAN\n");
+//   else
+//     debug.printf("Envoi commande 0x%0X\n", (frame.id & 0x7F80000) >> 19);
+// #else
   ACAN_ESP32::can.tryToSend(frame);
-#endif
+// #endif
 }
 
 auto formatMsg = [](CANMessage &frame, byte priorite, byte cmde, byte idExp, byte idDes, bool resp) -> CANMessage
