@@ -2,6 +2,8 @@
 
 copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 
+v 0.11.8 : Ajout de la détection de présence par consommation de courant
+
 */
 
 //---  Test si ESP32
@@ -10,7 +12,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.11.6"
+#define VERSION "v 0.11.8"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -82,38 +84,38 @@ void setup()
     return;
   }
 
-  Serial.printf(Settings::discoveryOn() ? "[Discovery] : on\n\n" : "[Discovery] : off\n\n");
-  Serial.printf("-----------------------------------\n\n");
-
   if (Settings::discoveryOn()) // Si option validee, lancement de la méthode pour le procecuss de decouverte
   {
-    //--- Wifi et web serveur
-    if (Settings::wifiOn()) // Si option validee
-    {
-      wifi.start();
-      webHandler.init(node, 80);
-    }
     Discovery::begin(node);
+    Settings::wifiOn(true);
   }
   else
   {
+    //Settings::wifiOn(false);
     for (byte i = 0; i < signalSize; i++)
     {
       if (node->signal[i] == nullptr)
         node->signal[i] = new Signal;
       node->signal[i]->setup();
     }
-
     railcom.begin();
     SignauxCmd::setup();
     GestionReseau::setup(node);
-
-    Settings::wifiOn(false);
-    Serial.end(); // Desactivation de Serial en exploitation
   }
+  //--- Wifi et web serveur
+  if (Settings::wifiOn()) // Si option validee
+  {
+    wifi.start();
+    webHandler.init(node, 80);
+  }
+
+  Serial.printf(Settings::discoveryOn() ? "[Discovery] : on\n" : "[Discovery] : off\n");
   Serial.printf(Settings::wifiOn() ? "[Wifi] : on\n" : "Wifi : off\n");
+  Serial.printf("-----------------------------------\n");
   Serial.printf("[Main %d] : End setup\n\n", __LINE__);
+  Serial.printf("-----------------------------------\n\n");
 #ifndef debug
+  vTaskDelay(pdMS_TO_TICKS(1000));
   Serial.end(); // Desactivation de Serial
 #endif
 } // ->End setup
@@ -138,15 +140,16 @@ void loop()
       node->busy(true);
       node->loco.address(railcom.address());
 #ifdef debug
-      debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
-      debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
+      // debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+      // debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
 #endif
     }
     else
     {
+      node->busy(false);
       node->loco.address(0);
 #ifdef debug
-      debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
+      //debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
 #endif
     }
     //**************************************************************************
