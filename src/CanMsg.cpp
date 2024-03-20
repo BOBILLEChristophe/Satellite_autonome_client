@@ -89,9 +89,9 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             Settings::wifiOn(true);
           else
             Settings::wifiOn(false);
-          Settings::writeFile();
-          delay(1000);
-          ESP.restart();
+          // Settings::writeFile();
+          // delay(1000);
+          // ESP.restart();
           break;
         case 0xBE: // Activation  - desactivation du mode Discovery
           if (frameIn.data[0])
@@ -115,6 +115,8 @@ void CanMsg::canReceiveMsg(void *pvParameters)
           debug.printf("Sauvegarde automatique desactivee.\n");
 #endif
           break;
+          
+
         case 0xC0: // fn : Réception de l'ID d'un satellite
           Discovery::ID_satPeriph(idSatExpediteur);
           break;
