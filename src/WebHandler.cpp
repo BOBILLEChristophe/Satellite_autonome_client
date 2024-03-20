@@ -119,11 +119,16 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
 #endif
         node->aigRun(servoName);
       }
-
       if (message.indexOf("wifi_on") >= 0)
       {
         const bool wifi_on = doc1["wifi_on"][0];
-        Settings::wifiOn(wifi_on);
+        if (wifi_on)
+          Settings::wifiOn(true);
+        else
+          Settings::wifiOn(false);
+        Settings::writeFile();
+        delay(1000);
+        ESP.restart();
 #ifdef DEBUG
         debug.printf("[discovery_on %d] : wifi_on %d\n", __LINE__, wifi_on);
 #endif
@@ -132,7 +137,17 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
       if (message.indexOf("discovery_on") >= 0)
       {
         const bool discovery_on = doc1["discovery_on"][0];
-        Settings::discoveryOn(discovery_on);
+        if (discovery_on)
+        {
+          Settings::discoveryOn(true);
+        }
+        else
+        {
+          Settings::discoveryOn(false);
+          Discovery::stopProcess(true);
+        }
+        Settings::writeFile();
+
 #ifdef DEBUG
         debug.printf("[discovery_on %d] : discovery_on %d\n", __LINE__, discovery_on);
 #endif
@@ -203,11 +218,13 @@ void WebHandler::notifyClients()
   doc["wifi_on"] = Settings::wifiOn();
   doc["discovery_on"] = Settings::discoveryOn();
 
-  doc["vitesseMax"] = node->maxSpeed();
+  doc["maxSpeed"] = node->maxSpeed();
   doc["sensMarche"] = node->sensMarche();
 
-  doc["cibleHoraire"] = node->signal[0]->type();
-  doc["cibleAntiHor"] = node->signal[1]->type();
+  if (node->signal[0] != nullptr)
+    doc["cibleHoraire"] = node->signal[0]->type();
+  if (node->signal[1] != nullptr)
+    doc["cibleAntiHor"] = node->signal[1]->type();
 
   String output;
   serializeJson(doc, output);
