@@ -78,6 +78,7 @@ Node::Node()
 
   sensor[0].setup(CAPT_PONCT_ANTIHOR_PIN, CAPT_PONCT_TEMPO, INPUT_PULLUP);
   sensor[1].setup(CAPT_PONCT_HORAIRE_PIN, CAPT_PONCT_TEMPO, INPUT_PULLUP);
+  //sensor[2].setup(DETECT_PRES_CONSO_COURANT_PIN, 50, INPUT_PULLUP);
 }
 
 // Node::~Node() {} // Destructeur
@@ -168,7 +169,6 @@ void Node::aigGoTo(void *p)
       debug.printf("m_speed : %d\n", pThis->m_speed);
       debug.println("vTaskDelete");
 #endif
-
       vTaskDelete(NULL);
     }
   }
