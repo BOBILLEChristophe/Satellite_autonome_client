@@ -238,20 +238,21 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                     {
                         // debug.printf("[GestionReseau %d] Le canton %s est accessible mais occupe\n", __LINE__, cantonName);
                         signalValue[i] = Rouge;
-                        if (node->loco.sens() == 1)
-                        {
-                            if (node->sensor[antiHor].state())
+                        //if (node->loco.sens() == 1)
+                        //{
+                            if (node->sensor[sens1].state())
                                 node->loco.stop();
-                            else if (node->sensor[horaire].state())
+                            else if (node->sensor[sens0].state())
                                 node->loco.speed(30);
-                        }
-                        if (node->loco.sens() == 2)
-                        {
-                            if (node->sensor[antiHor].state())
-                                node->loco.stop();
-                            else if (node->sensor[horaire].state())
-                                node->loco.ralentis(30);
-                        }
+                        //}
+                        
+                        // if (node->loco.sens() == 2)
+                        // {
+                        //     if (node->sensor[antiHor].state())
+                        //         node->loco.stop();
+                        //     else if (node->sensor[horaire].state())
+                        //         node->loco.ralentis(30);
+                        // }
                     }
                     else // Le canton SP1/SM1 est accessible et libre
                     {
