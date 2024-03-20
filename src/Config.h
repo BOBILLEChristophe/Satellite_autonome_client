@@ -32,7 +32,6 @@ enum : uint8_t // Index des satellites périphériques
 #define SAUV_BY_MAIN  // Sauvegardes des paramètres commandées par la carte Main
 #define CHIP_INFO
 #define RAILCOM
-//#define RFID
 
 /* ----- Debug   -------------------*/
 #define DEBUG
@@ -54,7 +53,7 @@ enum : uint8_t // Index des satellites périphériques
 /* ----- Node ----------------------*/
 const uint8_t nodePsize = 8;
 const uint8_t aigSize = 6;
-const uint8_t sensorSize = 2;
+const uint8_t sensorSize = 3;
 const uint8_t signalSize = 2;
 
 /* ----- Railcom -------------------*/
@@ -65,12 +64,12 @@ const uint8_t signalSize = 2;
 #endif
 
 /* ----- Sensors ------------------*/
-#define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_12
 #define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_15
+#define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_14
 #define CAPT_PONCT_TEMPO 10UL
 
 /* ----- Mesure de courant ---------*/
-#define MESURE_COURANT GPIO_NUM_33 // ADC1 canal 5
+#define DETECT_PRES_CONSO_COURANT_PIN GPIO_NUM_33 // ADC1 canal 5
 
 /* ----- Registres a decalage ------*/
 #define SHREG_PIN_VERROU GPIO_NUM_4
