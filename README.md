@@ -2,11 +2,7 @@
 
 PRESENTATION GENERALE DU CONCEPT DE SATELLITE AUTONOME
 
-/!\ ATTENTION : Ce programme est en cours de développement, il n'est donc pas opérationnel dans son ensemble.
-
 Je propose ici une nouvelle approche du concept des satellites devellopé par quelques membres de Locoduino, qui avait été présentés au salon du modélisme ferroviaire d’Orléans en 2018 et qui a fait l’objet d’une série d’articles.
-
-https://locoduino.org/spip.php?article243 (et suivants)
 
 Plusieurs années après, ce projet pourtant très riche et innovant n’a pas vraiment trouvé sa place sur les réseaux ferroviaires ce qui était bien sûr son ambition.
 
