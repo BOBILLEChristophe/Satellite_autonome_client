@@ -45,7 +45,7 @@ void Discovery::begin(Node *nd)
 
   TaskHandle_t discoveryProcessHandle = nullptr;
   xTaskCreatePinnedToCore(process, "Process", 4 * 1024, (void *)node, 7, NULL, 1);
-  xTaskCreatePinnedToCore(createAigEtCibles, "CreateAiguilles", 4 * 1024, (void *)node, 4, NULL, 0);
+  xTaskCreatePinnedToCore(createAigEtCibles, "CreateAiguilles", 4 * 1024, (void *)node, 2, NULL, 0);
 }
 
 void Discovery::process(void *p)
@@ -285,23 +285,23 @@ void Discovery::createAigEtCibles(void *p) // Création des aiguilles
         if (node->signal[0] == nullptr)
           node->signal[0] = new Signal;
         node->signal[0]->type(typeCible);
-        //debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : %d\n", __LINE__, typeCible);
+        // debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : %d\n", __LINE__, typeCible);
       }
       else if (index == m00)
       {
         if (node->signal[1] == nullptr)
           node->signal[1] = new Signal;
         node->signal[1]->type(typeCible);
-        //debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : %d\n", __LINE__, typeCible);
+        // debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : %d\n", __LINE__, typeCible);
       }
     }
+
+    if (m_stopProcess)
+    {
+      Settings::writeFile();
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      ESP.restart();
+    }
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000)); // toutes les x ms
   }
-  if (m_stopProcess)
-  {
-    Settings::discoveryOn(false);
-    Settings::writeFile();
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP.restart();
-  }
-  vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000)); // toutes les x ms
 }
