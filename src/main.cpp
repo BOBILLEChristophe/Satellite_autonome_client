@@ -3,6 +3,7 @@
 copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 
 v 0.11.8 : Ajout de la détection de présence par consommation de courant
+v 0.11.9 : Correction de divers petits bugs après essais sur réseau
 
 */
 
@@ -12,7 +13,7 @@ v 0.11.8 : Ajout de la détection de présence par consommation de courant
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.11.8"
+#define VERSION "v 0.12.0"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -140,8 +141,8 @@ void loop()
       node->busy(true);
       node->loco.address(railcom.address());
 #ifdef debug
-      // debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
-      // debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
+      //debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+      //debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
 #endif
     }
     else
@@ -154,5 +155,5 @@ void loop()
     }
     //**************************************************************************
   }
-  vTaskDelay(pdMS_TO_TICKS(10));
+  vTaskDelay(pdMS_TO_TICKS(100));
 } // ->End loop

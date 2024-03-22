@@ -53,11 +53,11 @@ enum : uint8_t // Index des satellites périphériques
 /* ----- Node ----------------------*/
 const uint8_t nodePsize = 8;
 const uint8_t aigSize = 6;
-const uint8_t sensorSize = 3;
+const uint8_t sensorSize = 2;
 const uint8_t signalSize = 2;
 
 /* ----- Railcom -------------------*/
-#define NB_ADDRESS_TO_COMPARE 10 // Nombre de valeurs à comparer pour obtenir l'adresse de la loco
+#define NB_ADDRESS_TO_COMPARE 100 // Nombre de valeurs à comparer pour obtenir l'adresse de la loco
 #ifdef RAILCOM
 #define RAILCOM_RX GPIO_NUM_0
 #define RAILCOM_TX GPIO_NUM_17

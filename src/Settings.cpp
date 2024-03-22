@@ -51,9 +51,9 @@ bool Settings::begin()
   {
     CanMsg::sendMsg(0, 0xB2, node->ID(), 254, 0);
     vTaskDelay(pdMS_TO_TICKS(100));
-  } while (!isMainReady );
+  } while (!isMainReady);
 
-  //Identifiant du Node
+  // Identifiant du Node
   if (node->ID() == NO_ID)
     Serial.printf("[Settings %d] : Le satellite ne possede pas d'identifiant.\n", __LINE__);
 
@@ -62,9 +62,9 @@ bool Settings::begin()
     //--- Requete identifiant
     CanMsg::sendMsg(0, 0xB4, node->ID(), 254, 0);
     vTaskDelay(pdMS_TO_TICKS(100));
+    if (node->ID() != NO_ID)
+      writeFile(); // Sauvegarde de donnees en flash
   }
-
-  //writeFile(); // Sauvegarde de donnees en flash
 
   Serial.printf("[Settings %d] : End settings\n", __LINE__);
   Serial.printf("-----------------------------------\n\n");
@@ -180,7 +180,7 @@ void Settings::readFile()
 #ifdef DEBUG
       debug.printf("---------------------------------\n");
 #endif
-     }
+    }
     file.close();
   }
 } //--- End readFile

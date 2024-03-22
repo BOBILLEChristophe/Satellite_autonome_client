@@ -32,7 +32,7 @@ void GestionReseau::signauxTask(void *p)
             {
                 SignauxCmd::affiche(node->signal[i]->affiche(signalValue[i]));
                 oldValue[i] = signalValue[i];
-                // debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
+                debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
             }
         }
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000));
