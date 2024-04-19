@@ -13,7 +13,7 @@ v 0.11.9 : Correction de divers petits bugs après essais sur réseau
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.12.0"
+#define VERSION "v 0.12.4"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -24,6 +24,7 @@ v 0.11.9 : Correction de divers petits bugs après essais sur réseau
 #ifdef CHIP_INFO
 #include "ChipInfo.h"
 #endif
+#include "ConsoCourant.h"
 #include "Discovery.h"
 #include "GestionReseau.h"
 #include "Node.h"
@@ -39,6 +40,7 @@ Node *node = new Node();
 Railcom railcom(RAILCOM_RX, RAILCOM_TX);
 Fl_Wifi wifi;
 WebHandler webHandler;
+ConsoCourant consoCourant;
 
 /*-------------------------------------------------------------
                            setup
@@ -92,7 +94,7 @@ void setup()
   }
   else
   {
-    //Settings::wifiOn(false);
+    // Settings::wifiOn(false);
     for (byte i = 0; i < signalSize; i++)
     {
       if (node->signal[i] == nullptr)
@@ -102,6 +104,7 @@ void setup()
     railcom.begin();
     SignauxCmd::setup();
     GestionReseau::setup(node);
+    consoCourant.setup(node, CONSO_COURANT_PIN);
   }
   //--- Wifi et web serveur
   if (Settings::wifiOn()) // Si option validee
@@ -136,24 +139,14 @@ void loop()
   {
     //************************* Railcom ****************************************
 
-    if (railcom.address())
+    if (railcom.address() && node->busy())
     {
-      node->busy(true);
       node->loco.address(railcom.address());
-#ifdef debug
-      //debug.printf("[Main %d ] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
-      //debug.printf("[main %d ] Railcom - this node busy : %d\n", __LINE__, node->busy());
-#endif
+      // #ifdef debug
+      //       debug.printf("[Main %d] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+      // #endif
     }
-    else
-    {
-      node->busy(false);
-      node->loco.address(0);
-#ifdef debug
-      //debug.printf("[Main %d ] Railcom - Pas de loco.\n", __LINE__);
-#endif
-    }
-    //**************************************************************************
   }
+  //**************************************************************************
   vTaskDelay(pdMS_TO_TICKS(100));
 } // ->End loop
