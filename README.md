@@ -34,3 +34,7 @@ Les points 1, 2 et 3 en particulier obligeaient à adapter chaque programme avan
 
 Avec cette nouvelle version, tous les programmes à télécharger sont absolument identiques pour tous les satellites. Les opérations de maintenance et de mise à jour sont considérablement simplifiées.
 
+Pour plus de détails, voir sur www.locoduino.org : https://www.locoduino.org/spip.php?article348
+
+Et sur le forum : https://forum.locoduino.org/index.php?topic=1648.msg17771
+
