@@ -16,6 +16,14 @@
 
 #include <Arduino.h>
 
+
+/* ----- Debug   -------------------*/
+//#define DEBUG
+#ifdef DEBUG
+#define debug Serial
+#endif
+
+
 enum : uint8_t // Index des satellites périphériques
 {
   p00,
@@ -30,20 +38,17 @@ enum : uint8_t // Index des satellites périphériques
 
 /* ----- Options   -------------------*/
 #define SAUV_BY_MAIN  // Sauvegardes des paramètres commandées par la carte Main
-#define CHIP_INFO
-#define RAILCOM
-
-/* ----- Debug   -------------------*/
-#define DEBUG
-#ifdef DEBUG
-#define debug Serial
-#endif
+#define CHIP_INFO     // Afficher les infos de la carte au demarrage
+//#define RAILCOM     // N'est plus une option depuis les version recentes des satellites
 
 //#define TEST_MEMORY_TASK
 
-/* ---------------------------------*/
-#define NO_ID 255
-#define NO_PIN 255
+/* ----- ID sur le bus CAN -----------------------*/
+#define CENTRALE_DCC_ID 253 // Identifiant centrale dcc sur bus CAN
+#define NO_ID 255           // Pour designer un noeud non identifier sur bus CAN   
+
+/* ----- Broches ESP32 -----------------------*/
+#define NO_PIN 255          // Pour désigner une broche sans affectation
 
 /* ----- CAN ----------------------*/
 #define CAN_RX GPIO_NUM_22
@@ -58,18 +63,18 @@ const uint8_t signalSize = 2;
 
 /* ----- Railcom -------------------*/
 #define NB_ADDRESS_TO_COMPARE 100 // Nombre de valeurs à comparer pour obtenir l'adresse de la loco
-#ifdef RAILCOM
+//#ifdef RAILCOM
 #define RAILCOM_RX GPIO_NUM_0
 #define RAILCOM_TX GPIO_NUM_17
-#endif
+//#endif
 
 /* ----- Sensors ------------------*/
 #define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_15
 #define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_14
 #define CAPT_PONCT_TEMPO 10UL
 
-/* ----- Mesure de courant ---------*/
-#define DETECT_PRES_CONSO_COURANT_PIN GPIO_NUM_33 // ADC1 canal 5
+/* ----- Détection présence ---------*/
+#define CONSO_COURANT_PIN GPIO_NUM_33 // 
 
 /* ----- Registres a decalage ------*/
 #define SHREG_PIN_VERROU GPIO_NUM_4
