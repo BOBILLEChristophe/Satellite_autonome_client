@@ -220,7 +220,7 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                 sens1 = antiHor;
                 access = node->SP2_acces();
                 busy = node->SP2_busy();
-                //debug.printf("Le SP1 %d est %s \n", index, busy ? "true" : "false");
+                // debug.printf("Le SP1 %d est %s \n", index, busy ? "true" : "false");
 #ifdef debug
                 strcpy(cantonName, "SP1");
 #endif
@@ -231,7 +231,7 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                 sens1 = horaire;
                 access = node->SM2_acces();
                 busy = node->SM2_busy();
-                //debug.printf("Le SM1 %d est %s \n", index, busy ? "true" : "false");
+                // debug.printf("Le SM1 %d est %s \n", index, busy ? "true" : "false");
 #ifdef debug
                 strcpy(cantonName, "SM1");
 #endif
@@ -246,10 +246,10 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
             {
                 if (node->nodeP[index]->acces()) // Le canton SP1/SM1 est accessible
                 {
-                    //debug.printf("[GestionReseau %d] Le canton %s est accessible\n", __LINE__, cantonName);
+                    // debug.printf("[GestionReseau %d] Le canton %s est accessible\n", __LINE__, cantonName);
                     if (node->nodeP[index]->busy()) // Le canton SP1/SM1 est occupé
                     {
-                        //debug.printf("[GestionReseau %d] Le canton %s est accessible mais occupe\n", __LINE__, cantonName);
+                        // debug.printf("[GestionReseau %d] Le canton %s est accessible mais occupe\n", __LINE__, cantonName);
                         signalValue[i] = Rouge;
                     }
                     else // Le canton SP1/SM1 est accessible et libre
@@ -290,21 +290,20 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                 signalValue[i] = Carre;
             }
 
-            if (node->loco.sens() == i + 1)
-            {
-                switch (signalValue[i])
-                {
-                case Carre:
-                case Rouge:
-                    if (node->sensor[sens0].state())
-                        node->loco.speed(30);
-                    else if (node->sensor[sens1].state())
-                        node->loco.stop();
-                    break;
-                case Ralentissement:
+            // debug.printf("[GestionReseau %d] node->loco.sens() %d\n", __LINE__, node->loco.sens());
 
-                    break;
-                }
+            switch (signalValue[i])
+            {
+            case Carre:
+            case Rouge:
+                if (node->sensor[sens0].state())
+                    node->loco.stop();
+                else if (node->sensor[sens1].state())
+                    node->loco.speed(30);
+                break;
+            case Ralentissement:
+
+                break;
             }
         }
 

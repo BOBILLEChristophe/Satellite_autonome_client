@@ -15,7 +15,7 @@ v 0.11.9 : Correction de divers petits bugs après essais sur réseau
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.12.5"
+#define VERSION "v 0.12.6"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
