@@ -18,7 +18,7 @@
 
 
 /* ----- Debug   -------------------*/
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define debug Serial
 #endif
@@ -39,7 +39,6 @@ enum : uint8_t // Index des satellites périphériques
 /* ----- Options   -------------------*/
 #define SAUV_BY_MAIN  // Sauvegardes des paramètres commandées par la carte Main
 #define CHIP_INFO     // Afficher les infos de la carte au demarrage
-//#define RAILCOM     // N'est plus une option depuis les version recentes des satellites
 
 //#define TEST_MEMORY_TASK
 
@@ -63,15 +62,13 @@ const uint8_t signalSize = 2;
 
 /* ----- Railcom -------------------*/
 #define NB_ADDRESS_TO_COMPARE 100 // Nombre de valeurs à comparer pour obtenir l'adresse de la loco
-//#ifdef RAILCOM
 #define RAILCOM_RX GPIO_NUM_0
 #define RAILCOM_TX GPIO_NUM_17
-//#endif
 
 /* ----- Sensors ------------------*/
 #define CAPT_PONCT_HORAIRE_PIN GPIO_NUM_15
 #define CAPT_PONCT_ANTIHOR_PIN GPIO_NUM_14
-#define CAPT_PONCT_TEMPO 10UL
+#define CAPT_PONCT_TEMPO 5UL
 
 /* ----- Détection présence ---------*/
 #define CONSO_COURANT_PIN GPIO_NUM_33 // 

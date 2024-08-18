@@ -1,3 +1,5 @@
+
+
 /*
 
 copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
@@ -13,7 +15,7 @@ v 0.11.9 : Correction de divers petits bugs après essais sur réseau
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.12.4"
+#define VERSION "v 0.12.5"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -130,6 +132,8 @@ void setup()
 
 void loop()
 {
+  static uint16_t oldAddress = 0;
+
   //******************** Ecouteur page web **********************************
 
   if (Settings::wifiOn()) // Si option validée
@@ -142,11 +146,15 @@ void loop()
     if (railcom.address() && node->busy())
     {
       node->loco.address(railcom.address());
-      // #ifdef debug
-      //       debug.printf("[Main %d] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
-      // #endif
     }
   }
+#ifdef debug
+  if (node->loco.address() != oldAddress)
+  {
+    debug.printf("[Main %d] Railcom - Numero de loco : %d\n", __LINE__, node->loco.address());
+    oldAddress = node->loco.address();
+  }
+#endif
   //**************************************************************************
-  vTaskDelay(pdMS_TO_TICKS(100));
+  vTaskDelay(pdMS_TO_TICKS(50));
 } // ->End loop
