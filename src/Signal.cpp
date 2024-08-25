@@ -89,7 +89,6 @@ uint16_t Signal::affiche(uint16_t x)
     case 2: // vert
       m_data = 0x04 << m_decalage;
       break;
-      break;
     }
     break;
   case 1: // Carré + oeilleton
