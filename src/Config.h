@@ -86,9 +86,9 @@ const uint8_t signalSize = 2;
 #define LED_PIN_DISCOV GPIO_NUM_32 // Led
 
 /* ----- Aiguilles -----------------*/
-#define AIG_PIN_SIGNAL_0 GPIO_NUM_19
+#define AIG_PIN_SIGNAL_0 GPIO_NUM_2
 #define AIG_PIN_SIGNAL_1 GPIO_NUM_21
-#define AIG_PIN_SIGNAL_2 GPIO_NUM_2
+#define AIG_PIN_SIGNAL_2 GPIO_NUM_19
 #define AIG_PIN_SIGNAL_3 GPIO_NUM_13
 #define AIG_SPEED 6000.0000
 

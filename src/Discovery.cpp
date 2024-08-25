@@ -237,7 +237,16 @@ void Discovery::createAigEtCibles(void *p) // Création des aiguilles
         break;
       }
 
-      byte typeCible = 0; // 3 feux
+      // Serial.print("m00 : ");
+      // Serial.println(m00);
+
+      // Serial.print("masque aig p00: ");
+      // Serial.println(node->nodeP[p00]->masqueAig());
+
+      // Serial.print("masque aig m00: ");
+      // Serial.println(node->nodeP[m00]->masqueAig());
+
+      byte typeCible = 0; // 3 feux par défaut
 
       if ((node->masqueAig()) & (1 << x)) // Il y a une aiguille a pied a horaire du canton S0 => RRalentissement (avec Carré)
       {
@@ -285,14 +294,14 @@ void Discovery::createAigEtCibles(void *p) // Création des aiguilles
         if (node->signal[0] == nullptr)
           node->signal[0] = new Signal;
         node->signal[0]->type(typeCible);
-        // debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : %d\n", __LINE__, typeCible);
+        debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : %d\n", __LINE__, typeCible);
       }
       else if (index == m00)
       {
         if (node->signal[1] == nullptr)
           node->signal[1] = new Signal;
         node->signal[1]->type(typeCible);
-        // debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : %d\n", __LINE__, typeCible);
+        debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : %d\n", __LINE__, typeCible);
       }
     }
 

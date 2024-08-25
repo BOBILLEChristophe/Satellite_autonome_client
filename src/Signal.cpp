@@ -67,6 +67,7 @@ void Signal::setup()
 
 uint16_t Signal::affiche(uint16_t x)
 {
+
   uint16_t clearMasque = 0;
   for (byte i = 0; i < m_length; i++)
     clearMasque += 1 << i;
@@ -79,6 +80,7 @@ uint16_t Signal::affiche(uint16_t x)
     switch (x) // orange  - rouge - vert
     {
     case 0: // orange
+    case 4: // ralentissement
       m_data = 0x01 << m_decalage;
       break;
     case 1: // rouge
@@ -87,9 +89,10 @@ uint16_t Signal::affiche(uint16_t x)
     case 2: // vert
       m_data = 0x04 << m_decalage;
       break;
+      break;
     }
     break;
-  case 1:
+  case 1: // Carré + oeilleton
     switch (x)
     {
     case 0: // orange - avertissement
@@ -103,6 +106,10 @@ uint16_t Signal::affiche(uint16_t x)
       break;
     case 3: // rouge - carré
       m_data = B10100 << m_decalage;
+      break;
+    // A vérifier
+    case 4: // ralentissement
+      m_data = B10 << m_decalage;
       break;
     }
   case 2:
@@ -128,7 +135,7 @@ uint16_t Signal::affiche(uint16_t x)
     break;
   }
   m_masque |= m_data;
-  // debug.printf("[Signal %d] Masque des feux : 0x", __LINE__);
+  // debug.printf("[Signal %d] Masque des feux : B", __LINE__);
   // debug.println(m_masque, BIN);
   return m_masque;
 }

@@ -130,7 +130,11 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             if (el != nullptr)
             {
               if (idSatExpediteur == el->ID()) // Si l'expediteur est un SP1 ou un SM1
-                el->masqueAig(frameIn.data[0]);
+                {
+                  el->masqueAig(frameIn.data[0]);
+                  // Serial.print("el.id = ");Serial.println(el->ID());
+                  // Serial.print("el.masqueAig = ");Serial.println(el->masqueAig());
+                }
             }
           }
           break;
@@ -147,27 +151,34 @@ void CanMsg::canReceiveMsg(void *pvParameters)
           //  debug.printf("[CanMsg %d] SM1 ID : %d\n", __LINE__, frameIn.data[1]);
           //  debug.printf("[CanMsg %d] SP1 ID : %d\n", __LINE__, frameIn.data[2]);
 
+          // Pour rappel, voici le message envoye :
+          /*
+           CanMsg::sendMsg(1, 0xE0, node->ID(), 0xE0, 0,
+                        node->busy(),
+                        nodeP_SP1_ID,
+                        nodeP_SM1_ID,
+                        nodeP_SP1_ACCES,
+                        nodeP_SP1_BUSY,
+                        nodeP_SM1_ACCES,
+                        nodeP_SM1_BUSY);
+          */
+
           if (node->nodeP[node->SP1_idx()] != nullptr)
           {
-            if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // Si l'expediteur est SP1
+            if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // L'expediteur est-il le SP1 de ce sat ?
             {
-              // L'ID SP1 que l'on recoit est il l'ID de ce sat => ? le sat est accessible : le sat n'est pas accessible
-              if (node->ID() == frameIn.data[1])
+              // L'expediteur est le SP1 de ce sat / ce sat est-il le SM1 de l'expediteur ?
+              if (node->ID() == frameIn.data[2])
               {
+                // Cela veut dire que le SP1 de ce sat est accessible
                 node->nodeP[node->SP1_idx()]->acces(true);
                 node->SP2_acces(frameIn.data[3]);
                 node->SP2_busy(frameIn.data[4]);
               }
               else
-                node->nodeP[node->SP1_idx()]->acces(false);
+                node->nodeP[node->SP1_idx()]->acces(false); // Le SP1 de ce sat n'est pas accessible
 
               node->nodeP[node->SP1_idx()]->busy(frameIn.data[0]);
-
-              // node->nodeP[node->SP1_idx()]->locoAddr((frameIn.data[0] << 8) + frameIn.data[1]);
-              // if (node->nodeP[node->SP1_idx()]->locoAddr() > 1)
-              //   node->nodeP[node->SP1_idx()]->busy(true);
-              // else
-              //   node->nodeP[node->SP1_idx()]->busy(false);
 
               // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->acces());
               // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->busy());
@@ -176,26 +187,20 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 
           if (node->nodeP[node->SM1_idx()] != nullptr)
           {
-            if (idSatExpediteur == node->nodeP[node->SM1_idx()]->ID()) // Si l'expediteur est SM1
+            if (idSatExpediteur == node->nodeP[node->SM1_idx()]->ID()) // L'expediteur est-il le SM1 de ce sat ?
             {
-              // L'ID SM1 que l'on recoit est il l'ID de ce sat => ? le sat est accessible : le sat n'est pas accessible
-              // debug.printf("[CanMsg %d] node->ID() : %d\n", __LINE__, node->ID());
-              if (node->ID() == frameIn.data[2])
+              // L'expediteur est le SM1 de ce sat / ce sat est-il le SP1 de l'expediteur ?
+              if (node->ID() == frameIn.data[1])
               {
+                // Cela veut dire que le SM1 de ce sat est accessible
                 node->nodeP[node->SM1_idx()]->acces(true);
                 node->SM2_acces(frameIn.data[5]);
                 node->SM2_busy(frameIn.data[6]);
               }
               else
-                node->nodeP[node->SM1_idx()]->acces(false);
+                node->nodeP[node->SM1_idx()]->acces(false); // Le SM1 de ce sat n'est pas accessible
 
               node->nodeP[node->SM1_idx()]->busy(frameIn.data[0]);
-
-              // node->nodeP[node->SM1_idx()]->locoAddr((frameIn.data[0] << 8) + frameIn.data[1]);
-              // if (node->nodeP[node->SM1_idx()]->locoAddr() > 1)
-              //   node->nodeP[node->SM1_idx()]->busy(true);
-              // else
-              //   node->nodeP[node->SM1_idx()]->busy(false);
 
               // debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->acces());
               // debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->busy());

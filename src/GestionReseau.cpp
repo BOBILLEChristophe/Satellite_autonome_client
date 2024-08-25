@@ -28,14 +28,15 @@ void GestionReseau::signauxTask(void *p)
     {
         for (byte i = 0; i < 2; i++)
         {
-            if (signalValue[i] > 0 && oldValue[i] != signalValue[i])
-            {
-                SignauxCmd::affiche(node->signal[i]->affiche(signalValue[i]));
-                oldValue[i] = signalValue[i];
+            // if (signalValue[i] > 0 && oldValue[i] != signalValue[i])
+            // {
+            SignauxCmd::affiche(node->signal[i]->affiche(signalValue[i]));
+            oldValue[i] = signalValue[i];
 #ifdef debug
-                debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
+// debug.printf("[GestionReseau %d] signal value %d\n", __LINE__, node->signal[i]->affiche(signalValue[i]));
+// debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
 #endif
-            }
+            // }
         }
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000));
     }
@@ -158,43 +159,61 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
          * Envoi sur le bus CAN des informations concernant ce satellite
          ************************************************************************************/
 
+        // SM1
         uint8_t nodeP_SM1_ID = 0;
-        bool nodeP_SM2_ACCES = false;
-        bool nodeP_SM2_BUSY = false;
-        if (node->nodeP[node->SP1_idx()] != nullptr)
+        bool nodeP_SM1_ACCES = false;
+        bool nodeP_SM1_BUSY = false;
+
+        if (node->nodeP[node->SM1_idx()] != nullptr)
         {
-            nodeP_SM1_ID = node->nodeP[node->SP1_idx()]->ID();
-            nodeP_SM2_ACCES = node->SP2_acces();
-            nodeP_SM2_BUSY = node->SP2_busy();
+            nodeP_SM1_ID = node->nodeP[node->SM1_idx()]->ID();
+            if (node->nodeP[node->SM1_idx()]->acces())
+                nodeP_SM1_ACCES = true;
+            if (node->nodeP[node->SM1_idx()]->busy())
+                nodeP_SM1_BUSY = true;
         }
 
         uint8_t nodeP_SP1_ID = 0;
-        bool nodeP_SP2_ACCES = false;
-        bool nodeP_SP2_BUSY = false;
-        if (node->nodeP[node->SM1_idx()] != nullptr)
+        bool nodeP_SP1_ACCES = false;
+        bool nodeP_SP1_BUSY = false;
+
+        if (node->nodeP[node->SP1_idx()] != nullptr)
         {
-            nodeP_SP1_ID = node->nodeP[node->SM1_idx()]->ID();
-            nodeP_SP2_ACCES = node->SM2_acces();
-            nodeP_SP2_BUSY = node->SM2_busy();
+            nodeP_SP1_ID = node->nodeP[node->SP1_idx()]->ID();
+            if (node->nodeP[node->SP1_idx()]->acces())
+                nodeP_SP1_ACCES = true;
+            if (node->nodeP[node->SP1_idx()]->busy())
+                nodeP_SP1_BUSY = true;
         }
 
-        // debug.printf("[GestionReseau %d ] nodeP_SP1_ID : %d\n", __LINE__, nodeP_SM1_ID);
-        // debug.printf("[GestionReseau %d ] nodeP_SM1_ID : %d\n", __LINE__, nodeP_SP1_ID);
+        // debug.printf("[GestionReseau %d ] nodeP_SM1_ID : %d\n", __LINE__, nodeP_SM1_ID);
+        // debug.printf("[GestionReseau %d ] nodeP_SP1_ID : %d\n", __LINE__, nodeP_SP1_ID);
         // debug.printf("[GestionReseau %d ] this node busy : %d\n", __LINE__, node->busy());
+
+        // debug.printf("[GestionReseau %d ] SP2_acces : %d\n", __LINE__, node->SP2_acces());
+        // debug.printf("[GestionReseau %d ] SP2_busy : %d\n", __LINE__, node->SP2_busy());
 
         CanMsg::sendMsg(1, 0xE0, node->ID(), 0xE0, 0,
                         node->busy(),
                         nodeP_SP1_ID,
                         nodeP_SM1_ID,
-                        nodeP_SP2_ACCES,
-                        nodeP_SP2_BUSY,
-                        nodeP_SM2_ACCES,
-                        nodeP_SM2_BUSY);
+                        nodeP_SP1_ACCES,
+                        nodeP_SP1_BUSY,
+                        nodeP_SM1_ACCES,
+                        nodeP_SM1_BUSY);
+
+        // Serial.print("nodeP_SP1_ID");
+        // Serial.println(nodeP_SP1_ID);
+        // Serial.print("nodeP_SM1_ID");
+        // Serial.println(nodeP_SM1_ID);
 
         // if (node->loco.address() > 1)
         // CanMsg::sendMsg(1, 0xE1, node->ID(), 0xE1, 0,
         //                 (node->loco.address() & 0xFF00) >> 8,
         //                 node->loco.address() & 0x00FF);
+
+        // Serial.print("node->busy()," );
+        // Serial.println(node->busy());
 
         enum : uint8_t
         {
@@ -220,7 +239,7 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                 sens1 = antiHor;
                 access = node->SP2_acces();
                 busy = node->SP2_busy();
-                // debug.printf("Le SP1 %d est %s \n", index, busy ? "true" : "false");
+                // debug.printf("[GestionReseau %d] Le SP2 est busy : %s \n", __LINE__, busy ? "true" : "false");
 #ifdef debug
                 strcpy(cantonName, "SP1");
 #endif
@@ -231,7 +250,7 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                 sens1 = horaire;
                 access = node->SM2_acces();
                 busy = node->SM2_busy();
-                // debug.printf("Le SM1 %d est %s \n", index, busy ? "true" : "false");
+                // debug.printf("[GestionReseau %d] Le SM2 est busy : %s \n", __LINE__, busy ? "true" : "false");
 #ifdef debug
                 strcpy(cantonName, "SM1");
 #endif
