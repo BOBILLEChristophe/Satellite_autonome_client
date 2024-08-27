@@ -67,20 +67,6 @@ void Signal::setup()
 
 uint16_t Signal::affiche(uint16_t x)
 {
-  // uint16_t clearMasque = 0;
-  // clearMasque = ((1 << (m_length + 1) - 1));
-
-  // uint16_t clearMasque = ((1 << (m_length + 1) - 1)) << m_decalage;
-  // clearMasque = clearMasque << m_decalage;
-
-  // uint16_t clearMasque = ((1 << (m_length) - 1)) << m_decalage;
-  // m_masque &= ~clearMasque;
-
-  // uint16_t clearMasque = 0;
-  // for (byte i = 0; i < m_length; i++)
-  //   clearMasque += 1 << i;
-  // clearMasque = clearMasque << m_decalage;
-  // m_masque &= ~clearMasque;
 
   uint16_t clearMasque = ((1 << m_length) - 1) << m_decalage;
   m_masque &= ~clearMasque;
