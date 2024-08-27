@@ -28,17 +28,17 @@ void GestionReseau::signauxTask(void *p)
     {
         for (byte i = 0; i < 2; i++)
         {
-            // if (signalValue[i] > 0 && oldValue[i] != signalValue[i])
-            // {
-            SignauxCmd::affiche(node->signal[i]->affiche(signalValue[i]));
-            oldValue[i] = signalValue[i];
+            if (signalValue[i] > 0 && oldValue[i] != signalValue[i])
+            {
+                SignauxCmd::affiche(node->signal[i]->affiche(signalValue[i]));
+                oldValue[i] = signalValue[i];
 #ifdef debug
 // debug.printf("[GestionReseau %d] signal value %d\n", __LINE__, node->signal[i]->affiche(signalValue[i]));
 // debug.printf("[GestionReseau %d] Fonction signauxTask\n", __LINE__);
 #endif
-            // }
+            }
         }
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(2000));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
     }
 }
 

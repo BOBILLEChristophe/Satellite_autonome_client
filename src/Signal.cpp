@@ -67,11 +67,22 @@ void Signal::setup()
 
 uint16_t Signal::affiche(uint16_t x)
 {
+  // uint16_t clearMasque = 0;
+  // clearMasque = ((1 << (m_length + 1) - 1));
 
-  uint16_t clearMasque = 0;
-  for (byte i = 0; i < m_length; i++)
-    clearMasque += 1 << i;
-  clearMasque = clearMasque << m_decalage;
+  // uint16_t clearMasque = ((1 << (m_length + 1) - 1)) << m_decalage;
+  // clearMasque = clearMasque << m_decalage;
+
+  // uint16_t clearMasque = ((1 << (m_length) - 1)) << m_decalage;
+  // m_masque &= ~clearMasque;
+
+  // uint16_t clearMasque = 0;
+  // for (byte i = 0; i < m_length; i++)
+  //   clearMasque += 1 << i;
+  // clearMasque = clearMasque << m_decalage;
+  // m_masque &= ~clearMasque;
+
+  uint16_t clearMasque = ((1 << m_length) - 1) << m_decalage;
   m_masque &= ~clearMasque;
 
   switch (m_type)
@@ -81,13 +92,13 @@ uint16_t Signal::affiche(uint16_t x)
     {
     case 0: // orange
     case 4: // ralentissement
-      m_data = 0x01 << m_decalage;
+      m_data = B1 << m_decalage;
       break;
     case 1: // rouge
-      m_data = 0x02 << m_decalage;
+      m_data = B10 << m_decalage;
       break;
     case 2: // vert
-      m_data = 0x04 << m_decalage;
+      m_data = B100 << m_decalage;
       break;
     }
     break;
@@ -95,22 +106,20 @@ uint16_t Signal::affiche(uint16_t x)
     switch (x)
     {
     case 0: // orange - avertissement
-      m_data = B10 << m_decalage;
+    case 4: // ralentissement
+      m_data = B00000010 << m_decalage;
       break;
     case 1: // rouge - sémaphore + oeilleton
-      m_data = B101 << m_decalage;
+      m_data = B00000101 << m_decalage;
       break;
     case 2: // vert - voie libre
-      m_data = B1000 << m_decalage;
+      m_data = B00001000 << m_decalage;
       break;
     case 3: // rouge - carré
       m_data = B10100 << m_decalage;
       break;
-    // A vérifier
-    case 4: // ralentissement
-      m_data = B10 << m_decalage;
-      break;
     }
+    break;
   case 2:
   case 3:
     switch (x)
@@ -134,8 +143,7 @@ uint16_t Signal::affiche(uint16_t x)
     break;
   }
   m_masque |= m_data;
-  // debug.printf("[Signal %d] Masque des feux : B", __LINE__);
-  // debug.println(m_masque, BIN);
+  Serial.println(m_masque, BIN);
   return m_masque;
 }
 

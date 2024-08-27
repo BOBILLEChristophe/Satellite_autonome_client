@@ -16,7 +16,7 @@ v 0.12.0 : Plusieurs bugs corrigés pour la signalisation
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.12.6"
+#define VERSION "v 0.12.7"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
