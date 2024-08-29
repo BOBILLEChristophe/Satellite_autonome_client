@@ -54,10 +54,10 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
     };
 
     uint8_t index = 0;
-    bool sens0 = 0;
-    bool sens1 = 0;
-    bool access = 0;
-    bool busy = 0;
+    bool sens0 = false;
+    bool sens1 = false;
+    bool access = false;
+    bool busy = false;
 
     uint16_t oldLocAddress = 0;
     uint8_t oldLocSpeed = 0;
