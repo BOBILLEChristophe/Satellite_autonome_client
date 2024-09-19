@@ -7,6 +7,7 @@ copyright (c) 2022 christophe.bobille - LOCODUINO - www.locoduino.org
 v 0.11.8 : Ajout de la détection de présence par consommation de courant
 v 0.11.9 : Correction de divers petits bugs après essais sur réseau
 v 0.12.0 : Plusieurs bugs corrigés pour la signalisation
+v 0.12.1 : Modification importantes des structures de message CAN
 
 */
 
@@ -16,7 +17,7 @@ v 0.12.0 : Plusieurs bugs corrigés pour la signalisation
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.12.7"
+#define VERSION "v 0.12.1"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -97,7 +98,7 @@ void setup()
   }
   else
   {
-    //Settings::wifiOn(false);
+    Settings::wifiOn(false);
     for (byte i = 0; i < signalSize; i++)
     {
       if (node->signal[i] == nullptr)

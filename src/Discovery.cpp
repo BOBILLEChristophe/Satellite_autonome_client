@@ -294,14 +294,14 @@ void Discovery::createAigEtCibles(void *p) // Création des aiguilles
         if (node->signal[0] == nullptr)
           node->signal[0] = new Signal;
         node->signal[0]->type(typeCible);
-        debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : %d\n", __LINE__, typeCible);
+        //debug.printf("[Discovery %d] : Type de Cible pour sortie horaire  : %d\n", __LINE__, typeCible);
       }
       else if (index == m00)
       {
         if (node->signal[1] == nullptr)
           node->signal[1] = new Signal;
         node->signal[1]->type(typeCible);
-        debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : %d\n", __LINE__, typeCible);
+        //debug.printf("[Discovery %d] : Type de Cible pour sortie anti-hor : %d\n", __LINE__, typeCible);
       }
     }
 

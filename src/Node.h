@@ -61,7 +61,7 @@ class Node : public Aig
   friend class Discovery;
 
 private:
-  uint8_t m_id;
+  uint16_t m_id;
   bool m_busy;
   byte m_masqueAig;
   uint8_t m_SP1_idx;
@@ -82,8 +82,8 @@ public:
   Loco loco;
   Sensor sensor[sensorSize];
   Signal *signal[signalSize];
-  void ID(uint8_t);
-  uint8_t ID();
+  void ID(uint16_t);
+  uint16_t ID();
   void busy(bool);
   bool busy();
   void masqueAig(byte);

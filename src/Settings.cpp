@@ -45,12 +45,16 @@ void Settings::setup(Node *nd)
 bool Settings::begin()
 {
   //--- Test de la présence de la carte Main
-
+  uint8_t comptRestar = 0;
   Serial.printf("[Settings %d] : Attente de reponse en provenance de la carte Main.\n", __LINE__);
   do
   {
-    CanMsg::sendMsg(0, 0xB2, node->ID(), 254, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
+    CanMsg::sendMsg(0, 0xB2, 0, node->ID());
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    Serial.print(".");
+    if (comptRestar == 10)
+      esp_restart();
+    comptRestar++;
   } while (!isMainReady);
 
   // Identifiant du Node
@@ -60,10 +64,12 @@ bool Settings::begin()
   while (node->ID() == NO_ID) // L'identifiant n'est pas en mémoire
   {
     //--- Requete identifiant
-    CanMsg::sendMsg(0, 0xB4, node->ID(), 254, 0);
+    CanMsg::sendMsg(0, 0xB4, 0, node->ID());
     vTaskDelay(pdMS_TO_TICKS(100));
     if (node->ID() != NO_ID)
       writeFile(); // Sauvegarde de donnees en flash
+    else
+      Serial.print(".");
   }
 
   Serial.printf("[Settings %d] : End settings\n", __LINE__);

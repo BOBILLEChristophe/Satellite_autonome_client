@@ -83,8 +83,8 @@ Node::Node()
 
 // Node::~Node() {} // Destructeur
 
-void Node::ID(uint8_t id) { m_id = id; }
-uint8_t Node::ID() { return m_id; }
+void Node::ID(uint16_t id) { m_id = id; }
+uint16_t Node::ID() { return m_id; }
 void Node::busy(bool busy) { m_busy = busy; }
 bool Node::busy() { return m_busy; }
 void Node::masqueAig(byte masqueAig) { m_masqueAig = masqueAig; }

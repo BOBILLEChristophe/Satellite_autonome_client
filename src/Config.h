@@ -52,7 +52,7 @@ enum : uint8_t // Index des satellites périphériques
 /* ----- CAN ----------------------*/
 #define CAN_RX GPIO_NUM_22
 #define CAN_TX GPIO_NUM_23
-#define CAN_BITRATE 1000UL * 1000UL // 1 Mb/s
+#define CAN_BITRATE 250UL * 1000UL // 250 Kb/s
 
 /* ----- Node ----------------------*/
 const uint8_t nodePsize = 8;

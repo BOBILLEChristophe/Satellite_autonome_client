@@ -60,8 +60,7 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
     bool busy = false;
 
     uint16_t oldLocAddress = 0;
-    uint8_t oldLocSpeed = 0;
-    uint8_t oldLocSens = 0;
+    uint16_t oldLocSpeed = 0;
     uint8_t comptCmdLoco = 0;
 
 #ifdef debug
@@ -192,8 +191,8 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
 
         // debug.printf("[GestionReseau %d ] SP2_acces : %d\n", __LINE__, node->SP2_acces());
         // debug.printf("[GestionReseau %d ] SP2_busy : %d\n", __LINE__, node->SP2_busy());
-
-        CanMsg::sendMsg(1, 0xE0, node->ID(), 0xE0, 0,
+ 
+        CanMsg::sendMsg(0, 0xE0, 0, node->ID(),
                         node->busy(),
                         nodeP_SP1_ID,
                         nodeP_SM1_ID,
@@ -318,13 +317,23 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                 if (node->sensor[sens0].state())
                     node->loco.stop();
                 else if (node->sensor[sens1].state())
-                    node->loco.speed(30);
+                    node->loco.speed(300); // 300/1000 = 30%
                 break;
             case Ralentissement:
 
                 break;
             }
         }
+
+        // node->loco.address(34);
+        // node->loco.speed(500); // 300/1000 = 30%
+        // CanMsg::sendMsg(0, 0x04, 0, node->ID(),
+        //                         0x00,
+        //                         0x00,
+        //                         (node->loco.address() & 0xFF00) >> 8,
+        //                         node->loco.address() & 0x00FF,
+        //                         (node->loco.speed() & 0xFF00) >> 8,
+        //                         node->loco.speed()); 
 
         // Envoi des commandes à la loco
         if (node->loco.address() > 0)
@@ -334,18 +343,19 @@ void IRAM_ATTR GestionReseau::loopTask(void *pvParameters)
                 comptCmdLoco = 0;
 
             if (comptCmdLoco < 5)
-            {
-                CanMsg::sendMsg(1, 0xF0, node->ID(), CENTRALE_DCC_ID, 0,
+            {   // Message à la centrale DCC++
+                CanMsg::sendMsg(0, 0x04, 0, node->ID(),
+                                0x00,
+                                0x00,
                                 (node->loco.address() & 0xFF00) >> 8,
                                 node->loco.address() & 0x00FF,
-                                node->loco.speed(),
-                                node->loco.sens()); // Message à la centrale DCC++
+                                (node->loco.speed() & 0xFF00) >> 8,
+                                node->loco.speed()); 
 #ifdef debug
                 debug.printf("[GestionReseau %d] Loco %d vitesse %d\n", __LINE__, node->loco.address(), node->loco.speed());
 #endif
                 oldLocAddress = node->loco.address();
                 oldLocSpeed = node->loco.speed();
-                oldLocSens = node->loco.sens();
                 comptCmdLoco++;
             }
         }
