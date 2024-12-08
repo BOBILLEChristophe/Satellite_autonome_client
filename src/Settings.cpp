@@ -17,9 +17,16 @@ bool Settings::isMainReady = false;
 Node *Settings::node = nullptr;
 void Settings::sMainReady(bool val) { Settings::isMainReady = val; }
 bool Settings::discoveryOn() { return DISCOVERY_ON; }
-void Settings::discoveryOn(bool val) { Settings::DISCOVERY_ON = val; }
+void Settings::discoveryOn(bool val)
+{
+  Settings::DISCOVERY_ON = val;
+  // Settings::writeFile();
+}
 bool Settings::wifiOn() { return WIFI_ON; }
-void Settings::wifiOn(bool val) { Settings::WIFI_ON = val; }
+void Settings::wifiOn(bool val)
+{
+  Settings::WIFI_ON = val;
+}
 
 /*-------------------------------------------------------------
                            setup
@@ -45,34 +52,38 @@ void Settings::setup(Node *nd)
 bool Settings::begin()
 {
   //--- Test de la présence de la carte Main
-  uint8_t comptRestar = 0;
+  uint8_t countReset = 0;
   Serial.printf("[Settings %d] : Attente de reponse en provenance de la carte Main.\n", __LINE__);
   do
   {
     CanMsg::sendMsg(0, 0xB2, 0, node->ID());
     vTaskDelay(pdMS_TO_TICKS(1000));
     Serial.print(".");
-    if (comptRestar == 10)
+    if (countReset == 10)
+    {
+      Serial.printf(" \n\n [Settings %d] : *** Redemarrage dans 5 secondes ***\n\n", __LINE__);
+      delay(5000);
       esp_restart();
-    comptRestar++;
+    }
+    countReset++;
   } while (!isMainReady);
 
   // Identifiant du Node
-  if (node->ID() == NO_ID)
-    Serial.printf("[Settings %d] : Le satellite ne possede pas d'identifiant.\n", __LINE__);
+  if (node->ID() == UNUSED_ID)
+    Serial.printf("\n[Settings %d] : Le satellite ne possede pas d'identifiant.\n", __LINE__);
 
-  while (node->ID() == NO_ID) // L'identifiant n'est pas en mémoire
+  while (node->ID() == UNUSED_ID) // L'identifiant n'est pas en mémoire
   {
     //--- Requete identifiant
     CanMsg::sendMsg(0, 0xB4, 0, node->ID());
-    vTaskDelay(pdMS_TO_TICKS(100));
-    if (node->ID() != NO_ID)
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    if (node->ID() != UNUSED_ID)
       writeFile(); // Sauvegarde de donnees en flash
     else
       Serial.print(".");
   }
 
-  Serial.printf("[Settings %d] : End settings\n", __LINE__);
+  Serial.printf("\n[Settings %d] : End settings\n", __LINE__);
   Serial.printf("-----------------------------------\n\n");
 
   return 0;
@@ -96,20 +107,43 @@ void Settings::readFile()
   {
 #ifdef DEBUG
     debug.printf("\nInformations du fichier \"settings.json\" : \n\n");
+    while (file.available())
+    {
+      Serial.write(file.read());
+    }
+    Serial.printf("\n\n");
+    file.seek(0); // Rewind the file to the beginning before deserializing
 #endif
-    DynamicJsonDocument doc(4 * 1024);
+
+    File file = SPIFFS.open("/settings.json", "r");
+    while (!file)
+    {
+      Serial.println("Failed to open settings.json");
+      delay(1000);
+    }
+    // Lire tout le fichier dans une chaîne
+    size_t size = file.size();
+    if (size > 2 * 1024) // Si la taille dépasse la capacité, on gère l'erreur
+    {
+      Serial.println("File size is too large");
+      file.close();
+      return;
+    }
+
+    DynamicJsonDocument doc(2 * 1024);
     DeserializationError error = deserializeJson(doc, file);
     vTaskDelay(pdMS_TO_TICKS(100));
     if (error)
     {
 #ifdef DEBUG
       debug.printf("[Settings %d] Failed to read file, using default configuration\n\n", __LINE__);
+      debug.printf("[Settings %d] DeserializationError: %s\n", __LINE__, error.c_str());
 #endif
     }
     else
     {
       // ---
-      node->ID(doc["idNode"] | NO_ID);
+      node->ID(doc["idNode"] | UNUSED_ID);
 #ifdef DEBUG
       debug.printf("- ID node : %d\n", node->ID());
 #endif
@@ -207,7 +241,7 @@ void Settings::writeFile()
   }
   else
   {
-    DynamicJsonDocument doc(4 * 1024);
+    DynamicJsonDocument doc(1024);
 
     doc["idNode"] = node->ID();
     doc["comptAig"] = Discovery::comptAig();

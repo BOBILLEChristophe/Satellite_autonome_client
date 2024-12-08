@@ -8,6 +8,7 @@ v 0.11.8 : Ajout de la détection de présence par consommation de courant
 v 0.11.9 : Correction de divers petits bugs après essais sur réseau
 v 0.12.0 : Plusieurs bugs corrigés pour la signalisation
 v 0.12.1 : Modification importantes des structures de message CAN
+v 0.13.0 : Mise à jour importante Ajout de fonctionnalités
 
 */
 
@@ -17,7 +18,7 @@ v 0.12.1 : Modification importantes des structures de message CAN
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.12.1"
+#define VERSION "v 0.13.0"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -45,6 +46,9 @@ Railcom railcom(RAILCOM_RX, RAILCOM_TX);
 Fl_Wifi wifi;
 WebHandler webHandler;
 ConsoCourant consoCourant;
+
+// Var globale
+bool wifiOn;
 
 /*-------------------------------------------------------------
                            setup
@@ -125,7 +129,9 @@ void setup()
 #ifndef debug
   vTaskDelay(pdMS_TO_TICKS(1000));
   Serial.end(); // Desactivation de Serial
+  Serial.println("Ne doit pas s'afficher !");
 #endif
+  wifiOn = Settings::wifiOn();
 } // ->End setup
 
 /*-------------------------------------------------------------
@@ -138,8 +144,8 @@ void loop()
 
   //******************** Ecouteur page web **********************************
 
-  if (Settings::wifiOn()) // Si option validée
-    webHandler.loop();    // ecoute des ports web 80 et 81
+  if (wifiOn)          // Si option validée
+    webHandler.loop(); // ecoute des ports web 80 et 81
 
   if (!Settings::discoveryOn()) // Si option non validée
   {

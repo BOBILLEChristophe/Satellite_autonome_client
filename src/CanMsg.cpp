@@ -51,13 +51,9 @@ void CanMsg::canReceiveMsg(void *pvParameters)
     CANMessage frameIn;
     if (ACAN_ESP32::can.receive(frameIn))
     {
-      // const byte commande = (frameIn.id & 0x7F80000) >> 19;
-      // const byte idSatExpediteur = (frameIn.id & 0x7F800) >> 11; // ID du satellite qui envoie
-      // const bool response = (frameIn.id & 0x08) >> 3;
-
-      const byte commande = (frameIn.id & 0x1fe0000) >> 17;  // Code de la commande
-      const uint16_t idSatExpediteur = frameIn.id & 0xffff;  // ID du satellite qui envoie
-      const bool response = (frameIn.id & 0x10000) >> 16;    // Reponse
+      const byte commande = (frameIn.id & 0x1fe0000) >> 17; // Code de la commande
+      const uint16_t idSatExpediteur = frameIn.id & 0xffff; // ID du satellite qui envoie
+      const bool response = (frameIn.id & 0x10000) >> 16;   // Reponse
 #ifdef DEBUG
       // debug.printf("\n[CanMsg %d]------ Expediteur %d : commande 0x%0X\n", __LINE__, idSatExpediteur, commande);
 #endif
@@ -82,24 +78,30 @@ void CanMsg::canReceiveMsg(void *pvParameters)
             Settings::sMainReady(true);
           break;
         case 0xB5: // fn : Reponse à demande d'identifiant (0xB4)
-          if (node->ID() == NO_ID)
+          if (node->ID() == UNUSED_ID)
             node->ID(frameIn.data[0]);
           break;
         case 0xBC: // Reset ESP32
           ESP.restart();
           break;
         case 0xBD: // Activation  - desactivation du WiFi
-          if (frameIn.data[0])
-            Settings::wifiOn(true);
-          else
-            Settings::wifiOn(false);
-          // Settings::writeFile();
-          // delay(1000);
-          // ESP.restart();
+          Serial.print("desactivation du WiFi : ");
+          Serial.println(frameIn.data[0]);
+          Settings::wifiOn(frameIn.data[0]);
+          Serial.print("desactivation du WiFi : ");
+          Serial.println(Settings::wifiOn());
+          Settings::writeFile();
+          delay(1000);
+          ESP.restart();
           break;
         case 0xBE: // Activation  - desactivation du mode Discovery
           if (frameIn.data[0])
+          {
             Settings::discoveryOn(true);
+            Settings::writeFile();
+            delay(1000);
+            ESP.restart();
+          }
           else
           {
             Settings::discoveryOn(false);
@@ -147,30 +149,14 @@ void CanMsg::canReceiveMsg(void *pvParameters)
            * reception periodique des data envoyees par les sat en exploitation (GestionReseau.cpp ligne 42)
            ******************************************************************************************************/
 
-          //  debug.printf("[CanMsg %d] commande 0xE0\n", __LINE__);
-          //  debug.printf("[CanMsg %d] idSatExpediteur : %d\n", __LINE__, idSatExpediteur);
-          //  debug.printf("[CanMsg %d] nodeP[0]->ID() : %d\n", __LINE__, node->nodeP[0]->ID());
-          //  debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
-          //  debug.printf("[CanMsg %d] node->tabInvers[idSatExpediteur] : %d\n", __LINE__, node->tabInvers[idSatExpediteur]);
-          //  debug.printf("[CanMsg %d] SM1 ID : %d\n", __LINE__, frameIn.data[1]);
-          //  debug.printf("[CanMsg %d] SP1 ID : %d\n", __LINE__, frameIn.data[2]);
-
-          // Pour rappel, voici le message envoye :
-          /*
-           CanMsg::sendMsg(1, 0xE0, node->ID(), 0xE0, 0,
-                        node->busy(),
-                        nodeP_SP1_ID,
-                        nodeP_SM1_ID,
-                        nodeP_SP1_ACCES,
-                        nodeP_SP1_BUSY,
-                        nodeP_SM1_ACCES,
-                        nodeP_SM1_BUSY);
-          */
+          // NB : node->SP1_idx() et node->SM1_idx() sont renseignés à GestionReseau.cpp ligne 111
+          // en fonction de la position des aiguilles
 
           if (node->nodeP[node->SP1_idx()] != nullptr)
           {
             if (idSatExpediteur == node->nodeP[node->SP1_idx()]->ID()) // L'expediteur est-il le SP1 de ce sat ?
             {
+              //debug.printf("[CanMsg %d] node->SP1_idx()->ID() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->ID());
               // L'expediteur est le SP1 de ce sat / ce sat est-il le SM1 de l'expediteur ?
               if (node->ID() == frameIn.data[2])
               {
@@ -184,8 +170,12 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 
               node->nodeP[node->SP1_idx()]->busy(frameIn.data[0]);
 
-              // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->acces());
+#ifdef DEBUG
               // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->busy());
+              // debug.printf("[CanMsg %d] node->nodeP[node->SP1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SP1_idx()]->acces());
+              // debug.printf("[CanMsg %d] node->SP2_acces : %d\n", __LINE__, node->SP2_acces());
+              // debug.printf("[CanMsg %d] node->SP2_busy : %d\n", __LINE__, node->SP2_busy());
+#endif
             }
           }
 
@@ -193,6 +183,7 @@ void CanMsg::canReceiveMsg(void *pvParameters)
           {
             if (idSatExpediteur == node->nodeP[node->SM1_idx()]->ID()) // L'expediteur est-il le SM1 de ce sat ?
             {
+              //debug.printf("[CanMsg %d] node->SM1_idx()->ID() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->ID());
               // L'expediteur est le SM1 de ce sat / ce sat est-il le SP1 de l'expediteur ?
               if (node->ID() == frameIn.data[1])
               {
@@ -206,8 +197,12 @@ void CanMsg::canReceiveMsg(void *pvParameters)
 
               node->nodeP[node->SM1_idx()]->busy(frameIn.data[0]);
 
-              // debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->acces());
+#ifdef DEBUG
               // debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->busy() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->busy());
+              // debug.printf("[CanMsg %d] node->nodeP[node->SM1_idx()]->acces() : %d\n", __LINE__, node->nodeP[node->SM1_idx()]->acces());
+              // debug.printf("[CanMsg %d] node->SM2_acces : %d\n", __LINE__, node->SM2_acces());
+              // debug.printf("[CanMsg %d] node->SM2_busy : %d\n", __LINE__, node->SM2_busy());
+#endif
             }
           }
           break;
@@ -259,15 +254,15 @@ void CanMsg::sendMsg(CANMessage &frame)
   //     debug.printf("Envoi commande 0x%0X\n", (frame.id & 0x1FE0000) >> 17);
   // #else
   ACAN_ESP32::can.tryToSend(frame);
-  //#endif
+  // #endif
 }
 
 auto formatMsg = [](CANMessage &frame, byte prio, byte cmde, byte resp, uint16_t thisNodeId) -> CANMessage
 {
-  frame.id |= (uint32_t) prio << 25;     // Priorite 0, 1 ou 2
-  frame.id |= (uint32_t) cmde << 17;     // commande appelée
-  frame.id |= (uint32_t) resp << 16;     // Response
-  frame.id |= (uint32_t) thisNodeId;     // ID expediteur
+  frame.id |= (uint32_t)prio << 25; // Priorite 0, 1 ou 2
+  frame.id |= (uint32_t)cmde << 17; // commande appelée
+  frame.id |= (uint32_t)resp << 16; // Response
+  frame.id |= (uint32_t)thisNodeId; // ID expediteur
   frame.ext = true;
   return frame;
 };

@@ -23,7 +23,7 @@
 uint8_t NodePeriph::comptInst = 0;
 
 NodePeriph::NodePeriph() // Constructeur
-    : m_id(NO_ID),
+    : m_id(UNUSED_ID),
       m_busy(false),
       m_acces(true),
       m_locoAddr(0),
@@ -55,7 +55,7 @@ byte NodePeriph::masqueAig() { return m_masqueAig; }
 
 // Constructor
 Node::Node()
-    : m_id(NO_ID),
+    : m_id(UNUSED_ID),
       m_busy(false),
       m_masqueAig(0x00),
       m_SP1_idx(0),

@@ -17,7 +17,7 @@
 
 byte Discovery::m_switchAig{0};
 byte Discovery::m_btnState{0};
-byte Discovery::m_ID_satPeriph{NO_ID};
+byte Discovery::m_ID_satPeriph{UNUSED_ID};
 byte Discovery::m_comptAig{0};
 bool Discovery::m_stopProcess{false};
 
@@ -76,7 +76,7 @@ void Discovery::process(void *p)
   auto btnPush = [&](uint8_t btnNum)
   {
     // Envoi sur le bus CAN de l'ID du satellite, commande 0xC0
-    CanMsg::sendMsg(0, 0xC0, node->ID(), NO_ID, 0);
+    CanMsg::sendMsg(0, 0xC0, 0, node->ID(), UNUSED_ID, 0);
 
     if (m_ID_satPeriph < 253)
     {
@@ -84,7 +84,7 @@ void Discovery::process(void *p)
         node->nodeP[btnNum] = new NodePeriph;
       node->nodeP[btnNum]->ID(m_ID_satPeriph);
       allumerLED();
-      m_ID_satPeriph = NO_ID;
+      m_ID_satPeriph = UNUSED_ID;
     }
     else
       clignoterLED();
@@ -160,7 +160,7 @@ void Discovery::process(void *p)
       break;
     }
     // debug.printf("[Discovery %d] : process runing\n", __LINE__);
-    CanMsg::sendMsg(0, 0xC1, node->ID(), NO_ID, 0, node->masqueAig()); // Envoi du masqueAig sur le bus CAN
+    CanMsg::sendMsg(0, 0xC1, 0, node->ID(), UNUSED_ID, 0, node->masqueAig()); // Envoi du masqueAig sur le bus CAN
     if (m_stopProcess)
     {
       vTaskDelete(NULL);
@@ -273,13 +273,13 @@ void Discovery::createAigEtCibles(void *p) // Création des aiguilles
               // cas 3
               typeCible = 2; // -> la cible est un ralentissement
             }
-            else
+            /*else
             {
               // SP1 n'a pas d'aiguille a horaire
               // Si SP2 a une aiguille a anti-horaire
 
               // Si SP2 na pas d'aiguille a anti horaire
-            }
+            }*/
           }
         }
         else // Il n'y a pas de canton a horaire de node S0

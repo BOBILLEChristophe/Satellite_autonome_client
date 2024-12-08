@@ -18,7 +18,7 @@
 
 
 /* ----- Debug   -------------------*/
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define debug Serial
 #endif
@@ -44,15 +44,15 @@ enum : uint8_t // Index des satellites périphériques
 
 /* ----- ID sur le bus CAN -----------------------*/
 #define CENTRALE_DCC_ID 253 // Identifiant centrale dcc sur bus CAN
-#define NO_ID 255           // Pour designer un noeud non identifier sur bus CAN   
+#define UNUSED_ID 255           // Pour designer un noeud non identifier sur bus CAN   
 
 /* ----- Broches ESP32 -----------------------*/
-#define NO_PIN 255          // Pour désigner une broche sans affectation
+#define UNUSED_PIN 255          // Pour désigner une broche sans affectation
 
 /* ----- CAN ----------------------*/
 #define CAN_RX GPIO_NUM_22
 #define CAN_TX GPIO_NUM_23
-#define CAN_BITRATE 250UL * 1000UL // 250 Kb/s
+#define CAN_BITRATE 1000UL * 1000UL // 1 Mb/s
 
 /* ----- Node ----------------------*/
 const uint8_t nodePsize = 8;

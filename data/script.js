@@ -42,29 +42,29 @@ function onMessage(event) {
 
   // Aiguilles
   document.getElementById('s0').value = data.s0;
-  document.getElementById('ss00').value = data.ss00;
-  document.getElementById('ss01').value = data.ss01;
-  document.getElementById('ss02').value = data.ss02;
+  document.getElementById('s00').value = data.s00;
+  document.getElementById('s01').value = data.s01;
+  document.getElementById('s02').value = data.s02;
   document.getElementById('s1').value = data.s1;
-  document.getElementById('ss10').value = data.ss10;
-  document.getElementById('ss11').value = data.ss11;
-  document.getElementById('ss12').value = data.ss12;
+  document.getElementById('s10').value = data.s10;
+  document.getElementById('s11').value = data.s11;
+  document.getElementById('s12').value = data.s12;
   document.getElementById('s2').value = data.s2;
-  document.getElementById('ss20').value = data.ss20;
-  document.getElementById('ss21').value = data.ss21;
-  document.getElementById('ss22').value = data.ss22;
+  document.getElementById('s20').value = data.s20;
+  document.getElementById('s21').value = data.s21;
+  document.getElementById('s22').value = data.s22;
   document.getElementById('s3').value = data.s3;
-  document.getElementById('ss30').value = data.ss30;
-  document.getElementById('ss31').value = data.ss31;
-  document.getElementById('ss32').value = data.ss32;
+  document.getElementById('s30').value = data.s30;
+  document.getElementById('s31').value = data.s31;
+  document.getElementById('s32').value = data.s32;
   document.getElementById('s4').value = data.s4;
-  document.getElementById('ss40').value = data.ss40;
-  document.getElementById('ss41').value = data.ss41;
-  document.getElementById('ss42').value = data.ss42;
+  document.getElementById('s40').value = data.s40;
+  document.getElementById('s41').value = data.s41;
+  document.getElementById('s42').value = data.s42;
   document.getElementById('s5').value = data.s5;
-  document.getElementById('ss50').value = data.ss50;
-  document.getElementById('ss51').value = data.ss51;
-  document.getElementById('ss52').value = data.ss52;
+  document.getElementById('s50').value = data.s50;
+  document.getElementById('s51').value = data.s51;
+  document.getElementById('s52').value = data.s52;
 
   document.getElementById('maxSpeed').value = data.maxSpeed;
 

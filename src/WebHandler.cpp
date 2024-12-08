@@ -205,13 +205,18 @@ void WebHandler::notifyClients()
   for (byte i = 0; i < aigSize; i++)
   {
     if (node->aig[i] == nullptr)
+    {
       doc["s" + String(i)] = "null";
+      doc["s" + String(i) + "0"] = "";
+      doc["s" + String(i) + "1"] = "";
+      doc["s" + String(i) + "2"] = "";
+    }
     else
     {
       doc["s" + String(i)] = "Actif";
-      doc["ss" + String(i) + "0"] = node->aig[i]->posDroit();
-      doc["ss" + String(i) + "1"] = node->aig[i]->posDevie();
-      doc["ss" + String(i) + "2"] = (11000 - node->aig[i]->speed()) / 1000;
+      doc["s" + String(i) + "0"] = node->aig[i]->posDroit();
+      doc["s" + String(i) + "1"] = node->aig[i]->posDevie();
+      doc["s" + String(i) + "2"] = (11000 - node->aig[i]->speed()) / 1000;
     }
   }
 

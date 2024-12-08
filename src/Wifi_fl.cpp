@@ -25,6 +25,7 @@ void Fl_Wifi::start()
     WiFi.begin(Settings::ssid, Settings::password);
     while (WiFi.status() != WL_CONNECTED)
     {
+        Serial.println(Settings::ssid);
         vTaskDelay(pdMS_TO_TICKS(500));
         Serial.print(".");
     }

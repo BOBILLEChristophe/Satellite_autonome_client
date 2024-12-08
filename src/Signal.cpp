@@ -129,7 +129,8 @@ uint16_t Signal::affiche(uint16_t x)
     break;
   }
   m_masque |= m_data;
-  Serial.println(m_masque, BIN);
+  // debug.printf("[Signal %d] masque feux :", __LINE__);
+  // Serial.println(m_masque, BIN);
   return m_masque;
 }
 
