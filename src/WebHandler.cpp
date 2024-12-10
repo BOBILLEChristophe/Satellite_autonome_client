@@ -95,7 +95,6 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
         }
         else if ('2' == servoId[2])
         {
-          debug.printf("'2' == servoId[2] %d\n", servoId[2]);
           // node->aig[servoName]->sSpeed((1 / (float)servoValue) * 10000);
           uint16_t speed = 11000 - (servoValue * 1000);
           node->aig[servoName]->speed(speed);
