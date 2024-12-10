@@ -9,6 +9,7 @@ v 0.11.9 : Correction de divers petits bugs après essais sur réseau
 v 0.12.0 : Plusieurs bugs corrigés pour la signalisation
 v 0.12.1 : Modification importantes des structures de message CAN
 v 0.13.0 : Mise à jour importante Ajout de fonctionnalités
+v 0.13.1 : Correction d'un bug sur les commandes d'aiguille
 
 */
 
@@ -18,7 +19,7 @@ v 0.13.0 : Mise à jour importante Ajout de fonctionnalités
 #endif
 
 #define PROJECT "Satellites autonomes (client)"
-#define VERSION "v 0.13.0"
+#define VERSION "v 0.13.1"
 #define AUTHOR "christophe BOBILLE : christophe.bobille@gmail.com"
 
 //--- Fichiers inclus
@@ -95,14 +96,16 @@ void setup()
     return;
   }
 
+  Settings::wifiOn(true);
+
   if (Settings::discoveryOn()) // Si option validee, lancement de la méthode pour le procecuss de decouverte
   {
     Discovery::begin(node);
-    Settings::wifiOn(true);
+    // Settings::wifiOn(true);
   }
   else
   {
-    Settings::wifiOn(false);
+    // Settings::wifiOn(false);
     for (byte i = 0; i < signalSize; i++)
     {
       if (node->signal[i] == nullptr)

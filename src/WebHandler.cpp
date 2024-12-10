@@ -78,23 +78,24 @@ void WebHandler::WsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, A
 #ifdef DEBUG
         debug.printf("servoId %s\n", servoId);
         debug.printf("servoValue %d\n", servoValue);
-        debug.printf("servoName %d\n", servoName);
+        debug.printf("servoName %d\n", servoName);    
 #endif
 
-        if ('0' == servoId[3])
+        if ('0' == servoId[2])
         {
           node->aig[servoName]->posDroit(servoValue);
           node->aig[servoName]->curPos(servoValue);
           node->aig[servoName]->move(servoValue);
         }
-        else if ('1' == servoId[3])
+        else if ('1' == servoId[2])
         {
           node->aig[servoName]->posDevie(servoValue);
           node->aig[servoName]->curPos(servoValue);
           node->aig[servoName]->move(servoValue);
         }
-        else if ('2' == servoId[3])
+        else if ('2' == servoId[2])
         {
+          debug.printf("'2' == servoId[2] %d\n", servoId[2]);
           // node->aig[servoName]->sSpeed((1 / (float)servoValue) * 10000);
           uint16_t speed = 11000 - (servoValue * 1000);
           node->aig[servoName]->speed(speed);
